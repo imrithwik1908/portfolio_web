@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BlogPostGrid } from '@/components/blog-post-grid';
 import { BlogPostForm } from '@/components/blog-post-form';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,14 +13,46 @@ import { LogOut } from 'lucide-react';
 
 const SESSION_EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
+type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  read_time: string;
+  created_at: string;
+  date: string; // Adding the `date` property for `BlogPostCard`
+  user_id?: string;
+};
+
 export default function BlogPage() {
-  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthPopupOpen, setIsAuthPopupOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState(null);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+
+  const fetchBlogPosts = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setBlogPosts(data as BlogPost[]);
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch blog posts. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     fetchBlogPosts();
@@ -39,7 +71,7 @@ export default function BlogPage() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  });
+  }, [fetchBlogPosts]);
 
   const checkSession = async () => {
     const { data } = await supabase.auth.getSession();
@@ -53,26 +85,7 @@ export default function BlogPage() {
     }
   };
 
-  const fetchBlogPosts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBlogPosts(data);
-    } catch (error) {
-      console.error('Error fetching blog posts:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch blog posts. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleAddPost = async (newPost) => {
+  const handleAddPost = async (post: Omit<BlogPost, 'id' | 'created_at' | 'date'>) => {
     if (!session) {
       setIsAuthPopupOpen(true);
       return;
@@ -81,12 +94,16 @@ export default function BlogPage() {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
-        .insert([{ ...newPost, user_id: session.user.id }])
+        .insert([{ ...post, user_id: session.user.id }])
         .select();
 
       if (error) throw error;
 
-      setBlogPosts([data[0], ...blogPosts]);
+      const newPosts = (data as BlogPost[]).map(post => ({
+        ...post,
+        date: post.created_at
+      }));
+      setBlogPosts([...newPosts, ...blogPosts]);
       setIsFormOpen(false);
       toast({
         title: 'Success',
@@ -102,22 +119,28 @@ export default function BlogPage() {
     }
   };
 
-  const handleEditPost = async (updatedPost) => {
-    if (!session) {
+  const handleEditPost = async (post: Omit<BlogPost, 'id' | 'created_at' | 'date'>) => {
+    if (!session || !editingPost) {
       setIsAuthPopupOpen(true);
       return;
     }
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('blog_posts')
-        .update(updatedPost)
-        .eq('id', updatedPost.id)
-        .select();
+        .update({
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          content: post.content,
+          read_time: post.read_time,
+        })
+        .eq('id', editingPost.id);
 
       if (error) throw error;
 
-      setBlogPosts(blogPosts.map((post) => (post.id === data[0].id ? data[0] : post)));
+      const updatedPost = { ...editingPost, ...post };
+      setBlogPosts(blogPosts.map((p) => (p.id === editingPost.id ? updatedPost : p)));
       setEditingPost(null);
       toast({
         title: 'Success',
@@ -133,7 +156,7 @@ export default function BlogPage() {
     }
   };
 
-  const handleDeletePost = async (id) => {
+  const handleDeletePost = async (id: string) => {
     if (!session) {
       setIsAuthPopupOpen(true);
       return;
@@ -197,7 +220,7 @@ export default function BlogPage() {
             onAuthRequest={handleAuthRequest}
             isOpen={isFormOpen}
             onOpenChange={setIsFormOpen}
-            post={editingPost}
+            post={editingPost || undefined}
           />
           {session && (
             <Button onClick={handleLogout} variant="ghost" className="flex items-center space-x-2">
@@ -210,7 +233,7 @@ export default function BlogPage() {
       <BlogPostGrid
         posts={blogPosts}
         onEdit={(post) => {
-          setEditingPost(post);
+          setEditingPost({ ...post, date: post.created_at });
           setIsFormOpen(true);
         }}
         onDelete={handleDeletePost}

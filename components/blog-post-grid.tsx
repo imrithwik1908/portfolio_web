@@ -1,23 +1,24 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { BlogPostCard } from './blog-post-card'
+import { motion } from 'framer-motion';
+import { BlogPostCard } from './blog-post-card';
 
 interface BlogPost {
-  id: string
-  title: string
-  excerpt: string
-  content: string
-  date: string
-  slug: string
-  read_time: string
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  slug: string;
+  read_time: string;
+  created_at: string;
+  date: string;
 }
 
 interface BlogPostGridProps {
-  posts: BlogPost[]
-  onEdit: (post: BlogPost) => void
-  onDelete: (id: string) => void
-  isAuthenticated: boolean
+  posts: BlogPost[];
+  onEdit: (post: BlogPost) => void;
+  onDelete: (id: string) => void;
+  isAuthenticated: boolean;
 }
 
 export function BlogPostGrid({ posts, onEdit, onDelete, isAuthenticated }: BlogPostGridProps) {
@@ -39,6 +40,5 @@ export function BlogPostGrid({ posts, onEdit, onDelete, isAuthenticated }: BlogP
         </motion.div>
       ))}
     </div>
-  )
+  );
 }
-

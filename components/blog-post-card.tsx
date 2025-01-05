@@ -1,23 +1,23 @@
-import Link from 'next/link'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { CalendarIcon, Clock, ArrowRight, Edit, Trash } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { motion } from 'framer-motion'
+import Link from 'next/link';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { CalendarIcon, Clock, ArrowRight, Edit, Trash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface BlogPost {
-  id: string
-  title: string
-  excerpt: string
-  date: string
-  slug: string
-  read_time: string
+  id: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  slug: string;
+  read_time: string;
 }
 
 interface BlogPostCardProps {
-  post: BlogPost
-  onEdit: (post: BlogPost) => void
-  onDelete: (id: string) => void
-  isAuthenticated: boolean
+  post: BlogPost;
+  onEdit: (post: BlogPost) => void;
+  onDelete: (id: string) => void;
+  isAuthenticated: boolean;
 }
 
 export function BlogPostCard({ post, onEdit, onDelete, isAuthenticated }: BlogPostCardProps) {
@@ -67,6 +67,5 @@ export function BlogPostCard({ post, onEdit, onDelete, isAuthenticated }: BlogPo
         </CardFooter>
       </Card>
     </motion.div>
-  )
+  );
 }
-
