@@ -42,7 +42,7 @@ export default function About() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          I'm a passionate backend developer and data scientist with a keen interest in machine learning. 
+          I&apos;m a passionate backend developer and data scientist with a keen interest in machine learning. 
           With a strong foundation in computer science and years of industry experience, I strive to create 
           efficient, scalable solutions that drive innovation and solve complex problems.
         </motion.p>
