@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server'
-// import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server';
 
-// const prisma = new PrismaClient()
-
-let projects = [
+const projects = [
   {
     id: '1',
     title: 'Fusion - Social Media Platform',
@@ -13,19 +10,22 @@ let projects = [
     github: 'https://github.com/imrithwik1908/fusion',
   },
   // Add more initial projects here
-]
+];
 
 export async function GET() {
-  return NextResponse.json(projects)
+  return NextResponse.json(projects);
 }
 
 export async function POST(request: Request) {
-  const body = await request.json()
-  const newProject = {
-    id: Date.now().toString(),
-    ...body,
+  try {
+    const body = await request.json();
+    const newProject = {
+      id: Date.now().toString(),
+      ...body,
+    };
+    projects.push(newProject);
+    return NextResponse.json(newProject, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
-  projects.push(newProject)
-  return NextResponse.json(newProject)
 }
-
