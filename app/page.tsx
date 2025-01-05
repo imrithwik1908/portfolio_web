@@ -75,7 +75,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4">
-            <span className="text-gradient">Hey, I'm C Sai Rithwik Reddy</span>
+            <span className="text-gradient">Hey, I&apos;m C Sai Rithwik Reddy</span>
           </h1>
           <TypeAnimation
             sequence={[
@@ -148,7 +148,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <p className="text-lg text-muted-foreground max-w-md">
-              I'm always open to new opportunities and collaborations. Feel free to reach out!
+              I&apos;m always open to new opportunities and collaborations. Feel free to reach out!
             </p>
             <div className="flex justify-center space-x-6">
               <motion.a

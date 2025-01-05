@@ -39,7 +39,7 @@ export default function BlogPage() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  });
 
   const checkSession = async () => {
     const { data } = await supabase.auth.getSession();
