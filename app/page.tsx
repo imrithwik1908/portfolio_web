@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+// import { useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { motion, useAnimation, useInView } from 'framer-motion'
+import { motion} from 'framer-motion'
 import { Github, Linkedin, Mail, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TypeAnimation } from 'react-type-animation'
@@ -11,59 +11,59 @@ import { Experience } from '@/components/Experience'
 import { Education } from '@/components/Education'
 import { Link as ScrollLink } from 'react-scroll'
 
-const skills = [
-  'Python', 'PyTorch', 'TensorFlow', 'Scikit-learn', 'FastAPI',
-  'Node.js', 'Express', 'PostgreSQL', 'MongoDB', 'Docker',
-  'Kubernetes', 'AWS', 'Git', 'CI/CD'
-]
+// const skills = [
+//   'Python', 'PyTorch', 'TensorFlow', 'Scikit-learn', 'FastAPI',
+//   'Node.js', 'Express', 'PostgreSQL', 'MongoDB', 'Docker',
+//   'Kubernetes', 'AWS', 'Git', 'CI/CD'
+// ]
 
-const experiences = [
-  {
-    title: 'Senior Machine Learning Engineer',
-    company: 'AI Solutions Inc.',
-    period: '2021 - Present',
-    description: 'Leading the development of deep learning models for computer vision and NLP tasks. Architecting scalable ML pipelines for production environments.'
-  },
-  {
-    title: 'Backend Developer',
-    company: 'Tech Innovators',
-    period: '2019 - 2021',
-    description: 'Developed and maintained high-performance RESTful APIs. Implemented microservices architecture and optimized database queries.'
-  },
-  {
-    title: 'Data Scientist',
-    company: 'Data Insights Co.',
-    period: '2017 - 2019',
-    description: 'Conducted exploratory data analysis and built predictive models. Collaborated with cross-functional teams to deliver data-driven solutions.'
-  }
-]
+// const experiences = [
+//   {
+//     title: 'Senior Machine Learning Engineer',
+//     company: 'AI Solutions Inc.',
+//     period: '2021 - Present',
+//     description: 'Leading the development of deep learning models for computer vision and NLP tasks. Architecting scalable ML pipelines for production environments.'
+//   },
+//   {
+//     title: 'Backend Developer',
+//     company: 'Tech Innovators',
+//     period: '2019 - 2021',
+//     description: 'Developed and maintained high-performance RESTful APIs. Implemented microservices architecture and optimized database queries.'
+//   },
+//   {
+//     title: 'Data Scientist',
+//     company: 'Data Insights Co.',
+//     period: '2017 - 2019',
+//     description: 'Conducted exploratory data analysis and built predictive models. Collaborated with cross-functional teams to deliver data-driven solutions.'
+//   }
+// ]
 
-function FadeInWhenVisible({ children }: { children: React.ReactNode }) {
-  const controls = useAnimation()
-  const ref = useRef(null)
-  const inView = useInView(ref)
+// function FadeInWhenVisible({ children }: { children: React.ReactNode }) {
+//   const controls = useAnimation()
+//   const ref = useRef(null)
+//   const inView = useInView(ref)
 
-  useEffect(() => {
-    if (inView) {
-      controls.start('visible')
-    }
-  }, [controls, inView])
+//   useEffect(() => {
+//     if (inView) {
+//       controls.start('visible')
+//     }
+//   }, [controls, inView])
 
-  return (
-    <motion.div
-      ref={ref}
-      animate={controls}
-      initial="hidden"
-      transition={{ duration: 0.5 }}
-      variants={{
-        visible: { opacity: 1, y: 0 },
-        hidden: { opacity: 0, y: 20 }
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
+//   return (
+//     <motion.div
+//       ref={ref}
+//       animate={controls}
+//       initial="hidden"
+//       transition={{ duration: 0.5 }}
+//       variants={{
+//         visible: { opacity: 1, y: 0 },
+//         hidden: { opacity: 0, y: 20 }
+//       }}
+//     >
+//       {children}
+//     </motion.div>
+//   )
+// }
 
 export default function Home() {
   return (
