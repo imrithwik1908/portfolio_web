@@ -9,7 +9,6 @@ import { ModeToggle } from './mode-toggle'
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Blog', href: '/blog' },
   { name: 'Projects', href: '/projects' },
 ]
 
