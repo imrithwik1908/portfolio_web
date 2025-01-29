@@ -13,7 +13,7 @@ const skillCategories = [
   {
     name: 'Data & AI',
     icon: Brain,
-    skills: ['Machine Learning', 'Deep Learning', 'Data Science', 'Analytics', 'Statistics'],
+    skills: ['Machine Learning', 'Deep Learning', 'Data Science', 'Analytics'],
   },
   {
     name: 'Databases',
@@ -23,7 +23,7 @@ const skillCategories = [
   {
     name: 'Tools',
     icon: Cpu,
-    skills: ['Git', 'Docker', 'Linux', 'CI/CD', 'Cloud Platforms'],
+    skills: ['Git', 'Docker', 'Linux', 'CI/CD', 'GCP', 'Power BI'],
   },
 ]
 

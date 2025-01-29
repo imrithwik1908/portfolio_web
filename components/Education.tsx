@@ -8,13 +8,17 @@ const education = [
   {
     degree: 'B.Tech in Computer Science Engineering',
     school: 'Indian Institute of Information Technology, Dharwad',
-    period: 'Dec 2021 - May 2025',
-    description: 'CGPA: 8.9',
+    period: 'Dec 2021 - Jun 2025',
+    description: 'CGPA: 8.88',
     courses: [
       'Data Structures & Algorithms',
       'Operating Systems',
       'Computer Networks',
       'Database Management Systems',
+      'Machine Learning',
+      'Software Development',
+      'Cybersecurity',
+      'DevOps'
     ],
   },
   {

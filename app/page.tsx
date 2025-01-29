@@ -114,7 +114,7 @@ export default function Home() {
             <Link href="/projects">View Projects</Link>
           </Button>
           <Button variant="outline" asChild>
-            <a href="https://drive.google.com/file/d/1WMYt4tfhId4PaS_8UJfbvrT25ncE78rN/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Resume</a>
+            <a href="https://drive.google.com/file/d/1h1EDADnI8NI3wMGbRncLiOWeM7WsNuLX/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Resume</a>
           </Button>
         </motion.div>
         <motion.div

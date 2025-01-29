@@ -13,7 +13,7 @@ const experiences = [
   {
     title: 'Summer Research Intern',
     company: 'Indian Institute of Technology, Indore',
-    period: 'Apr 2024 - Dec 2024',
+    period: 'Apr 2024 - Nov 2024',
     description: 'Led the deployment of explainable hate speech detection models into a cloud-based architecture, optimizing resource allocation and scaling across multiple languages.',
   },
   {
