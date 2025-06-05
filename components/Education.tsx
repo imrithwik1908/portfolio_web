@@ -6,6 +6,18 @@ import { GraduationCap, Calendar, BookOpen, Award, MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+interface EducationItem {
+  degree: string
+  institution: string
+  location: string
+  period: string
+  gpa: string
+  description: string
+  skills: string[]
+  achievements: string[]
+  color: string
+}
+
 const education = [
   {
     degree: "Bachelor of Technology in Computer Science Engineering",
@@ -80,7 +92,7 @@ export function Education() {
   )
 }
 
-function EducationCard({ item, index }: { item: any; index: number }) {
+function EducationCard({ item, index }: { item: EducationItem; index: number }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-50px" })
 
