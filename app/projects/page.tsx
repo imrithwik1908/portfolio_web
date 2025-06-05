@@ -1,20 +1,17 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { ProjectGrid } from '@/components/project-grid'
+import { TechBackground } from '@/components/TechBackground'
 
 type Project = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  tags: string[];
-  github: string;
+  id: string
+  title: string
+  description: string
+  image: string
+  tags: string[]
+  github: string
 }
-
-// export const metadata = {
-//   title: 'Projects | Your Name',
-//   description: 'Explore my projects in AI, Machine Learning, and Backend Development',
-// }
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -26,10 +23,12 @@ export default function ProjectsPage() {
   }, [])
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-16">
-      <h1 className="mb-8 text-3xl font-bold text-center">Projects</h1>
-      <ProjectGrid projects={projects} />
+    <div className="relative">
+      <TechBackground />
+      <div className="container mx-auto max-w-5xl px-4 py-16 relative z-10">
+        <h1 className="mb-8 text-3xl font-bold text-center">Projects</h1>
+        <ProjectGrid projects={projects} />
+      </div>
     </div>
   )
 }
-
