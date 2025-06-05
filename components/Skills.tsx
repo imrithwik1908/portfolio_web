@@ -85,14 +85,10 @@ export function Skills() {
                   Hello, I&apos;m Rithwik
                 </h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  I&apos;m a passionate full-stack developer with over 5 years of experience creating digital experiences
-                  that make a difference. I specialize in modern web technologies and have a strong background in data
-                  science and AI.
+                   I&apos;m a data-driven developer with a strong interest in AI and machine learning. I enjoy working on problems that require both analytical thinking and creativity — whether it&apos;s building models to understand human behavior or making systems more efficient with smart automation. I&apos;ve spent most of my time exploring how data can be used to solve real problems, and I&apos;m especially drawn to projects where the impact is clear and measurable
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  When I&apos;m not coding, you&apos;ll find me exploring new technologies, contributing to open-source projects,
-                  or sharing knowledge with the developer community. I believe in writing clean, maintainable code and
-                  creating user-centered solutions.
+                   Outside of work, I like experimenting with new tools, following emerging research, and learning from open-source communities. I care about writing clean, maintainable code and building solutions that are practical and scalable. For me, it&apos;s not just about applying algorithms — it&apos;s about understanding the problem deeply and using the right tools to solve it well..
                 </p>
               </motion.div>
 

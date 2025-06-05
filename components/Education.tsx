@@ -24,7 +24,7 @@ const education = [
     institution: "Indian Institute of Information Technology, Dharwad",
     location: "Dharwad, India",
     period: "Dec 2021 - Jun 2025",
-    gpa: "CGPA: 8.94",
+    gpa: "8.94/10.0",
     description:
       "Focused on core computer science fundamentals with practical projects in ML, Cybersecurity, and Software Development.",
     skills: [
@@ -46,7 +46,7 @@ const education = [
     institution: "Narayana College",
     location: "Hyderabad, India",
     period: "Jun 2019 - May 2021",
-    gpa: "98% Percentage",
+    gpa: "98%",
     description:
       "Specialized in Science stream with high marks in Mathematics and Physics.",
     skills: ["Mathematics", "Physics", "Chemistry"],

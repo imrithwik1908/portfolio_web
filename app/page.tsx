@@ -130,11 +130,11 @@ export default function Home() {
             </h1>
             <TypeAnimation
               sequence={[
-                'Full Stack Developer',
-                2000,
                 'Machine Learning Enthusiast',
                 2000,
                 'Data Science Associate',
+                2000,
+                'Full Stack Developer',
                 2000
               ]}
               wrapper="h2"
@@ -149,8 +149,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Passionate about crafting intelligent solutions with AI, robust backend systems, and cutting-edge web technologies. 
-            Currently pursuing B.Tech in Computer Science Engineering at IIIT Dharwad.
+            Driven by data and AI, I build intelligent models and scalable backend systems to solve real-world problems. Skilled in machine learning, deep learning, and full-stack development, I focus on creating efficient, impactful solutions.
           </motion.p>
           <motion.div
             className="flex flex-wrap justify-center gap-4"
@@ -166,12 +165,13 @@ export default function Home() {
             </Button>
             <Button variant="outline" asChild>
               <a
-                href="https://drive.google.com/uc?export=download&id=1h1EDADnI8NI3wMGbRncLiOWeM7WsNuLX"
+                href="https://drive.google.com/uc?export=download&id=167-7dvJgSWE9kbKYPYBwVaHln8JncN0n"
                 download
               >
                 Download Resume
               </a>
             </Button>
+
           </motion.div>
           <motion.div
             className="mt-12"

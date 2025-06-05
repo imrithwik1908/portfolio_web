@@ -7,9 +7,9 @@ const experiences = [
   {
     title: 'Data Science Associate',
     company: 'Blackcoffer',
-    period: 'Jan 2025 - Present',
+    period: 'Dec 2024 - May 2025',
     description:
-      'Applying advanced data science techniques to solve complex business problems. Developing and implementing machine learning models for predictive analytics and data-driven decision making.',
+      'Built predictive models for customer movement and revenue forecasting using real-world trajectory and behavior data. Applied advanced time-series analysis and uncovered key patterns to help optimize marketing decisions and improve business outcomes.',
   },
   {
     title: 'Summer Research Intern',
