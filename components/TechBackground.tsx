@@ -1,9 +1,11 @@
 // components/TechBackground.tsx
 'use client'
 import { useEffect, useRef } from 'react'
+import { useTheme } from 'next-themes'
 
 export function TechBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -26,7 +28,11 @@ export function TechBackground() {
     const draw = () => {
       ctx.clearRect(0, 0, width, height)
 
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+      if (theme === 'light') {
+        ctx.strokeStyle = 'rgba(206, 204, 204, 0.95)'; // grey for light mode
+      } else {
+        ctx.strokeStyle = 'rgba(34, 34, 34, 0.95)'; // dark mode original
+      }      
       ctx.lineWidth = 1
 
       // Draw grid
@@ -74,7 +80,7 @@ export function TechBackground() {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [theme])
 
   return (
     <canvas

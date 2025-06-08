@@ -84,10 +84,10 @@ export function Skills() {
                   <Zap className="h-6 w-6 text-primary" />
                   Hello, I&apos;m Rithwik
                 </h3>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
                    I&apos;m a data-driven developer with a strong interest in AI and machine learning. I enjoy working on problems that require both analytical thinking and creativity — whether it&apos;s building models to understand human behavior or making systems more efficient with smart automation. I&apos;ve spent most of my time exploring how data can be used to solve real problems, and I&apos;m especially drawn to projects where the impact is clear and measurable
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
                    Outside of work, I like experimenting with new tools, following emerging research, and learning from open-source communities. I care about writing clean, maintainable code and building solutions that are practical and scalable. For me, it&apos;s not just about applying algorithms — it&apos;s about understanding the problem deeply and using the right tools to solve it well..
                 </p>
               </motion.div>
@@ -100,12 +100,12 @@ export function Skills() {
                 className="flex flex-wrap gap-4 text-sm text-muted-foreground"
               >
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span>Hyderabad, IND</span>
+                  <MapPin className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  <span className="text-gray-900 dark:text-gray-100">Hyderabad, IND</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span>Available for work</span>
+                  <span className="text-gray-900 dark:text-gray-100">Available for work</span>
                 </div>
               </motion.div>
 
