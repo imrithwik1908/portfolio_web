@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TypeAnimation } from 'react-type-animation'
 import { Skills } from '@/components/Skills'
@@ -126,7 +126,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4">
-              <span className="text-gradient">Hey, I&apos;m C Sai Rithwik Reddy</span>
+              <span className="text-gradient">Hey, I&apos;m Sai Rithwik Reddy Chirra</span>
             </h1>
             <TypeAnimation
               sequence={[
@@ -167,8 +167,10 @@ export default function Home() {
               <a
                 href="https://drive.google.com/uc?export=download&id=167-7dvJgSWE9kbKYPYBwVaHln8JncN0n"
                 download
+                className="flex items-center gap-2"
               >
-                Download Resume
+                <Download className="h-4 w-4" />
+                Resume
               </a>
             </Button>
 

@@ -1,8 +1,10 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
+import { Space_Grotesk } from "next/font/google"
 import {
   MapPin,
   Calendar,
@@ -11,9 +13,17 @@ import {
   Brain,
   Wrench,
   Target,
-  Zap,
+  Github,
+  Linkedin,
+  Mail,
+  Instagram,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400"],
+})
 
 type SkillCategory = "Development" | "AI & Data" | "Database" | "Tools"
 
@@ -41,10 +51,33 @@ const stats = [
   { label: "Projects Completed", value: "20+", icon: <Target className="h-5 w-5" /> },
 ]
 
+const socialLinks = [
+  {
+    label: "GitHub",
+    href: "https://github.com/imrithwik1908",
+    icon: Github,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/sairithwikreddy",
+    icon: Linkedin,
+  },
+  {
+    label: "Email",
+    href: "mailto:csairithwik.reddy@gmail.com",
+    icon: Mail,
+  },
+  {
+    label: "Instagram",
+    href: "https://instagram.com/rithwik.cs",
+    icon: Instagram,
+  },
+]
+
 type Stat = {
-  label: string;
-  value: string;
-  icon: JSX.Element;
+  label: string
+  value: string
+  icon: JSX.Element
 }
 
 export function Skills() {
@@ -71,7 +104,7 @@ export function Skills() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="space-y-8"
+            className={`${spaceGrotesk.className} space-y-8`}
           >
             <div className="space-y-6">
               <motion.div
@@ -79,17 +112,64 @@ export function Skills() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
+                className="space-y-6"
               >
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Zap className="h-6 w-6 text-primary" />
-                  Hello, I&apos;m Rithwik
-                </h3>
-                <p className="text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
-                   I&apos;m a data-driven developer with a strong interest in AI and machine learning. I enjoy working on problems that require both analytical thinking and creativity — whether it&apos;s building models to understand human behavior or making systems more efficient with smart automation. I&apos;ve spent most of my time exploring how data can be used to solve real problems, and I&apos;m especially drawn to projects where the impact is clear and measurable
-                </p>
-                <p className="text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
-                   Outside of work, I like experimenting with new tools, following emerging research, and learning from open-source communities. I care about writing clean, maintainable code and building solutions that are practical and scalable. For me, it&apos;s not just about applying algorithms — it&apos;s about understanding the problem deeply and using the right tools to solve it well..
-                </p>
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1.75rem] bg-muted shadow-xl shadow-black/20">
+                    <Image
+                      src="/profile.jpg"
+                      alt="Hi, This is Rithwik"
+                      fill
+                      className="scale-[1.10] object-cover"
+                      priority
+                    />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-normal tracking-tight text-foreground">
+                      Hi, This is Rithwik
+                    </h3>
+
+                    <div className="mt-4 flex items-center gap-5 text-muted-foreground">
+                      {socialLinks.map((social) => {
+                        const Icon = social.icon
+
+                        return (
+                          <a
+                            key={social.label}
+                            href={social.href}
+                            target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+                            rel={social.href.startsWith("mailto:") ? undefined : "noreferrer"}
+                            aria-label={social.label}
+                            className="transition-colors duration-300 hover:text-primary"
+                          >
+                            <Icon className="h-5 w-5" />
+                          </a>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <p className="text-gray-900 dark:text-gray-300 leading-relaxed mb-4 font-normal">
+                    I&apos;m a data-driven developer with a strong interest in AI and machine learning.
+                    I enjoy working on problems that require both analytical thinking and creativity —
+                    whether it&apos;s building models to understand human behavior or making systems more
+                    efficient with smart automation.
+                  </p>
+
+                  <p className="text-gray-900 dark:text-gray-300 leading-relaxed mb-4 font-normal">
+                    I&apos;ve spent most of my time exploring how data can be used to solve real problems,
+                    and I&apos;m especially drawn to projects where the impact is clear and measurable.
+                  </p>
+
+                  <p className="text-gray-900 dark:text-gray-300 leading-relaxed mb-4 font-normal">
+                    Outside of work, I like experimenting with new tools, following emerging research,
+                    and learning from open-source communities. I care about writing clean, maintainable
+                    code and building solutions that are practical and scalable.
+                  </p>
+                </div>
               </motion.div>
 
               <motion.div
@@ -101,29 +181,13 @@ export function Skills() {
               >
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  <span className="text-gray-900 dark:text-gray-100">Hyderabad, IND</span>
+                  <span className="text-gray-900 dark:text-gray-100 font-normal">Tempe, AZ</span>
                 </div>
+
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-gray-900 dark:text-gray-100">Available for work</span>
+                  <span className="text-gray-900 dark:text-gray-100 font-normal">Available for work</span>
                 </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-                className="flex flex-wrap gap-4"
-              >
-                {/* <Button className="group">
-                  <Download className="mr-2 h-4 w-4 group-hover:translate-y-1 transition-transform duration-200" />
-                  Download CV
-                </Button>
-                <Button variant="outline">
-                  Let&apos;s Connect
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button> */}
               </motion.div>
             </div>
 

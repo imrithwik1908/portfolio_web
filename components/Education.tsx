@@ -20,6 +20,25 @@ interface EducationItem {
 
 const education = [
   {
+    degree: "Master of Science in Computer Science",
+    institution: "Arizona State University",
+    location: "Tempe, AZ, USA",
+    period: "Aug 2025 - Present",
+    gpa: "4.00",
+    description:
+      "Currently pursuing graduate studies in Computer Science with a focus on advanced software engineering, artificial intelligence, and scalable computing systems.",
+    skills: [
+      "Knowledge Representation and Reasoning",
+      "Software Verification and Testing",
+      "Artificial Intelligence",
+      "Data Mining",
+      "Distributed Database Management Systems",
+      "Data Visualization",
+    ],
+    achievements: [],
+    color: "from-yellow-500/20 to-orange-500/20"
+  },
+  {
     degree: "Bachelor of Technology in Computer Science Engineering",
     institution: "Indian Institute of Information Technology, Dharwad",
     location: "Dharwad, India",
@@ -40,18 +59,6 @@ const education = [
       "Research Internship at IIT Indore"
     ],
     color: "from-indigo-500/20 to-purple-500/20"
-  },
-  {
-    degree: "12th Grade",
-    institution: "Narayana College",
-    location: "Hyderabad, India",
-    period: "Jun 2019 - May 2021",
-    gpa: "98%",
-    description:
-      "Specialized in Science stream with high marks in Mathematics and Physics.",
-    skills: ["Mathematics", "Physics", "Chemistry"],
-    achievements: [""],
-    color: "from-green-400/20 to-teal-400/20"
   },
 ]
 
@@ -187,26 +194,28 @@ function EducationCard({ item, index }: { item: EducationItem; index: number }) 
           </div>
 
           {/* Achievements */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium flex items-center gap-2">
-              <Award className="h-3 w-3 text-primary" />
-              Achievements
-            </h4>
-            <div className="space-y-1">
-              {item.achievements.map((achievement: string, i: number) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ delay: index * 0.2 + i * 0.15 }}
-                  className="text-xs text-muted-foreground flex items-center gap-2"
-                >
-                  <div className="w-1 h-1 rounded-full bg-primary/60"></div>
-                  {achievement}
-                </motion.div>
-              ))}
+          {item.achievements.filter(Boolean).length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Award className="h-3 w-3 text-primary" />
+                Achievements
+              </h4>
+              <div className="space-y-1">
+                {item.achievements.filter(Boolean).map((achievement: string, i: number) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                    transition={{ delay: index * 0.2 + i * 0.15 }}
+                    className="text-xs text-muted-foreground flex items-center gap-2"
+                  >
+                    <div className="w-1 h-1 rounded-full bg-primary/60"></div>
+                    {achievement}
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
 
         {/* Hover effect overlay */}

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ProjectGrid } from '@/components/project-grid'
-import { TechBackground } from '@/components/TechBackground'
+import { useEffect, useState } from 'react'
+import { ProjectShowcase } from '../../components/project-showcase'
 
 type Project = {
   id: string
@@ -18,17 +17,13 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetch('/api/projects')
-      .then(response => response.json())
-      .then(data => setProjects(data))
+      .then((response) => response.json())
+      .then((data) => setProjects(data))
   }, [])
 
   return (
-    <div className="relative">
-      <TechBackground />
-      <div className="container mx-auto max-w-5xl px-4 py-16 relative z-10">
-        <h1 className="mb-8 text-3xl font-bold text-center">Projects</h1>
-        <ProjectGrid projects={projects} />
-      </div>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <ProjectShowcase projects={projects} />
     </div>
   )
 }
