@@ -1,7 +1,7 @@
 'use client'
 
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 const experiences = [
   {
@@ -9,134 +9,110 @@ const experiences = [
     company: 'Blackcoffer',
     period: 'Dec 2024 - May 2025',
     description:
-      'Built predictive models for customer movement and revenue forecasting using real-world trajectory and behavior data. Applied advanced time-series analysis and uncovered key patterns to help optimize marketing decisions and improve business outcomes.',
+      'Built predictive models for customer movement and revenue forecasting using real-world trajectory and behavior data. Applied time-series analysis to identify patterns that supported marketing decisions and business outcomes.',
+    tags: ['Forecasting', 'Trajectory data', 'Business analysis'],
   },
   {
     title: 'Summer Research Intern',
     company: 'Indian Institute of Technology, Indore',
     period: 'Apr 2024 - Nov 2024',
     description:
-      'Led the deployment of explainable hate speech detection models into a cloud-based architecture, optimizing resource allocation and scaling across multiple languages.',
+      'Led deployment work for explainable hate speech detection models in a cloud-based architecture, improving resource allocation and multilingual scaling.',
+    tags: ['Explainable AI', 'Cloud deployment', 'NLP'],
   },
   {
     title: 'Full Stack Developer Intern',
     company: 'CodeAlpha',
     period: 'Jun 2023 - Jul 2023',
     description:
-      'Designed and maintained robust RESTful APIs, optimized MongoDB queries, and collaborated with UI/UX designers to improve front-end interfaces, enhancing user satisfaction ratings by 25%.',
+      'Designed and maintained RESTful APIs, optimized MongoDB queries, and collaborated on front-end improvements that enhanced user satisfaction ratings by 25%.',
+    tags: ['REST APIs', 'MongoDB', 'Frontend'],
   },
 ]
 
 export function Experience() {
-  const ref = useRef(null)
+  const flowRef = useRef<HTMLDivElement | null>(null)
   const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
-
-  const lineHeight = useTransform(scrollYProgress, [0, 0.9], ['0%', '100%'])
-
-  const totalNodes = experiences.length
-  const [activeNodes, setActiveNodes] = useState<boolean[]>(Array(totalNodes).fill(false))
-
-  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    const newActiveNodes = experiences.map((_, index) => latest >= index / totalNodes)
-    setActiveNodes((prev) => {
-      for (let i = 0; i < totalNodes; i++) {
-        if (prev[i] !== newActiveNodes[i]) return newActiveNodes
-      }
-      return prev
-    })
+    target: flowRef,
+    offset: ['start 72%', 'end 54%'],
   })
 
   return (
-    <section id="experience" className="py-20" ref={ref}>
-      <div className="container mx-auto px-4">
-        <motion.h2
-          className="text-3xl font-bold mb-12 text-center text-foreground"
-          initial={{ opacity: 0, y: -50 }}
+    <section id="experience" className="section-flow py-20">
+      <div className="container mx-auto max-w-7xl px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="mb-10 max-w-3xl"
         >
-          Work Experience
-        </motion.h2>
-        <div className="relative">
-          {/* Vertical timeline line */}
-          <motion.div
-            className="absolute top-0 h-full bg-primary/30 origin-top"
-            style={{
-              left: 'calc(50% - 1px)',
-              width: '2px',
-              scaleY: lineHeight,
-            }}
-          />
+          <div>
+            <p className="eyebrow">Experience</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.045em] text-foreground sm:text-5xl">
+              Roles, without the resume wall.
+            </h2>
+          </div>
+        </motion.div>
 
-          {experiences.map((exp, index) => {
-            const isActive = activeNodes[index]
-
-            return (
-              <motion.div
-                key={index}
-                className="mb-12 flex items-center justify-center relative"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-              >
-                {/* Left Side */}
-                <motion.div
-                  className={`w-1/2 pr-8 text-right transition-opacity duration-300 ${
-                    isActive
-                      ? 'opacity-100 text-foreground'
-                      : 'opacity-50 text-muted-foreground'
-                  }`}
-                >
-                  <h3 className="text-xl font-semibold">{exp.title}</h3>
-                  <p className="text-primary">{exp.company}</p>
-                </motion.div>
-
-                {/* Node */}
-                <div className="relative flex flex-col items-center justify-center w-8">
-                  <div
-                    className={`rounded-full border-2 border-primary transition-all duration-500 ${
-                      isActive
-                        ? 'bg-gradient-to-tr from-blue-600 to-blue-400 shadow-[0_0_10px_3px_rgba(59,130,246,0.6)]'
-                        : 'bg-transparent'
-                    }`}
-                    style={{
-                      width: 14,
-                      height: 14,
-                      boxShadow: isActive
-                        ? '0 0 10px 3px rgba(59, 130, 246, 0.6)'
-                        : 'none',
-                    }}
-                  />
-                  {/* Glow below node */}
-                  <div
-                    className={`absolute bottom-[-10px] rounded-full transition-all duration-500 ${
-                      isActive
-                        ? 'bg-blue-500 opacity-30 blur-[8px]'
-                        : 'bg-transparent opacity-0'
-                    }`}
-                    style={{ width: 24, height: 8 }}
-                  />
-                </div>
-
-                {/* Right Side */}
-                <motion.div
-                  className={`w-1/2 pl-8 transition-opacity duration-300 ${
-                    isActive
-                      ? 'opacity-100 text-foreground'
-                      : 'opacity-50 text-muted-foreground'
-                  }`}
-                >
-                  <p className="text-sm mb-2">{exp.period}</p>
-                  <p className="text-sm">{exp.description}</p>
-                </motion.div>
-              </motion.div>
-            )
-          })}
+        <div ref={flowRef} className="work-flow">
+          <motion.div className="work-progress" style={{ scaleY: scrollYProgress }} aria-hidden="true" />
+          {experiences.map((exp, index) => (
+            <WorkItem key={exp.title} exp={exp} index={index} />
+          ))}
         </div>
       </div>
     </section>
+  )
+}
+
+function WorkItem({ exp, index }: { exp: (typeof experiences)[number]; index: number }) {
+  const itemRef = useRef<HTMLElement | null>(null)
+  const { scrollYProgress } = useScroll({
+    target: itemRef,
+    offset: ['start 68%', 'center 48%'],
+  })
+  const markerScale = useTransform(scrollYProgress, [0, 1], [0.94, 1.1])
+  const markerBg = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ['hsl(var(--background) / 0.86)', 'hsl(var(--primary) / 0.1)'],
+  )
+
+  return (
+    <motion.article
+      ref={itemRef}
+      initial={{ y: 26 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      className="work-item group"
+    >
+      <div className="work-index">
+        <motion.span style={{ scale: markerScale, background: markerBg }}>
+          {String(index + 1).padStart(2, '0')}
+        </motion.span>
+      </div>
+
+      <div className="work-copy">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+          <div>
+            <h3 className="text-3xl font-black tracking-[-0.04em] text-foreground sm:text-4xl">
+              {exp.title}
+            </h3>
+            <p className="mt-1 text-base font-medium text-primary">{exp.company}</p>
+          </div>
+          <p className="font-mono text-sm text-muted-foreground">{exp.period}</p>
+        </div>
+
+        <p className="mt-6 max-w-4xl text-base leading-8 text-muted-foreground">{exp.description}</p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          {exp.tags.map((tag) => (
+            <span key={tag} className="quiet-tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </motion.article>
   )
 }

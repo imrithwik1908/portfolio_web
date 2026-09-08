@@ -1,10 +1,18 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SiteHeader } from '@/components/site-header'
 
-const inter = Inter({ subsets: ['latin'] })
+const geistSans = localFont({
+  src: './fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
+})
+
+const geistMono = localFont({
+  src: './fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
+})
 
 export const metadata: Metadata = {
   title: 'C Sai Rithwik Reddy',
@@ -18,14 +26,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gradient-to-br from-background to-secondary/20`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} bg-background font-sans`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          storageKey="portfolio-theme-v3"
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
+          <div className="site-shell terminal-surface relative flex min-h-screen flex-col">
             <SiteHeader />
             <main className="flex-1">{children}</main>
           </div>
@@ -34,4 +43,3 @@ export default function RootLayout({
     </html>
   )
 }
-

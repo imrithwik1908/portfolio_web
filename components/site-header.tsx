@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { ModeToggle } from './mode-toggle'
 
 const navigation = [
-  { name: 'Home', href: '/' },
+  { name: 'About', href: '/#about' },
+  { name: 'Work', href: '/#experience' },
   { name: 'Projects', href: '/projects' },
+  { name: 'Contact', href: '/#contact' },
 ]
 
 export function SiteHeader() {
@@ -25,24 +26,25 @@ export function SiteHeader() {
   }, [])
 
   return (
-    <motion.header
+    <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled ? "bg-background/80 backdrop-blur-sm shadow-md" : "bg-transparent"
+        isScrolled ? "bg-background/58 shadow-sm shadow-foreground/5 backdrop-blur-2xl" : "bg-transparent"
       )}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.3 }}
     >
-      <div className="container mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <nav className="flex gap-6">
+      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        <Link href="/" className="text-sm font-black tracking-[-0.02em] text-foreground">
+          Sai Rithwik
+        </Link>
+
+        <nav className="hidden min-w-0 items-center gap-7 sm:flex">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname === item.href
+                'shrink-0 text-sm transition-colors hover:text-foreground',
+                item.href === '/projects' && pathname === '/projects'
                   ? 'text-foreground'
                   : 'text-muted-foreground'
               )}
@@ -53,7 +55,6 @@ export function SiteHeader() {
         </nav>
         <ModeToggle />
       </div>
-    </motion.header>
+    </header>
   )
 }
-

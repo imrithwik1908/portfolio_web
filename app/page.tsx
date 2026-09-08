@@ -1,197 +1,151 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ChevronDown, Download } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowDown, Download } from 'lucide-react'
+import { Link as ScrollLink } from 'react-scroll'
 import { Button } from '@/components/ui/button'
-import { TypeAnimation } from 'react-type-animation'
 import { Skills } from '@/components/Skills'
 import { Experience } from '@/components/Experience'
 import { Education } from '@/components/Education'
+import { HomeProjects } from '@/components/HomeProjects'
 import { ContactSection } from '@/components/ContactSection'
-import { Link as ScrollLink } from 'react-scroll'
-import { useEffect, useRef } from 'react'
-import { useTheme } from 'next-themes'
+
+const heroSignals = [
+  ['Current', 'MS CS @ Arizona State University'],
+  ['Focus', 'ML systems + backend APIs'],
+  ['Based in', 'Tempe, AZ'],
+]
+
+const roles = [
+  'Machine Learning Engineer',
+  'Data Science Associate',
+  'Backend Systems Builder',
+  'Full Stack Developer',
+]
 
 export default function Home() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const { theme } = useTheme()
+  const [roleIndex, setRoleIndex] = useState(0)
+  const [typedRole, setTypedRole] = useState("")
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const context = ctx as CanvasRenderingContext2D
+    let buffer = ''
 
-    let w = (canvas.width = window.innerWidth)
-    let h = (canvas.height = window.innerHeight)
-
-    window.addEventListener('resize', () => {
-      w = canvas.width = window.innerWidth
-      h = canvas.height = window.innerHeight
-    })
-
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 1.5,
-      o: Math.random()
-    }))
-
-    const comets = Array.from({ length: 6 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      dx: -2 - Math.random() * 3,
-      dy: 1 + Math.random(),
-      length: 100 + Math.random() * 100
-    }))
-
-    function drawMoon() {
-      context.save()
-      context.beginPath()
-      context.arc(w - 100, 100, 40, 0, Math.PI * 2)
-      context.shadowColor = theme === 'light' ? 'rgba(0,0,0,0.3)' : 'white'
-      context.shadowBlur = 20
-      context.fillStyle = theme === 'light' ? '#fefcd7' : 'white'
-      context.fill()
-      context.restore()
+    if (!window.location.hash) {
+      window.scrollTo({ top: 0, left: 0 })
     }
 
-    function drawStars() {
-      stars.forEach((star) => {
-        context.beginPath()
-        context.arc(star.x, star.y, star.r, 0, 2 * Math.PI)
-        context.fillStyle = `rgba(255,255,255,${Math.abs(Math.sin(Date.now() * 0.001 + star.o))})`
-        context.fill()
-      })
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      buffer = `${buffer}${event.key.toLowerCase()}`.slice(-8)
+
+      if (buffer.includes('hire')) {
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+      }
     }
 
-    function drawComets() {
-      comets.forEach((comet) => {
-        context.beginPath()
-        const gradient = context.createLinearGradient(
-          comet.x,
-          comet.y,
-          comet.x + comet.length,
-          comet.y - comet.length / 2
-        )
-        gradient.addColorStop(0, theme === 'light' ? '#3b82f6' : 'white')
-        gradient.addColorStop(1, 'transparent')
-        context.strokeStyle = gradient
-        context.lineWidth = 2
-        context.moveTo(comet.x, comet.y)
-        context.lineTo(comet.x + comet.length, comet.y - comet.length / 2)
-        context.stroke()
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [])
 
-        comet.x += comet.dx
-        comet.y += comet.dy
+  useEffect(() => {
+    const currentRole = roles[roleIndex]
 
-        if (comet.x < -comet.length || comet.y > h + comet.length) {
-          comet.x = w + Math.random() * 200
-          comet.y = Math.random() * h
-        }
-      })
+    if (typedRole === currentRole) {
+      const timer = window.setTimeout(() => {
+        setRoleIndex((index) => (index + 1) % roles.length)
+        setTypedRole("")
+      }, 1600)
+      return () => window.clearTimeout(timer)
     }
 
-    function animate() {
-      context.fillStyle = theme === 'light' ? '#ffffff' : '#000000'
-      context.fillRect(0, 0, w, h)
-      drawStars()
-      drawMoon()
-      drawComets()
-      requestAnimationFrame(animate)
-    }
+    const timer = window.setTimeout(() => {
+      setTypedRole(currentRole.slice(0, typedRole.length + 1))
+    }, typedRole.length === 0 ? 170 : 58)
 
-    animate()
-  }, [theme])
+    return () => window.clearTimeout(timer)
+  }, [roleIndex, typedRole])
+
+  useEffect(() => {
+    if (typedRole.length > 0) return
+
+    const timer = window.setTimeout(() => {
+      setTypedRole(roles[roleIndex].slice(0, 1))
+    }, 210)
+
+    return () => window.clearTimeout(timer)
+  }, [roleIndex, typedRole])
 
   return (
-    <div className="relative overflow-hidden flex flex-col min-h-screen">
-      {/* Background canvas */}
-      <canvas
-        ref={canvasRef}
-        className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
-      />
-
-      {/* Glass overlay */}
-      <div className="absolute top-0 left-0 w-full h-full backdrop-blur-[2px] bg-white/5 dark:bg-black/10 -z-10 pointer-events-none" />
-
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4">
-              <span className="text-gradient">Hey, I&apos;m Sai Rithwik Reddy Chirra</span>
-            </h1>
-            <TypeAnimation
-              sequence={[
-                'Machine Learning Enthusiast',
-                2000,
-                'Data Science Associate',
-                2000,
-                'Full Stack Developer',
-                2000
-              ]}
-              wrapper="h2"
-              cursor={true}
-              repeat={Infinity}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6"
-            />
-          </motion.div>
-          <motion.p
-            className="max-w-2xl text-lg mb-8 text-muted-foreground"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Driven by data and AI, I build intelligent models and scalable backend systems to solve real-world problems. Skilled in machine learning, deep learning, and full-stack development, I focus on creating efficient, impactful solutions.
-          </motion.p>
-          <motion.div
-            className="flex flex-wrap justify-center gap-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <ScrollLink to="contact" smooth={true} duration={500}>
-              <Button>Get in Touch</Button>
-            </ScrollLink>
-            <Button variant="outline" asChild>
-              <Link href="/projects">View Projects</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <a
-                href="https://drive.google.com/uc?export=download&id=167-7dvJgSWE9kbKYPYBwVaHln8JncN0n"
-                download
-                className="flex items-center gap-2"
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      <main className="relative z-10 flex-grow">
+        <section className="container relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center px-4 py-16">
+          <div className="mx-auto w-full">
+            <div className="mx-auto max-w-6xl text-center">
+              <button
+                type="button"
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                className="hero-kicker mx-auto mb-7 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase text-primary"
               >
-                <Download className="h-4 w-4" />
-                Resume
-              </a>
-            </Button>
+                Open to selective opportunities
+              </button>
 
-          </motion.div>
-          <motion.div
-            className="mt-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <ChevronDown className="animate-bounce" size={32} />
-          </motion.div>
+              <h1 className="hero-title text-5xl font-black leading-[0.92] tracking-[-0.055em] text-foreground sm:text-6xl md:text-7xl">
+                <span className="block">Hey, I&apos;m</span>
+                <span className="hero-name text-gradient animate-gradient block whitespace-normal lg:whitespace-nowrap">
+                  Sai Rithwik Reddy Chirra
+                </span>
+              </h1>
+
+              <div className="mt-7 min-h-[3rem] text-3xl font-extrabold tracking-[-0.03em] text-foreground sm:text-4xl md:text-5xl">
+                <span className="role-type">{typedRole}</span>
+              </div>
+
+              <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl">
+                I build practical AI workflows, predictive models, APIs, and product systems where the output needs to be clear, useful, and dependable.
+              </p>
+
+              <div className="mt-9 flex flex-wrap justify-center gap-3">
+                <ScrollLink to="contact" smooth={true} duration={500}>
+                  <Button size="lg">Get in Touch</Button>
+                </ScrollLink>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/projects">View Projects</Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <a
+                    href="https://drive.google.com/uc?export=download&id=167-7dvJgSWE9kbKYPYBwVaHln8JncN0n"
+                    download
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Resume
+                  </a>
+                </Button>
+              </div>
+            </div>
+
+            <div className="hero-signal-row mx-auto mt-10">
+              {heroSignals.map(([label, value]) => (
+                <span key={label} className="hero-signal">
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="absolute bottom-7 left-1/2 -translate-x-1/2">
+            <ArrowDown className="h-7 w-7 animate-bounce text-foreground/80" />
+          </div>
         </section>
 
-        {/* Main Sections */}
         <Skills />
+        <HomeProjects />
         <Experience />
         <Education />
       </main>
 
-      {/* Footer Contact Section */}
       <ContactSection />
     </div>
   )
