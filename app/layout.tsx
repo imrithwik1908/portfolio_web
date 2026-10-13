@@ -15,8 +15,8 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'C Sai Rithwik Reddy',
-  description: 'Crafting intelligent solutions with AI and robust backend systems',
+  title: 'Sai Rithwik Reddy Chirra | Software, Data & AI',
+  description: 'Rithwik is an MS Computer Science student at Arizona State University working across backend systems, data, and machine learning.',
 }
 
 export default function RootLayout({

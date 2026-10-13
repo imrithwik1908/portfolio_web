@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 
 const experiences = [
   {
@@ -9,33 +9,81 @@ const experiences = [
     company: 'Blackcoffer',
     period: 'Dec 2024 - May 2025',
     description:
-      'Built predictive models for customer movement and revenue forecasting using real-world trajectory and behavior data. Applied time-series analysis to identify patterns that supported marketing decisions and business outcomes.',
-    tags: ['Forecasting', 'Trajectory data', 'Business analysis'],
+      'I worked with a 40K+ retail-mall trajectory dataset, testing time-series models for customer movement and improving predictive accuracy by 18% over traditional methods. A second project focused on digital-ad revenue forecasts, along with the preprocessing, feature engineering, and validation needed to make the results useful.',
+    tags: ['Time-series forecasting', 'Trajectory data', 'Revenue forecasting'],
   },
   {
     title: 'Summer Research Intern',
     company: 'Indian Institute of Technology, Indore',
     period: 'Apr 2024 - Nov 2024',
     description:
-      'Led deployment work for explainable hate speech detection models in a cloud-based architecture, improving resource allocation and multilingual scaling.',
-    tags: ['Explainable AI', 'Cloud deployment', 'NLP'],
+      'I worked on X-MuTeST, an explainable hate-speech detection framework for English, Hindi, and Telugu. The work covered human rationales, LLaMA 3.1, MuRIL and XLM-R encoders, plus deployment changes that reduced inference latency by 20%. It later became an AAAI 2026 paper.',
+    tags: ['Explainable NLP', 'Multilingual models', 'Inference optimization'],
   },
   {
     title: 'Full Stack Developer Intern',
     company: 'CodeAlpha',
     period: 'Jun 2023 - Jul 2023',
     description:
-      'Designed and maintained RESTful APIs, optimized MongoDB queries, and collaborated on front-end improvements that enhanced user satisfaction ratings by 25%.',
-    tags: ['REST APIs', 'MongoDB', 'Frontend'],
+      'This was my first internship. I worked through responsive front-end tasks and built a small Node.js/EJS application, which gave me an early look at how a feature continues past the page and into the application behind it.',
+    tags: ['Node.js', 'EJS', 'Frontend'],
   },
 ]
 
 export function Experience() {
   const flowRef = useRef<HTMLDivElement | null>(null)
+  const [lineRange, setLineRange] = useState({
+    points: [0, 0.5, 1],
+    segments: [] as Array<{ top: number; height: number; start: number; end: number }>,
+  })
   const { scrollYProgress } = useScroll({
     target: flowRef,
-    offset: ['start 72%', 'end 54%'],
+    offset: ['start 68%', 'end 52%'],
   })
+
+  useLayoutEffect(() => {
+    const flow = flowRef.current
+    if (!flow) return
+
+    const measure = () => {
+      const markers = flow.querySelectorAll<HTMLElement>('.work-index span')
+      const first = markers.item(0)
+      const last = markers.item(markers.length - 1)
+      if (!first || !last) return
+
+      const flowRect = flow.getBoundingClientRect()
+      const firstRect = first.getBoundingClientRect()
+      const lastRect = last.getBoundingClientRect()
+      const start = firstRect.top - flowRect.top + firstRect.height / 2
+      const end = lastRect.top - flowRect.top + lastRect.height / 2
+      const length = Math.max(0, end - start)
+      const points = Array.from(markers).map((marker) => {
+        const rect = marker.getBoundingClientRect()
+        const center = rect.top - flowRect.top + rect.height / 2
+        return length ? Math.min(1, Math.max(0, (center - start) / length)) : 0
+      })
+      const markerRects = Array.from(markers).map((marker) => marker.getBoundingClientRect())
+      const segments = markerRects.slice(0, -1).map((rect, index) => {
+        const nextRect = markerRects[index + 1]
+        const top = rect.bottom - flowRect.top + 5
+        const bottom = nextRect.top - flowRect.top - 5
+
+        return {
+          top,
+          height: Math.max(0, bottom - top),
+          start: points[index],
+          end: points[index + 1],
+        }
+      })
+
+      setLineRange({ points, segments })
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(flow)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <section id="experience" className="section-flow py-20">
@@ -49,15 +97,23 @@ export function Experience() {
           <div>
             <p className="eyebrow">Experience</p>
             <h2 className="mt-3 text-4xl font-black tracking-[-0.045em] text-foreground sm:text-5xl">
-              Roles, without the resume wall.
+              Where I&apos;ve worked.
             </h2>
           </div>
         </motion.div>
 
         <div ref={flowRef} className="work-flow">
-          <motion.div className="work-progress" style={{ scaleY: scrollYProgress }} aria-hidden="true" />
+          {lineRange.segments.map((segment, index) => (
+            <TimelineSegment key={index} progress={scrollYProgress} segment={segment} />
+          ))}
           {experiences.map((exp, index) => (
-            <WorkItem key={exp.title} exp={exp} index={index} />
+            <WorkItem
+              key={exp.title}
+              exp={exp}
+              index={index}
+              progress={scrollYProgress}
+              threshold={lineRange.points[index] ?? index / Math.max(1, experiences.length - 1)}
+            />
           ))}
         </div>
       </div>
@@ -65,29 +121,65 @@ export function Experience() {
   )
 }
 
-function WorkItem({ exp, index }: { exp: (typeof experiences)[number]; index: number }) {
-  const itemRef = useRef<HTMLElement | null>(null)
-  const { scrollYProgress } = useScroll({
-    target: itemRef,
-    offset: ['start 68%', 'center 48%'],
-  })
-  const markerScale = useTransform(scrollYProgress, [0, 1], [0.94, 1.1])
+function TimelineSegment({
+  progress,
+  segment,
+}: {
+  progress: MotionValue<number>
+  segment: { top: number; height: number; start: number; end: number }
+}) {
+  const scaleY = useTransform(progress, [segment.start, segment.end], [0, 1])
+
+  return (
+    <motion.div
+      className="work-progress"
+      style={{ top: segment.top, height: segment.height, scaleY, opacity: segment.height ? 1 : 0 }}
+      aria-hidden="true"
+    />
+  )
+}
+
+function WorkItem({
+  exp,
+  index,
+  progress,
+  threshold,
+}: {
+  exp: (typeof experiences)[number]
+  index: number
+  progress: MotionValue<number>
+  threshold: number
+}) {
+  const activationStart = Math.max(0, threshold - 0.012)
+  const activationEnd = Math.min(1, Math.max(0.02, threshold + 0.012))
+  const markerScale = useTransform(progress, [activationStart, activationEnd], [1, 1.035])
   const markerBg = useTransform(
-    scrollYProgress,
-    [0, 1],
-    ['hsl(var(--background) / 0.86)', 'hsl(var(--primary) / 0.1)'],
+    progress,
+    [activationStart, activationEnd],
+    ['hsl(var(--background))', 'hsl(var(--primary) / 0.09)'],
+  )
+  const markerBorder = useTransform(
+    progress,
+    [activationStart, activationEnd],
+    ['hsl(var(--border))', 'hsl(var(--primary) / 0.78)'],
+  )
+  const markerShadow = useTransform(
+    progress,
+    [activationStart, activationEnd],
+    ['0 0 0 6px hsl(var(--background)), 0 0 0 6px hsl(var(--primary) / 0)', '0 0 0 6px hsl(var(--background)), 0 0 0 11px hsl(var(--primary) / 0.075)'],
   )
 
   return (
     <motion.article
-      ref={itemRef}
       initial={{ y: 26 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       className="work-item group"
     >
       <div className="work-index">
-        <motion.span style={{ scale: markerScale, background: markerBg }}>
+        <motion.span
+          style={{ scale: markerScale, background: markerBg, borderColor: markerBorder, boxShadow: markerShadow }}
+        >
           {String(index + 1).padStart(2, '0')}
         </motion.span>
       </div>
@@ -108,6 +200,7 @@ function WorkItem({ exp, index }: { exp: (typeof experiences)[number]; index: nu
         <div className="mt-6 flex flex-wrap gap-3">
           {exp.tags.map((tag) => (
             <span key={tag} className="quiet-tag">
+              <span aria-hidden="true" />
               {tag}
             </span>
           ))}

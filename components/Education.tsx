@@ -12,7 +12,7 @@ const education = [
     period: 'Aug 2025 - Present',
     gpa: '4.00',
     description:
-      'Graduate work across software engineering, artificial intelligence, and scalable computing systems.',
+      'Current coursework in artificial intelligence, databases, software verification, and the behavior of larger software systems.',
     courses: [
       'Knowledge Representation',
       'Software Verification',
@@ -21,7 +21,7 @@ const education = [
       'Distributed Databases',
       'Data Visualization',
     ],
-    highlights: ['Current graduate focus in AI and scalable systems'],
+    highlights: ['Current GPA: 4.00'],
   },
   {
     mark: 'IIIT DWD',
@@ -31,7 +31,7 @@ const education = [
     period: 'Dec 2021 - Jun 2025',
     gpa: '8.94/10.0',
     description:
-      'Core CS foundation with applied work across machine learning, cybersecurity, and software development.',
+      'Core computer science coursework, with project work in machine learning, cybersecurity, and web systems.',
     courses: ['Data Structures', 'Algorithms', 'Operating Systems', 'Machine Learning', 'Cybersecurity', 'DevOps'],
     highlights: ['Secured 1st in 66 Days of Data Science', 'Research Internship at IIT Indore'],
   },
@@ -49,7 +49,7 @@ export function Education() {
         >
           <p className="eyebrow">Education</p>
           <h2 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.045em] text-foreground sm:text-5xl">
-            Academic path.
+            Where I studied.
           </h2>
         </motion.div>
 

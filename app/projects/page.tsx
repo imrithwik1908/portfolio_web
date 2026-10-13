@@ -10,6 +10,9 @@ type Project = {
   image: string
   tags: string[]
   github: string
+  live?: string
+  context?: string
+  category?: string
 }
 
 export default function ProjectsPage() {

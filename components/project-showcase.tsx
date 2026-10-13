@@ -12,6 +12,9 @@ type Project = {
   image: string
   tags: string[]
   github: string
+  live?: string
+  context?: string
+  category?: string
 }
 
 type ProjectShowcaseProps = {
@@ -27,6 +30,8 @@ const filters = [
 ]
 
 function getProjectCategory(project: Project) {
+  if (project.category) return project.category
+
   const text = `${project.title} ${project.description} ${project.tags.join(' ')}`.toLowerCase()
 
   if (
@@ -85,17 +90,16 @@ export function ProjectShowcase({ projects }: ProjectShowcaseProps) {
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm text-primary">
             <Sparkles className="h-4 w-4" />
-            Selected work
+            Projects
           </div>
 
           <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-            Projects that turn ideas into{' '}
-            <span className="text-gradient">working systems</span>
+            Some of my{' '}
+            <span className="text-gradient">projects.</span>
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            A curated collection of full-stack, machine learning, backend, and data-driven projects
-            built with a focus on performance, usability, and practical impact.
+            A closer look at what each project does and how it was built.
           </p>
         </motion.div>
 
@@ -156,7 +160,7 @@ export function ProjectShowcase({ projects }: ProjectShowcaseProps) {
 
         {filteredProjects.length === 0 && (
           <div className="py-16 text-center text-muted-foreground">
-            No projects found for this category.
+            Nothing in this category yet.
           </div>
         )}
       </div>

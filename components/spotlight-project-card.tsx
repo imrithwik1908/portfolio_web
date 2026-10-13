@@ -14,6 +14,9 @@ type Project = {
   image: string
   tags: string[]
   github: string
+  live?: string
+  context?: string
+  category?: string
 }
 
 type SpotlightProjectCardProps = {
@@ -93,7 +96,7 @@ function ProjectImage({
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-50" />
 
         <div className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
-          Project {index + 1}
+          {project.context ?? `Project ${index + 1}`}
         </div>
       </div>
     </motion.div>
@@ -116,10 +119,8 @@ function ProjectContent({
         {project.title}
       </h2>
 
-      <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-        {shouldTruncate
-          ? `${project.description.slice(0, 225)}...`
-          : project.description}
+      <p className={`mt-4 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base ${shouldTruncate ? 'line-clamp-4' : ''}`}>
+        {project.description}
       </p>
 
       {shouldTruncate && (
@@ -127,7 +128,7 @@ function ProjectContent({
           onClick={onOpen}
           className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
         >
-          Read full details
+          Read the project notes
           <ArrowUpRight className="h-3.5 w-3.5" />
         </button>
       )}
@@ -157,7 +158,7 @@ function ProjectContent({
           className="rounded-lg"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
-          Details
+          Project notes
         </Button>
       </div>
     </div>
@@ -234,12 +235,12 @@ function ProjectDetailsModal({
               </a>
             </Button>
 
-            <Button asChild className="rounded-lg">
-              <a href={project.github} target="_blank" rel="noopener noreferrer">
+            {project.live && <Button asChild className="rounded-lg">
+              <a href={project.live} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Open Project
+                Open live app
               </a>
-            </Button>
+            </Button>}
           </div>
         </div>
       </motion.div>

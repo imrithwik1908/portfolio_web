@@ -22,6 +22,10 @@ interface BlogPostGridProps {
 }
 
 export function BlogPostGrid({ posts, onEdit, onDelete, isAuthenticated }: BlogPostGridProps) {
+  if (posts.length === 0) {
+    return <p className="py-12 text-muted-foreground">Nothing published here yet.</p>;
+  }
+
   return (
     <div className="grid gap-8 md:grid-cols-2">
       {posts.map((post, index) => (

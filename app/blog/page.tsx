@@ -213,7 +213,10 @@ export default function BlogPage() {
   return (
     <div className="container mx-auto max-w-5xl px-4 py-16">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Blog</h1>
+        <div>
+          <p className="eyebrow">Notes</p>
+          <h1 className="mt-2 text-3xl font-bold">Things I wanted to think through properly.</h1>
+        </div>
         <div className="flex items-center space-x-4">
           <BlogPostForm
             onSubmit={editingPost ? handleEditPost : handleAddPost}

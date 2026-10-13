@@ -49,7 +49,7 @@ export function BlogPostCard({ post, onEdit, onDelete, isAuthenticated }: BlogPo
         <CardFooter className="p-6 pt-0 flex justify-between items-center">
           <Link href={`/blog/${post.slug}`} passHref>
             <Button variant="link" className="p-0 h-auto font-semibold text-primary">
-              Read More <ArrowRight className="ml-2 h-4 w-4" />
+              Read note <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
           {isAuthenticated && (

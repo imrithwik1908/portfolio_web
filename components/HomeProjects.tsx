@@ -7,25 +7,25 @@ import { ArrowUpRight } from "lucide-react"
 
 const projects = [
   {
+    title: "AgentGuard",
+    image: "/agentguard.png",
+    media: "project-media-cover",
+    description: "AgentGuard records LLM application traces, reruns test suites, and compares candidate versions against a stored baseline.",
+    tags: ["FastAPI", "PostgreSQL", "Next.js"],
+  },
+  {
     title: "Tensor Fusion",
     image: "/tensor_fusion.jpg",
     media: "project-media-contain",
-    description: "Model-facing work around multimodal learning and practical inference workflows.",
-    tags: ["ML", "Python", "Research"],
+    description: "Experiments comparing ways to combine language, visual, and acoustic signals for sentiment analysis on review videos.",
+    tags: ["Python", "Deep Learning", "Multimodal"],
   },
   {
     title: "Course Catalog",
     image: "/course_catalog.jpg",
     media: "project-media-cover",
-    description: "A clean full-stack product surface for browsing structured academic data.",
-    tags: ["Next.js", "API", "UX"],
-  },
-  {
-    title: "Custom API",
-    image: "/custom_api.png",
-    media: "project-media-contain",
-    description: "Backend architecture work focused on reliable data access and developer ergonomics.",
-    tags: ["Node.js", "REST", "Database"],
+    description: "A role-based course system with Google sign-in, separate student and professor flows, enrollment state, and MongoDB-backed records.",
+    tags: ["Node.js", "MongoDB", "Google OAuth"],
   },
 ]
 
@@ -42,14 +42,14 @@ export function HomeProjects() {
           <div>
             <p className="eyebrow">Projects</p>
             <h2 className="mt-3 max-w-2xl text-4xl font-black tracking-[-0.045em] text-foreground sm:text-5xl">
-              A few things I’ve been shaping.
+              A few things I&apos;ve worked on.
             </h2>
           </div>
           <Link
             href="/projects"
             className="group inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary"
           >
-            View all projects
+            All projects
             <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
         </motion.div>
