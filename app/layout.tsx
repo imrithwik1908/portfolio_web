@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SiteHeader } from '@/components/site-header'
+import { PortfolioInteractions } from '@/components/portfolio-interactions'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -15,8 +16,25 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Sai Rithwik Reddy Chirra | Software, Data & AI',
-  description: 'Rithwik is an MS Computer Science student at Arizona State University working across backend systems, data, and machine learning.',
+  metadataBase: new URL('https://sairithwikreddy.vercel.app'),
+  title: {
+    default: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
+    template: '%s — Sai Rithwik Reddy Chirra',
+  },
+  description: 'Rithwik builds the systems around data and AI: backend services, data infrastructure, evaluations, and ML applications.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
+    description: 'Backend services, data infrastructure, evaluations, and ML applications.',
+    url: '/',
+    siteName: 'Sai Rithwik Reddy Chirra',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
+    description: 'Backend services, data infrastructure, evaluations, and ML applications.',
+  },
 }
 
 export default function RootLayout({
@@ -34,9 +52,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="site-shell terminal-surface relative flex min-h-screen flex-col">
+          <div className="site-shell relative flex min-h-screen flex-col">
             <SiteHeader />
-            <main className="flex-1">{children}</main>
+            <div className="flex-1">{children}</div>
+            <PortfolioInteractions />
           </div>
         </ThemeProvider>
       </body>

@@ -1,59 +1,40 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { ModeToggle } from './mode-toggle'
+import { useState } from "react"
+import Link from "next/link"
+import { Command, Menu, X } from "lucide-react"
+import { ModeToggle } from "@/components/mode-toggle"
 
 const navigation = [
-  { name: 'About', href: '/#about' },
-  { name: 'Work', href: '/#experience' },
-  { name: 'Projects', href: '/projects' },
-  { name: 'Contact', href: '/#contact' },
-]
+  ["Work", "/#work"],
+  ["About", "/#about"],
+  ["Experience", "/#experience"],
+  ["Projects", "/projects"],
+] as const
 
 export function SiteHeader() {
-  const pathname = usePathname()
-  const [isScrolled, setIsScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  const [open, setOpen] = useState(false)
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled ? "bg-background/58 shadow-sm shadow-foreground/5 backdrop-blur-2xl" : "bg-transparent"
-      )}
-    >
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="text-sm font-black tracking-[-0.02em] text-foreground">
-          Sai Rithwik
+    <header className="site-header">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <div className="page-shell header-inner">
+        <Link href="/" className="site-wordmark" aria-label="Sai Rithwik Reddy Chirra, home">
+          <span>SR</span><strong>Rithwik</strong>
         </Link>
-
-        <nav className="hidden min-w-0 items-center gap-7 sm:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                'shrink-0 text-sm transition-colors hover:text-foreground',
-                item.href === '/projects' && pathname === '/projects'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground'
-              )}
-            >
-              {item.name}
-            </Link>
-          ))}
+        <nav id="main-navigation" className={open ? "site-nav is-open" : "site-nav"} aria-label="Main navigation">
+          {navigation.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}</Link>)}
+          <a href="/#contact" onClick={() => setOpen(false)}>Contact</a>
         </nav>
-        <ModeToggle />
+        <div className="header-tools">
+          <button className="command-trigger" type="button" onClick={() => window.dispatchEvent(new Event("portfolio:command"))} aria-label="Open command menu">
+            <Command aria-hidden="true" /><span>⌘K</span>
+          </button>
+          <ModeToggle />
+          <button className="mobile-menu" type="button" aria-expanded={open} aria-controls="main-navigation" aria-label={open ? "Close navigation" : "Open navigation"} onClick={() => setOpen((value) => !value)}>
+            {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+          </button>
+        </div>
       </div>
     </header>
   )
