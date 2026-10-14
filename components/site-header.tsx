@@ -6,10 +6,9 @@ import { Command, Menu, X } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 
 const navigation = [
-  ["Work", "/#work"],
+  ["Projects", "/projects"],
   ["About", "/#about"],
   ["Experience", "/#experience"],
-  ["Projects", "/projects"],
 ] as const
 
 export function SiteHeader() {

@@ -1,11 +1,11 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowDown, ArrowUpRight, FileText, Mail } from "lucide-react"
 import { SelectedWork } from "@/components/selected-work"
 import { Experience } from "@/components/Experience"
 import { Skills } from "@/components/Skills"
 import { Education } from "@/components/Education"
 import { ContactSection } from "@/components/ContactSection"
+import { TempeTime } from "@/components/editorial-interactions"
 
 const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
 
@@ -34,16 +34,19 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       <main id="main-content">
         <section className="hero page-shell" aria-labelledby="hero-title">
-          <div className="hero-topline"><span>Sai Rithwik Reddy Chirra</span><span>Tempe, Arizona · 2:17 AM somewhere in the commit history</span></div>
-          <div className="hero-copy">
-            <p className="section-kicker">Systems, data &amp; AI</p>
-            <h1 id="hero-title">I build the systems around data and AI.</h1>
-            <p>Backend services, data infrastructure, evaluations, and ML applications. Usually the work between a model call and something another person can actually rely on.</p>
+          <div className="hero-topline"><span>Computer science · systems around data and AI</span><TempeTime /></div>
+          <div className="hero-name">
+            <p>Hi, I&apos;m</p>
+            <h1 id="hero-title" aria-label="Sai Rithwik Reddy Chirra"><span aria-hidden="true">Sai Rithwik</span><span aria-hidden="true">Reddy Chirra.</span></h1>
+          </div>
+          <div className="hero-intro">
+            <h2>I work on the software around data and AI.</h2>
+            <p>That usually means APIs, databases, evaluation, and ML systems. I like the point where a model stops being a notebook result and has to behave like ordinary software.</p>
           </div>
           <div className="hero-actions" aria-label="Primary links">
-            <Link className="primary-action" href="/#work">Selected work <ArrowDown aria-hidden="true" /></Link>
-            <a href={resumeUrl} target="_blank" rel="noreferrer"><FileText aria-hidden="true" /> Resume</a>
-            <a href="mailto:sairithwikreddy.chirra@gmail.com"><Mail aria-hidden="true" /> Contact</a>
+            <Link href="/#work">Projects <span aria-hidden="true">↓</span></Link>
+            <a href={resumeUrl} target="_blank" rel="noreferrer">Resume <span aria-hidden="true">↗</span></a>
+            <a href="mailto:sairithwikreddy.chirra@gmail.com">Email <span aria-hidden="true">↗</span></a>
           </div>
           <dl className="hero-context">
             <div><dt>Now</dt><dd>M.S. Computer Science at ASU</dd></div>
@@ -55,23 +58,19 @@ export default function Home() {
         <SelectedWork />
 
         <section id="about" className="about-section page-shell" aria-labelledby="about-title">
-          <div className="about-photo">
-            <Image src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" fill sizes="(max-width: 767px) 46vw, 25vw" className="object-cover" />
-            <span aria-hidden="true">IIIT Dharwad · 2024</span>
+          <div className="about-photo-wrap">
+            <div className="about-photo"><Image src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" fill sizes="(max-width: 767px) 76vw, 26vw" className="object-cover" /></div>
+            <span>IIIT Dharwad · 2024</span>
           </div>
           <div className="about-copy">
             <p className="section-kicker">A little context</p>
             <h2 id="about-title">I&apos;m Rithwik.</h2>
-            <p className="about-lede">I started in ML through multilingual NLP research at IIT Indore, where accuracy wasn&apos;t enough. We also had to ask why a model made a decision across English, Hindi, and Telugu.</p>
-            <p>Industry work at Blackcoffer brought a different kind of problem: messy data, ambiguous questions, and no neat notebook-shaped answer. Somewhere between those two, I became more interested in the engineering around intelligent systems: how data is stored, how APIs behave, how models are evaluated, and what happens when something fails.</p>
-            <p>That is mostly what I work on now. AgentGuard is the clearest example: a project that began with LLM evaluation and quickly became a problem about traces, background jobs, database boundaries, and release decisions.</p>
-            <Link className="text-link" href="/projects/agentguard">See how that turned into a system <ArrowUpRight aria-hidden="true" /></Link>
+            <p className="about-lede">I came to computer science through machine learning, but the surrounding engineering kept pulling me in.</p>
+            <p>At IIT Indore, I worked on multilingual hate-speech detection in English, Hindi, and Telugu. Getting the label right was only half the problem; we also needed to inspect which words supported it. That work became X-MuTeST, an AAAI 2026 paper and rationale benchmark.</p>
+            <p>Blackcoffer was much less tidy. Customer trajectories and advertising data arrived as business questions first, modelling problems second. Working through that ambiguity made me care more about the data and assumptions behind an answer, not only the score at the end.</p>
+            <p>I&apos;m now doing my M.S. in Computer Science at ASU. Recent work has moved further into APIs, databases, background jobs, and evaluation systems. AgentGuard is the clearest example: what started as an LLM-testing idea became a system about traces, stored evidence, and release decisions.</p>
+            <div className="about-links"><Link href="/projects/x-mutest">Read the research <span aria-hidden="true">↗</span></Link><Link href="/projects/agentguard">Open AgentGuard <span aria-hidden="true">↗</span></Link></div>
           </div>
-          <aside className="about-notes" aria-label="Current context">
-            <div><span>Now</span><p>Arizona State University</p></div>
-            <div><span>Before</span><p>IIIT Dharwad</p></div>
-            <div><span>Research</span><p>X-MuTeST · AAAI 2026</p></div>
-          </aside>
         </section>
 
         <Experience />

@@ -6,7 +6,7 @@ import { Command, FileText, FlaskConical, Mail, Moon, Search, Sun, X } from "luc
 import { useTheme } from "next-themes"
 
 const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
-const projectSlugs = ["agentguard", "tensor-fusion", "course-catalog"] as const
+const projectSlugs = ["agentguard", "x-mutest", "tensor-fusion", "course-catalog"] as const
 
 export function PortfolioInteractions() {
   const [open, setOpen] = useState(false)
@@ -17,14 +17,14 @@ export function PortfolioInteractions() {
   const { resolvedTheme, setTheme } = useTheme()
 
   const actions = useMemo(() => [
-    { label: "Selected work", hint: "Homepage", icon: Search, run: () => router.push("/#work") },
+    { label: "Projects", hint: "Homepage", icon: Search, run: () => router.push("/#work") },
     { label: "All projects", hint: "Case studies", icon: Command, run: () => router.push("/projects") },
     { label: "About Rithwik", hint: "Point of view", icon: Command, run: () => router.push("/#about") },
     { label: "Email Rithwik", hint: "Start a conversation", icon: Mail, run: () => window.location.href = "mailto:sairithwikreddy.chirra@gmail.com" },
     { label: "Open resume", hint: "Google Drive", icon: FileText, run: () => window.open(resumeUrl, "_blank", "noopener,noreferrer") },
     { label: "Open the lab", hint: "Small experiments", icon: FlaskConical, run: () => router.push("/lab") },
     {
-      label: resolvedTheme === "dark" ? "Switch to Arizona Noon" : "Switch to 2:17 AM",
+      label: resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode",
       hint: "Theme",
       icon: resolvedTheme === "dark" ? Sun : Moon,
       run: () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),

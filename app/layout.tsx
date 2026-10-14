@@ -18,22 +18,22 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL('https://sairithwikreddy.vercel.app'),
   title: {
-    default: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
+    default: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
     template: '%s — Sai Rithwik Reddy Chirra',
   },
-  description: 'Rithwik builds the systems around data and AI: backend services, data infrastructure, evaluations, and ML applications.',
+  description: 'Rithwik works on APIs, databases, evaluations, and ML systems — the engineering around data and AI.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
-    description: 'Backend services, data infrastructure, evaluations, and ML applications.',
+    title: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
+    description: 'APIs, databases, evaluations, and ML systems.',
     url: '/',
     siteName: 'Sai Rithwik Reddy Chirra',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sai Rithwik Reddy Chirra — Systems, Data & AI Engineer',
-    description: 'Backend services, data infrastructure, evaluations, and ML applications.',
+    title: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
+    description: 'APIs, databases, evaluations, and ML systems.',
   },
 }
 

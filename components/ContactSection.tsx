@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react"
 import { BuildMark } from "@/components/portfolio-interactions"
 
 const links = [
@@ -15,11 +14,11 @@ export function ContactSection() {
         <p className="section-kicker">Contact</p>
         <div className="contact-main">
           <h2>Building something difficult?</h2>
-          <p>I&apos;d probably like to hear about it. Roles, research, project questions, or a technical rabbit hole are all fair reasons to write.</p>
-          <a className="contact-address" href="mailto:sairithwikreddy.chirra@gmail.com">sairithwikreddy.chirra@gmail.com <ArrowUpRight aria-hidden="true" /></a>
+          <p>I&apos;d probably like to hear about it. Roles, research, project questions, and interesting engineering problems are all fair reasons to write.</p>
+          <a className="contact-address" href="mailto:sairithwikreddy.chirra@gmail.com">sairithwikreddy.chirra@gmail.com <span aria-hidden="true">↗</span></a>
         </div>
         <div className="contact-bottom">
-          <nav aria-label="Contact links">{links.map(([label, href]) => <a key={label} href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel={href.startsWith("mailto:") ? undefined : "noreferrer"}>{label}</a>)}</nav>
+          <nav aria-label="Contact links">{links.map(([label, href]) => <a key={label} href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel={href.startsWith("mailto:") ? undefined : "noreferrer"}>{label} <span aria-hidden="true">↗</span></a>)}</nav>
           <BuildMark />
         </div>
       </div>

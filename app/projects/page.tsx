@@ -24,9 +24,9 @@ export default function ProjectsPage() {
   return (
     <main id="main-content" className="projects-page page-shell">
       <header className="projects-hero">
-        <p className="section-kicker">Project notes</p>
-        <h1>The work, including the parts that fought back.</h1>
-        <p>These are not launch announcements. They are short records of the problem, the implementation, the awkward decisions, and what still needs work.</p>
+        <p className="section-kicker">Projects</p>
+        <h1>The details matter more than the launch copy.</h1>
+        <p>Four records of what I was trying to solve, how the implementation changed, and what the finished version still does not do.</p>
       </header>
       <ProjectIndex projects={projectPreviews} />
     </main>

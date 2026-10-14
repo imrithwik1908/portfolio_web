@@ -1,4 +1,4 @@
-export type ProjectStatus = "Working build" | "Completed study" | "Completed project"
+export type ProjectStatus = "Working build" | "Completed study" | "Completed project" | "Published research"
 
 export type Project = {
   slug: string
@@ -15,6 +15,7 @@ export type Project = {
   capabilities: Array<"systems" | "data" | "intelligence">
   github: string
   live?: string
+  paper?: string
   outcome: string
   outcomeLabel: string
   problem: string[]
@@ -90,6 +91,69 @@ export const projects: Project[] = [
       { label: "PostgreSQL", detail: "Traces, suites, jobs, evidence" },
       { label: "Worker", detail: "Redis / ARQ evaluation jobs" },
       { label: "Decision UI", detail: "Compare, diagnose, release" },
+    ],
+  },
+  {
+    slug: "x-mutest",
+    title: "X-MuTeST",
+    shortTitle: "X-MuTeST",
+    eyebrow: "Explainable multilingual NLP research",
+    question: "A correct label is not the same as a useful explanation.",
+    summary:
+      "An AAAI 2026 paper and benchmark for explainable hate-speech detection in English, Hindi, and Telugu. The work pairs classification labels with token-level human rationales, then evaluates whether a model's explanation is both plausible and faithful.",
+    image: "/xmutest-architecture.png",
+    imageFit: "contain",
+    status: "Published research",
+    year: "2026",
+    stack: ["MuRIL", "XLM-R", "LLaMA 3.1", "PyTorch", "Hugging Face"],
+    capabilities: ["data", "intelligence"],
+    github: "https://github.com/ziarehman30/X-MuTeST",
+    paper: "https://doi.org/10.1609/aaai.v40i46.41261",
+    outcome: "16,830 samples with token-level rationales",
+    outcomeLabel: "Published benchmark",
+    problem: [
+      "Hate-speech classifiers can produce the right label for the wrong reason. That is especially difficult to inspect in lower-resource languages, where rationale-annotated benchmarks are scarce.",
+      "X-MuTeST adds human-marked rationales to English, Hindi, and Telugu data, then asks two separate questions: does the explanation overlap with what people marked, and does the model actually depend on those highlighted tokens?",
+    ],
+    system: [
+      "The training process has two stages. Human rationales guide model attention first. A second stage uses token-importance targets produced by an n-gram perturbation method, which measures how predictions change across unigrams, bigrams, and trigrams.",
+      "The final rationale is the union of the model-derived tokens and LLaMA 3.1 suggestions. MuRIL is used for Telugu and English, while XLM-R is used for Hindi based on validation performance.",
+    ],
+    decisions: [
+      {
+        title: "Evaluate the explanation separately",
+        body: "Token-F1 and IOU-F1 measure overlap with human rationales. Comprehensiveness and sufficiency test whether removing or keeping those tokens changes the prediction as expected.",
+      },
+      {
+        title: "Use human and model signals",
+        body: "Stage one aligns attention with human rationales. Stage two lets the model-derived n-gram signal refine that target instead of assuming either source is complete on its own.",
+      },
+      {
+        title: "Keep the language choice empirical",
+        body: "The encoder was selected per language from validation results rather than forcing one multilingual model across every dataset.",
+      },
+    ],
+    debugging:
+      "The annotation process needed more than one pass. Three native-language annotators marked rationales, reviewed disagreements in guidance sessions, and re-annotated the data. The reported overall agreement reached 81.0 for Telugu, 83.15 for Hindi, and 85.10 for English.",
+    results: [
+      "The benchmark contains 4,492 Telugu, 6,004 Hindi, and 6,334 English samples with token-level rationales.",
+      "The reported X-MuTeST setup reached 0.8881 accuracy on Telugu, 0.8745 on Hindi, and 0.8604 on English.",
+      "The paper reports explanation quality with plausibility and faithfulness metrics, then tests generalization on HateXplain and HateBRXplain.",
+    ],
+    limitations: [
+      "The benchmark covers three languages and binary hate / not-hate labels; it does not represent every dialect, culture, or moderation policy.",
+      "A rationale that looks plausible to a person is not automatically a faithful account of the model's internal decision.",
+      "The final union inherits the cost and variability of consulting an LLM.",
+    ],
+    next:
+      "I would want a follow-up to separate annotator disagreement from annotation noise more explicitly and test whether the rationale supervision transfers across language varieties, not only across benchmark datasets.",
+    architecture: [
+      { label: "Human rationales", detail: "Three annotators per language" },
+      { label: "Stage 1", detail: "Align attention with people" },
+      { label: "N-gram signal", detail: "Measure prediction changes" },
+      { label: "Stage 2", detail: "Refine attention targets" },
+      { label: "LLM consultation", detail: "Add contextual tokens" },
+      { label: "Evaluation", detail: "Plausibility and faithfulness" },
     ],
   },
   {
@@ -218,7 +282,7 @@ export const projects: Project[] = [
   },
 ]
 
-export const selectedProjects = projects.slice(0, 3)
+export const selectedProjects = projects
 
 export const capabilities = [
   {
@@ -235,7 +299,7 @@ export const capabilities = [
     title: "Data",
     summary: "Data models, queries, pipelines, and knowing what the data can actually support.",
     tools: "SQL · MongoDB · Pandas · time-series analysis",
-    evidence: ["agentguard", "tensor-fusion", "course-catalog"],
+    evidence: ["agentguard", "x-mutest", "tensor-fusion", "course-catalog"],
   },
   {
     id: "intelligence",
@@ -243,32 +307,28 @@ export const capabilities = [
     title: "Intelligence",
     summary: "Training and evaluating models, with the measurements and software around them.",
     tools: "PyTorch · NLP · multimodal ML · LLM evaluation",
-    evidence: ["agentguard", "tensor-fusion"],
+    evidence: ["agentguard", "x-mutest", "tensor-fusion"],
   },
 ] as const
 
 export const experiences = [
   {
+    year: "2025",
     company: "Blackcoffer",
     role: "Data Science Associate",
     period: "Dec 2024 – May 2025",
     summary:
       "I worked on customer-trajectory analysis and digital-ad revenue forecasting. The useful part was deciding what a messy dataset could support, then building and validating a result that answered the business question rather than stopping at a model score.",
-    metrics: [
-      { value: "40K+", label: "trajectory records" },
-      { value: "18%", label: "forecast improvement" },
-    ],
+    aside: "A 40K+ record trajectory dataset; the final forecasting work improved on the earlier approach by 18%.",
   },
   {
+    year: "2024",
     company: "IIT Indore",
     role: "Summer Research Intern",
     period: "Apr 2024 – Nov 2024",
     summary:
       "I worked on X-MuTeST, explainable hate-speech detection across English, Hindi, and Telugu. The work covered human rationales, multilingual encoders, model behavior, and deployment changes; it later became an AAAI 2026 paper.",
-    metrics: [
-      { value: "3", label: "languages" },
-      { value: "20%", label: "lower inference latency" },
-    ],
+    aside: "The research became an AAAI 2026 paper with rationale-annotated data in three languages.",
   },
 ] as const
 
@@ -282,4 +342,3 @@ export const earlierExperience = {
 export function getProject(slug: string) {
   return projects.find((project) => project.slug === slug)
 }
-
