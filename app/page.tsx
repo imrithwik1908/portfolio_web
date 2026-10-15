@@ -5,7 +5,6 @@ import { Experience } from "@/components/Experience"
 import { Skills } from "@/components/Skills"
 import { Education } from "@/components/Education"
 import { ContactSection } from "@/components/ContactSection"
-import { TempeTime } from "@/components/editorial-interactions"
 
 const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
 
@@ -34,7 +33,6 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       <main id="main-content">
         <section className="hero page-shell" aria-labelledby="hero-title">
-          <div className="hero-topline"><span>Computer science · systems around data and AI</span><TempeTime /></div>
           <div className="hero-name">
             <p>Hi, I&apos;m</p>
             <h1 id="hero-title" aria-label="Sai Rithwik Reddy Chirra"><span aria-hidden="true">Sai Rithwik</span><span aria-hidden="true">Reddy Chirra.</span></h1>
@@ -48,11 +46,10 @@ export default function Home() {
             <a href={resumeUrl} target="_blank" rel="noreferrer">Resume <span aria-hidden="true">↗</span></a>
             <a href="mailto:sairithwikreddy.chirra@gmail.com">Email <span aria-hidden="true">↗</span></a>
           </div>
-          <dl className="hero-context">
-            <div><dt>Now</dt><dd>M.S. Computer Science at ASU</dd></div>
-            <div><dt>Graduating</dt><dd>May 2027</dd></div>
-            <div><dt>Current thread</dt><dd>Reliability for LLM applications</dd></div>
-          </dl>
+          <div className="hero-context">
+            <p>M.S. Computer Science @ ASU <span aria-hidden="true">·</span> Tempe, Arizona <span aria-hidden="true">·</span> graduating May 2027</p>
+            <p>Currently working on reliability for LLM applications.</p>
+          </div>
         </section>
 
         <SelectedWork />

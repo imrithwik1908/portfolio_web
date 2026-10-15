@@ -3,7 +3,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArchitectureFlow } from "@/components/architecture-flow"
-import { ProjectSignal } from "@/components/editorial-interactions"
 import { getProject, projects } from "@/lib/portfolio-data"
 
 type ProjectPageProps = { params: { slug: string } }
@@ -62,7 +61,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const labels = chapterCopy[project.slug]
   const currentIndex = projects.findIndex((item) => item.slug === project.slug)
   const nextProject = projects[(currentIndex + 1) % projects.length]
-  const signalProject = project.slug as "agentguard" | "x-mutest" | "tensor-fusion" | "course-catalog"
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -81,7 +79,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       <header className="case-hero page-shell">
         <Link className="back-link" href="/projects"><span aria-hidden="true">←</span> Projects</Link>
         <div className="case-title-row">
-          <div><p className="section-kicker">{project.eyebrow}</p><h1>{project.question}</h1><p>{project.summary}</p></div>
+          <div><p className="section-kicker">{project.eyebrow}</p><h1>{project.title}</h1><p className="case-question">{project.question}</p><p>{project.summary}</p></div>
           <span className="status-note"><i aria-hidden="true" />{project.status}</span>
         </div>
         <dl className="case-meta">
@@ -93,7 +91,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       </header>
 
       <div className="case-lead-visual page-shell">
-        <ProjectSignal project={signalProject} />
         <div className="case-image"><Image src={project.image} alt={`${project.title} project visual`} fill priority sizes="(max-width: 767px) 100vw, 1280px" className={project.imageFit === "contain" ? "object-contain" : "object-cover"} /></div>
       </div>
 

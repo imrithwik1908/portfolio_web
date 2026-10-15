@@ -11,9 +11,9 @@ export function Skills() {
       <div className="capability-list">
         {capabilities.map((capability) => (
           <article id={capability.id} key={capability.id}>
-            <span className="capability-number">{capability.index}</span>
             <div className="capability-copy"><h3>{capability.title}</h3><p>{capability.summary}</p><small>{capability.tools}</small></div>
             <div className="capability-evidence" aria-label={`${capability.title} project evidence`}>
+              <span>Projects:</span>
               {capability.evidence.map((slug) => {
                 const project = projects.find((item) => item.slug === slug)
                 return project ? <Link key={slug} href={`/projects/${slug}`}>{project.shortTitle}<span aria-hidden="true">↗</span></Link> : null

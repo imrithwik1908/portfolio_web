@@ -4,7 +4,6 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import type { Project } from "@/lib/portfolio-data"
-import { ProjectSignal } from "@/components/editorial-interactions"
 
 export type ProjectPreview = Pick<Project, "slug" | "title" | "eyebrow" | "status" | "question" | "summary" | "image" | "imageFit" | "capabilities">
 
@@ -33,15 +32,14 @@ export function ProjectIndex({ projects }: { projects: ProjectPreview[] }) {
           <article key={project.slug}>
             <div className="project-index-number">{String(index + 1).padStart(2, "0")}</div>
             <div className="project-index-visual">
-              <ProjectSignal project={project.slug as "agentguard" | "x-mutest" | "tensor-fusion" | "course-catalog"} />
               <Link href={`/projects/${project.slug}`} className="project-index-image" aria-label={`Read ${project.title}`}>
-                <Image src={project.image} alt="" fill sizes="(max-width: 767px) 100vw, 42vw" className={project.imageFit === "contain" ? "object-contain" : "object-cover"} />
+                <Image src={project.image} alt={`${project.title} project visual`} fill sizes="(max-width: 767px) 100vw, 55vw" className={project.imageFit === "contain" ? "object-contain" : "object-cover"} />
               </Link>
             </div>
             <div className="project-index-copy">
               <p>{project.eyebrow} · {project.status}</p>
-              <h2><Link href={`/projects/${project.slug}`}>{project.question}</Link></h2>
-              <span>{project.title}</span>
+              <h2><Link href={`/projects/${project.slug}`}>{project.title}</Link></h2>
+              <h3>{project.question}</h3>
               <p>{project.summary}</p>
               <Link className="text-link" href={`/projects/${project.slug}`}>Open case study <span aria-hidden="true">↗</span></Link>
             </div>
