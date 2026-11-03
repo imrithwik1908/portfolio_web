@@ -1,38 +1,22 @@
-"use client"
-
 import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
 import { Note } from "@/components/xp/note"
 
-// The three passages quote Rithwik's own writing from the original site. The line about what
-// he's drawn to comes from his own description of himself.
-const passages = [
-  { place: "IIT Indore", text: "Getting the label right was only half the problem; we also needed to inspect which words supported it.", link: { href: "/projects/x-mutest", label: "X-MuTeST" } },
-  { place: "Blackcoffer", text: "Questions arrived as business questions first, modelling problems second. It made me care about the data and assumptions behind an answer, not only the score at the end." },
-  { place: "Arizona State", text: "What started as an LLM-testing idea became a system about traces, stored evidence, and release decisions.", link: { href: "/projects/agentguard", label: "AgentGuard" } },
-]
-
+// Written from Rithwik's own earlier writing and his description of himself.
 export function About() {
   return (
     <div className="xp-about">
       <div className="xp-about-side">
-        <p className="xp-about-lede">I came to computer science through machine learning, but the engineering around the models kept pulling me in.</p>
+        <p className="xp-about-lede">I got into computer science through machine learning. What kept me there was everything around the model.</p>
       </div>
 
       <div className="xp-about-text">
-        <p className="xp-about-off">Off the clock, I&apos;m drawn to mysteries, slow-burning suspense and the kind of horror that makes you pay attention. The pull is the same as in engineering: the satisfying part is finally understanding what was happening underneath.</p>
-
-        <ol className="xp-passages">
-          {passages.map((p) => (
-            <li key={p.place}>
-              <p className="xp-passage-place">{p.place}</p>
-              <blockquote>{p.text}</blockquote>
-              {p.link && <Link href={p.link.href} className="xp-link">{p.link.label} <Arrow /></Link>}
-            </li>
-          ))}
-        </ol>
+        <p>At IIT Indore, a model could get the label right and still be wrong about why. Checking which words it leaned on, in three languages, taught me not to trust a good number until I can explain it. <Link href="/projects/x-mutest" className="xp-inline-link">That became X-MuTeST <Arrow /></Link></p>
+        <p>Blackcoffer was the opposite kind of problem: messy business data, no clean benchmark, and someone waiting on a forecast. There I learned to ask what the data can actually support before reaching for a model.</p>
+        <p>At ASU those two lessons met. <Link href="/projects/agentguard" className="xp-inline-link">AgentGuard <Arrow /></Link> exists because an average score can go up while the cases you care about quietly break.</p>
+        <p className="xp-about-off">Away from code, I like mysteries, slow-burn suspense and the kind of horror that makes you pay attention. It&apos;s the same itch as debugging: something is off, and I want to know exactly why. That&apos;s probably why my current course project is a chess bot that has to play without seeing most of the board.</p>
       </div>
-      <Note className="is-about">The three passages are quoted from my own earlier writing about each of these places.</Note>
+      <Note className="is-about">Every claim here traces back to my résumé, my repositories, or my own earlier notes.</Note>
     </div>
   )
 }

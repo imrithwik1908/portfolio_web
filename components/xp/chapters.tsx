@@ -4,21 +4,37 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
 import { useGlider } from "@/components/xp/use-glider"
-import { earlierExperience, experiences } from "@/lib/portfolio-data"
 
-// Study and work as chapters you can select, like scenes on a disc menu. Each question is taken
-// from Rithwik's own writing or the project it led to; chapters without one simply have none.
-const [blackcoffer, iitIndore] = experiences
-const DURATION = 7000
+// Work, newest first, written from Rithwik's résumé and repositories. Results are his own
+// reported numbers; each question is the one the work was actually trying to answer.
+const DURATION = 8000
 
-type Chapter = { id: string; kind: string; when: string; place: string; role: string; where: string; question?: string; body: string; result?: string; link?: { href: string; label: string } }
+type Chapter = { id: string; tab: string; kind: string; when: string; place: string; role: string; question?: string; body: string; results?: string[]; link?: { href: string; label: string } }
 
 const chapters: Chapter[] = [
-  { id: "dharwad", kind: "Study", when: "2021 — 2025", place: "IIIT Dharwad", role: "B.Tech Computer Science", where: "Dharwad, India", body: "Computer science foundations, ML research and systems projects." },
-  { id: "codealpha", kind: "Internship", when: earlierExperience.period, place: earlierExperience.company, role: earlierExperience.role, where: "Web development", body: earlierExperience.summary },
-  { id: "indore", kind: "Research", when: iitIndore.period, place: iitIndore.company, role: iitIndore.role, where: "Explainable NLP", question: "Which words actually support the label?", body: iitIndore.summary, link: { href: "/projects/x-mutest", label: "X-MuTeST" } },
-  { id: "blackcoffer", kind: "Work", when: blackcoffer.period, place: blackcoffer.company, role: blackcoffer.role, where: "Data science", question: "What can this data actually support?", body: blackcoffer.summary, result: blackcoffer.aside },
-  { id: "asu", kind: "Study · now", when: "2025 — May 2027", place: "Arizona State", role: "M.S. Computer Science", where: "Tempe, Arizona", question: "What changed, and is it safe to release?", body: "Distributed systems, machine learning, security and software verification. Most of the work has moved into APIs, databases, background jobs and evaluation systems.", link: { href: "/projects/agentguard", label: "AgentGuard" } },
+  {
+    id: "now", tab: "Now", kind: "Graduate projects", when: "Fall 2026", place: "Arizona State", role: "M.S. Computer Science",
+    question: "What changed, and is it safe to release?",
+    body: "Most of my time goes into AgentGuard, a regression-testing and release gate for LLM apps, built to catch the cases an average score hides. In class, I'm training a small network to play Fog-of-War chess, where you can't see most of the board.",
+    link: { href: "/projects/agentguard", label: "AgentGuard" },
+  },
+  {
+    id: "blackcoffer", tab: "Blackcoffer", kind: "Data Science Associate", when: "Dec 2024 – May 2025", place: "Blackcoffer", role: "Data Science Associate · India",
+    question: "What can this data actually support?",
+    body: "Two forecasting problems that arrived as business questions. One was a 40K+ record dataset of shoppers' paths through a mall; the other was daily digital-ad revenue. Most of the work was preprocessing, feature engineering and deciding what the data could support before choosing a model.",
+    results: ["18% better forecasting accuracy than the earlier approach, 82% overall", "Mean daily error on ad revenue brought down to $142, after finding three hidden patterns in user behaviour"],
+  },
+  {
+    id: "indore", tab: "IIT Indore", kind: "Summer Research Intern", when: "Apr – Nov 2024", place: "IIT Indore", role: "Summer Research Intern · AI/ML",
+    question: "Which words actually support the label?",
+    body: "I worked on X-MuTeST: hate-speech detection in English, Hindi and Telugu where the model also has to point at the words that justify its answer. I built and compared MuRIL, XLM-R and LLaMA 3.1 pipelines and wrote the technical reports on the design.",
+    results: ["Iterating on the pipeline cut inference latency by 20%", "The work became an AAAI 2026 paper"],
+    link: { href: "/projects/x-mutest", label: "X-MuTeST" },
+  },
+  {
+    id: "codealpha", tab: "CodeAlpha", kind: "Full Stack Developer Intern", when: "Jun – Jul 2023", place: "CodeAlpha", role: "Full Stack Developer Intern",
+    body: "Early web work: responsive pages and a small Node.js / EJS application.",
+  },
 ]
 
 export function Chapters() {
@@ -38,7 +54,6 @@ export function Chapters() {
     return () => observer.disconnect()
   }, [])
 
-  // Auto-advance only while on screen and untouched; the progress bar is the same timer in CSS.
   const running = auto && visible && !paused
   useEffect(() => {
     if (!running) return
@@ -46,8 +61,7 @@ export function Chapters() {
     return () => window.clearTimeout(id)
   }, [running, active])
 
-  // On narrow screens the chapter list scrolls sideways; keep the active chapter in view
-  // by scrolling the list itself, never the page.
+  // On narrow screens the list scrolls sideways; keep the active entry in view by scrolling the list, never the page.
   useEffect(() => {
     const strip = list.container.current
     const button = document.getElementById(`chapter-${chapters[active].id}`)
@@ -69,23 +83,12 @@ export function Chapters() {
 
   return (
     <div ref={root} className={`xp-chapters-ui ${running ? "is-running" : ""}`} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
-      <div className="xp-chapter-list" role="tablist" aria-label="Chapters" aria-orientation="vertical" ref={list.container as React.Ref<HTMLDivElement>} onKeyDown={onKey}>
+      <div className="xp-chapter-list" role="tablist" aria-label="Experience" aria-orientation="vertical" ref={list.container as React.Ref<HTMLDivElement>} onKeyDown={onKey}>
         <span className="xp-glider is-soft" style={list.style} aria-hidden="true" />
         {chapters.map((ch, i) => (
-          <button
-            key={ch.id}
-            id={`chapter-${ch.id}`}
-            ref={list.register(ch.id)}
-            type="button"
-            role="tab"
-            aria-selected={i === active}
-            aria-controls="chapter-stage"
-            tabIndex={i === active ? 0 : -1}
-            className={i === active ? "is-active" : undefined}
-            onClick={() => choose(i)}
-          >
-            <span className="xp-chapter-no">{String(i + 1).padStart(2, "0")}</span>
-            <span className="xp-chapter-name">{ch.place}<small>{ch.kind}</small></span>
+          <button key={ch.id} id={`chapter-${ch.id}`} ref={list.register(ch.id)} type="button" role="tab" aria-selected={i === active} aria-controls="chapter-stage" tabIndex={i === active ? 0 : -1} className={i === active ? "is-active" : undefined} onClick={() => choose(i)}>
+            <span className="xp-chapter-no">{ch.when.slice(-4)}</span>
+            <span className="xp-chapter-name">{ch.tab}<small>{ch.kind}</small></span>
             {i === active && <span className="xp-chapter-timer" key={`${active}-${running}`} aria-hidden="true" />}
           </button>
         ))}
@@ -93,17 +96,13 @@ export function Chapters() {
 
       <article id="chapter-stage" role="tabpanel" aria-labelledby={`chapter-${c.id}`} className="xp-scene" key={c.id}>
         <span className="xp-scene-no" aria-hidden="true">{String(active + 1).padStart(2, "0")}</span>
-        <p className="xp-scene-kicker">{c.kind} · {c.when} · {c.where}</p>
+        <p className="xp-scene-kicker">{c.when}</p>
         <h3>{c.place}</h3>
         <p className="xp-scene-role">{c.role}</p>
         {c.question && <p className="xp-scene-question">“{c.question}”</p>}
         <p className="xp-scene-body">{c.body}</p>
-        {(c.result || c.link) && (
-          <p className="xp-scene-result">
-            {c.result && <span>{c.result}</span>}
-            {c.link && <Link href={c.link.href} className="xp-link">{c.link.label} <Arrow /></Link>}
-          </p>
-        )}
+        {c.results && <ul className="xp-scene-results">{c.results.map((r) => <li key={r}>{r}</li>)}</ul>}
+        {c.link && <p className="xp-scene-result"><Link href={c.link.href} className="xp-link">{c.link.label} <Arrow /></Link></p>}
       </article>
     </div>
   )

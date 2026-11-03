@@ -7,11 +7,11 @@ import { toggleCloser } from "@/components/xp/ambient"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
 
-const watched = ["work", "research", "path", "toolkit", "about", "contact"]
+const watched = ["work", "research", "path", "education", "toolkit", "about", "contact"]
 
 const sections = [
   ["work", "Work"],
-  ["path", "Story"],
+  ["path", "Career"],
   ["about", "About"],
   ["contact", "Contact"],
 ] as const
@@ -58,7 +58,7 @@ export function XpNav() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => visible.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0))
       const best = Array.from(visible.entries()).sort((a, b) => b[1] - a[1])[0]
-      setActive(best && best[1] > 0 ? (best[0] === "research" ? "work" : best[0] === "toolkit" ? "path" : best[0]) : null)
+      setActive(best && best[1] > 0 ? (best[0] === "research" ? "work" : best[0] === "toolkit" || best[0] === "education" ? "path" : best[0]) : null)
     }, { threshold: [0, 0.15, 0.4, 0.7], rootMargin: "-20% 0px -35% 0px" })
     watched.forEach((id) => { const node = document.getElementById(id); if (node) observer.observe(node) })
     return () => { observer.disconnect(); window.removeEventListener("scroll", onScroll) }

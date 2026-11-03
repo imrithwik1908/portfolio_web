@@ -81,13 +81,11 @@ export function Contact() {
 
   return (
     <div ref={scene} className="xp-finale">
-      <span className="xp-finale-bar is-top" aria-hidden="true" />
-      <span className="xp-finale-bar is-bottom" aria-hidden="true" />
 
       <div className="xp-finale-inner">
         <p className="xp-finale-kicker">Contact</p>
         <h2 className="xp-finale-title">Got something that <em>doesn&apos;t quite add up?</em></h2>
-        <p className="xp-finale-lede">A role, a research question, or a system failing in a way nobody can explain yet. Let&apos;s look at it together.</p>
+        <p className="xp-finale-lede">An internship or full-time role in ML engineering or data science, a research question, or a system failing in a way nobody can explain yet. I&apos;d like to hear about it.</p>
 
         <button type="button" className={`xp-mail ${copied ? "is-copied" : ""}`} onClick={copy}>
           <span className="xp-mail-address">{EMAIL}</span>
@@ -105,7 +103,7 @@ export function Contact() {
         <Cipher />
         <span><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} aria-hidden="true" />{now ? `${now.part} in Tempe, ${now.time}` : "Tempe, Arizona"}</span>
       </footer>
-      <Note className="is-contact">The bars close with your scroll position. Copy uses the Clipboard API and falls back to your mail app if the browser blocks it.</Note>
+      <Note className="is-contact">Copy uses the Clipboard API and falls back to your mail app if the browser blocks it.</Note>
     </div>
   )
 }

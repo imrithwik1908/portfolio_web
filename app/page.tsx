@@ -6,6 +6,7 @@ import { EMAIL } from "@/components/xp/copy-email"
 import { Hero } from "@/components/xp/hero"
 import { Note } from "@/components/xp/note"
 import { Chapters } from "@/components/xp/chapters"
+import { Education } from "@/components/xp/education"
 import { ProjectDeck } from "@/components/xp/project-deck"
 import { Publication } from "@/components/xp/publication"
 import { SectionHead } from "@/components/xp/section-head"
@@ -36,30 +37,35 @@ export default function Home() {
       <Hero />
 
       <section id="work" className="xp-section" aria-label="Selected work">
-        <SectionHead index="01" label="Work" title="Things I built to understand something." aside={<Link href="/projects" className="xp-link">All {projects.length} projects <Arrow /></Link>} />
+        <SectionHead index="01" label="Projects" title="What I&apos;ve been building." aside={<Link href="/projects" className="xp-link">All {projects.length} projects <Arrow /></Link>} />
         <ProjectDeck projects={shown} />
         <Note className="is-deck">Each card recedes as the next one covers it: one scroll listener writes a CSS variable. AgentGuard&apos;s dots are its recorded demo, where 2 of 10 cases regress.</Note>
       </section>
 
       <section id="research" className="xp-section" aria-label="Research">
-        <SectionHead index="02" label="Research" title="Published at AAAI 2026." />
+        <SectionHead index="02" label="Research" title="The research that became a paper." />
         <Publication />
         <Note className="is-paper">The citation is copied verbatim from the repository&apos;s README, not retyped.</Note>
       </section>
 
       <section id="path" className="xp-section" aria-label="Path">
-        <SectionHead index="03" label="Chapters" title="From Dharwad to Tempe, one question at a time." />
+        <SectionHead index="03" label="Experience" title="Where I&apos;ve worked, and what each place asked of me." />
         <Chapters />
-        <Note className="is-path">Chapters advance on their own only while on screen and stop for good once you pick one. Each question comes from my own notes on that work.</Note>
+        <Note className="is-path">Entries advance on their own only while on screen and stop for good once you pick one. Results are the numbers I report on my résumé.</Note>
+      </section>
+
+      <section id="education" className="xp-section xp-section-tight" aria-label="Education">
+        <SectionHead index="04" label="Education" title="Where I studied." />
+        <Education />
       </section>
 
       <section id="toolkit" className="xp-section xp-section-tight" aria-label="Toolkit">
-        <SectionHead index="04" label="Toolkit" title="What I reach for." />
+        <SectionHead index="05" label="Toolkit" title="What I reach for, and why." />
         <Skills />
       </section>
 
       <section id="about" className="xp-section" aria-label="About">
-        <SectionHead index="05" label="About" title="Beneath the résumé." />
+        <SectionHead index="06" label="About" title="A little more about me." />
         <About />
       </section>
 

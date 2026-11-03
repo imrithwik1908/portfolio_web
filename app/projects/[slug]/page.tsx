@@ -6,6 +6,7 @@ import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
 import { RepoSection } from "@/components/xp/repo-section"
+import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
 import { projectMeta } from "@/lib/project-highlights"
 import { repoDetail } from "@/lib/project-repo"
@@ -87,6 +88,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <div><dt>Built with</dt><dd>{project.stack.join(", ")}</dd></div>
       </dl>
 
+      <section className="xp-inshort" aria-label="In short">
+        <div><p>The problem</p><span>{project.problem[0]}</span></div>
+        <div><p>How it works</p><span>{project.system[0]}</span></div>
+        <div><p>What I&apos;d do next</p><span>{project.next}</span></div>
+      </section>
+
       {project.slug === "agentguard" && (
         <section className="xp-section xp-try" aria-labelledby="try-title">
           <p className="xp-head-label"><span>↳</span>Try it</p>
@@ -98,6 +105,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
       <RepoSection detail={repoDetail[project.slug]} github={project.github} />
 
+      <div className="xp-read">
+      <Toc items={chapters.map((c) => ({ id: c.id, title: c.title }))} />
       <article className="xp-chapters">
         {chapters.map((c, i) => (
           <section key={c.id} className="xp-chapter" aria-labelledby={`ch-${c.id}`}>
@@ -109,6 +118,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           </section>
         ))}
       </article>
+      </div>
 
       <Link href={`/projects/${next.slug}`} className="xp-next" style={{ "--tint": projectMeta[next.slug].tint, "--accent": projectMeta[next.slug].accent } as React.CSSProperties}>
         <span className="xp-head-label">Next project</span>

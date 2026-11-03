@@ -42,10 +42,10 @@ export function Hero() {
           Tempe, Arizona{now && <> · {now.part}, {now.time}</>}
         </p>
         <h1 id="xp-hero-title">Hi, I&apos;m <em>Rithwik</em>.</h1>
-        <p className="xp-hero-line">I build the software around data and AI, and I like knowing why it works, and when it doesn&apos;t.</p>
-        <p className="xp-hero-sub">Software engineer and M.S. student at Arizona State. Before that, research on explainable multilingual NLP, published at AAAI 2026.</p>
+        <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
+        <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an AAAI 2026 paper, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
         <div className="xp-hero-actions">
-          <Link href="/#work" className="xp-button">See the work <Arrow dir="down" /></Link>
+          <Link href="/#work" className="xp-button">See what I&apos;ve built <Arrow dir="down" /></Link>
           <a href={resumeUrl} target="_blank" rel="noreferrer" className="xp-link">Résumé <Arrow dir="out" /></a>
         </div>
       </div>
