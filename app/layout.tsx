@@ -5,6 +5,7 @@ import './globals.css'
 import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { XpNav } from '@/components/xp/nav'
+import { Ambient } from '@/components/xp/ambient'
 import { PortfolioInteractions } from '@/components/portfolio-interactions'
 
 const geistSans = localFont({
@@ -58,6 +59,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="site-shell relative flex min-h-screen flex-col">
+            <Ambient />
             <XpNav />
             <div className="flex-1">{children}</div>
             <PortfolioInteractions />

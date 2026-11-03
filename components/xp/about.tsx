@@ -2,47 +2,47 @@
 
 import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
-import { useInView } from "@/components/xp/use-in-view"
+import { Lens } from "@/components/xp/lens"
+import { Note } from "@/components/xp/note"
 
-// Every note quotes Rithwik's own words from the original site; nothing here is invented.
-const notes = [
-  { place: "IIT Indore · 2024", text: "Getting the label right was only half the problem; we also needed to inspect which words supported it.", link: { href: "/projects/x-mutest", label: "That became X-MuTeST" } },
-  { place: "Blackcoffer · 2025", text: "Business questions first, modelling problems second. It made me care about the data and assumptions behind an answer, not only the score at the end." },
-  { place: "ASU · now", text: "What started as an LLM-testing idea became a system about traces, stored evidence, and release decisions.", link: { href: "/projects/agentguard", label: "That's AgentGuard" } },
+// The three passages quote Rithwik's own writing from the original site. The line about what
+// he's drawn to comes from his own description of himself.
+const passages = [
+  { place: "IIT Indore", text: "Getting the label right was only half the problem; we also needed to inspect which words supported it.", link: { href: "/projects/x-mutest", label: "X-MuTeST" } },
+  { place: "Blackcoffer", text: "Questions arrived as business questions first, modelling problems second. It made me care about the data and assumptions behind an answer, not only the score at the end." },
+  { place: "Arizona State", text: "What started as an LLM-testing idea became a system about traces, stored evidence, and release decisions.", link: { href: "/projects/agentguard", label: "AgentGuard" } },
 ]
 
-const askMe = ["Why averages hide regressions", "Rationales in Telugu and Hindi", "Fusing voice, text and video", "Release gates for LLM apps"]
+function Photo({ negative = false }: { negative?: boolean }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/profile.jpg" alt={negative ? "" : "Rithwik standing outdoors at IIIT Dharwad"} width={1200} height={1600} loading="lazy" decoding="async" className={negative ? "is-negative" : undefined} />
+  )
+}
 
 export function About() {
-  const { ref, inView } = useInView<HTMLDivElement>()
   return (
-    <div ref={ref} className={`xp-board ${inView ? "is-in" : ""}`}>
-      <figure className="xp-board-photo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/profile.jpg" alt="Rithwik at IIIT Dharwad" width={1200} height={1600} loading="lazy" decoding="async" />
+    <div className="xp-about">
+      <figure className="xp-about-photo">
+        <Lens radius={90} surface={<Photo />} beneath={<Photo negative />} toggleLabel={["See the negative", "See the photo"]} />
         <figcaption>Dharwad, 2024</figcaption>
-        <span className="xp-tape" aria-hidden="true" />
       </figure>
 
-      <div className="xp-board-lede">
-        <p>I came to computer science through machine learning, but <em>the surrounding engineering</em> kept pulling me in.</p>
-      </div>
+      <div className="xp-about-text">
+        <p className="xp-about-lede">I came to computer science through machine learning, but the engineering around the models kept pulling me in.</p>
+        <p className="xp-about-off">Off the clock, I&apos;m drawn to mysteries, slow-burning suspense and the kind of horror that makes you pay attention. The pull is the same as in engineering: the satisfying part is finally understanding what was happening underneath.</p>
 
-      <div className="xp-notes">
-      {notes.map((note, i) => (
-        <article key={note.place} className="xp-note" style={{ "--i": i } as React.CSSProperties}>
-          <span className="xp-pin" aria-hidden="true" />
-          <p className="xp-note-place">{note.place}</p>
-          <p className="xp-note-text">{note.text}</p>
-          {note.link && <Link href={note.link.href} className="xp-note-link">{note.link.label} <Arrow /></Link>}
-        </article>
-      ))}
+        <ol className="xp-passages">
+          {passages.map((p) => (
+            <li key={p.place}>
+              <p className="xp-passage-place">{p.place}</p>
+              <blockquote>{p.text}</blockquote>
+              {p.link && <Link href={p.link.href} className="xp-link">{p.link.label} <Arrow /></Link>}
+            </li>
+          ))}
+        </ol>
       </div>
-
-      <div className="xp-askme">
-        <p>Ask me about</p>
-        <ul>{askMe.map((topic) => <li key={topic}>{topic}</li>)}</ul>
-      </div>
+      <Note className="is-about">The negative is the same photo with an inverted filter, revealed through the same lens as the greeting.</Note>
     </div>
   )
 }

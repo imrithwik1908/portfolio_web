@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
 import { CountUp } from "@/components/xp/count-up"
 import { ProjectVisual } from "@/components/xp/project-visual"
@@ -12,6 +13,7 @@ import { projectMeta } from "@/lib/project-highlights"
 // `variant="grid"` is the compact card on the projects index.
 export function ProjectCard({ project, index, total, variant }: { project: Project; index: number; total: number; variant: "stack" | "grid" }) {
   const meta = projectMeta[project.slug]
+  const [beneath, setBeneath] = useState(false)
   const { ref, inView } = useInView<HTMLElement>("0px 0px -25% 0px")
   const number = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`
 
@@ -60,6 +62,22 @@ export function ProjectCard({ project, index, total, variant }: { project: Proje
         <span className="pc-cta" aria-hidden="true">Explore the project <Arrow /></span>
       </div>
       <div className="pc-visual"><ProjectVisual slug={project.slug} /></div>
+      {variant === "stack" && (
+        <>
+          <button type="button" className="pc-beneath-toggle" aria-pressed={beneath} onClick={() => setBeneath((v) => !v)}>
+            <span className="xp-eye" aria-hidden="true" />{beneath ? "Back to the surface" : "How it works"}
+          </button>
+          <div className={`pc-beneath ${beneath ? "is-open" : ""}`} aria-hidden={!beneath}>
+            <p className="pc-beneath-label">Beneath {project.title}</p>
+            <ol>
+              {project.architecture.map((node, i) => (
+                <li key={node.label} style={{ "--i": i } as React.CSSProperties}><span>{String(i + 1).padStart(2, "0")}</span><strong>{node.label}</strong><em>{node.detail}</em></li>
+              ))}
+            </ol>
+            <Link href={`/projects/${project.slug}`} className="xp-link" tabIndex={beneath ? 0 : -1}>The full write-up <Arrow /></Link>
+          </div>
+        </>
+      )}
     </article>
   )
 }

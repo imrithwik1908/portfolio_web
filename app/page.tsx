@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { Arrow } from "@/components/xp/arrow"
 import { About } from "@/components/xp/about"
+import { Arrow } from "@/components/xp/arrow"
 import { Contact } from "@/components/xp/contact"
 import { EMAIL } from "@/components/xp/copy-email"
-import { Education } from "@/components/xp/education"
-import { Experience } from "@/components/xp/experience"
 import { Hero } from "@/components/xp/hero"
+import { Note } from "@/components/xp/note"
+import { Path } from "@/components/xp/path"
 import { ProjectDeck } from "@/components/xp/project-deck"
 import { Publication } from "@/components/xp/publication"
 import { SectionHead } from "@/components/xp/section-head"
@@ -19,7 +19,7 @@ const personSchema = {
   alternateName: "Rithwik",
   url: "https://sairithwikreddy.vercel.app",
   email: `mailto:${EMAIL}`,
-  jobTitle: "Computer Science graduate student",
+  jobTitle: "Software engineer",
   alumniOf: [{ "@type": "CollegeOrUniversity", name: "Indian Institute of Information Technology Dharwad" }],
   affiliation: { "@type": "CollegeOrUniversity", name: "Arizona State University" },
   sameAs: ["https://github.com/imrithwik1908", "https://www.linkedin.com/in/sairithwikreddy"],
@@ -36,37 +36,34 @@ export default function Home() {
       <Hero />
 
       <section id="work" className="xp-section" aria-label="Selected work">
-        <SectionHead index="01" label="Selected work" title="Things I've built, and what they taught me." aside={<Link href="/projects" className="xp-link">All {projects.length} projects <Arrow /></Link>} />
+        <SectionHead index="01" label="Work" title="Things I built to understand something." aside={<Link href="/projects" className="xp-link">All {projects.length} projects <Arrow /></Link>} />
         <ProjectDeck projects={shown} />
-      </section>
-
-      <section id="experience" className="xp-section" aria-label="Experience">
-        <SectionHead index="02" label="Experience" title="Where the work happened." />
-        <Experience />
+        <Note className="is-deck">Each card recedes as the next one covers it: one scroll listener writes a CSS variable. AgentGuard&apos;s dots are its recorded demo, where 2 of 10 cases regress.</Note>
       </section>
 
       <section id="research" className="xp-section" aria-label="Research">
-        <SectionHead index="03" label="Research" title="Published at AAAI 2026." />
+        <SectionHead index="02" label="Research" title="Published at AAAI 2026." />
         <Publication />
+        <Note className="is-paper">The citation is copied verbatim from the repository&apos;s README, not retyped.</Note>
       </section>
 
-      <section id="education" className="xp-section" aria-label="Education">
-        <SectionHead index="04" label="Education" title="Two degrees, two continents." />
-        <Education />
+      <section id="path" className="xp-section" aria-label="Path">
+        <SectionHead index="03" label="Path" title="From Dharwad to Tempe, one question at a time." />
+        <Path />
+        <Note className="is-path">The line fills with your scroll position. Each question comes from my own notes on that work.</Note>
       </section>
 
-      <section id="skills" className="xp-section" aria-label="Skills">
-        <SectionHead index="05" label="Skills" title="Tools, and where I used them." />
+      <section id="toolkit" className="xp-section xp-section-tight" aria-label="Toolkit">
+        <SectionHead index="04" label="Toolkit" title="What I reach for." />
         <Skills />
       </section>
 
       <section id="about" className="xp-section" aria-label="About">
-        <SectionHead index="06" label="About" title="How I got here." />
+        <SectionHead index="05" label="About" title="Beneath the résumé." />
         <About />
       </section>
 
-      <section id="contact" className="xp-section xp-contact" aria-label="Contact">
-        <SectionHead index="07" label="Contact" title="Write to me." />
+      <section id="contact" className="xp-section" aria-label="Contact">
         <Contact />
       </section>
     </main>
