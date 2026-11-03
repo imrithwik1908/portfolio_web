@@ -3,6 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  async redirects() {
+    return [
+      { source: "/blog/:path*", destination: "/", permanent: true },
+      { source: "/now", destination: "/", permanent: true },
+      { source: "/lab", destination: "/", permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

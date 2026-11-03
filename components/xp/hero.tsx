@@ -23,6 +23,23 @@ function Letterbox() {
   return <div className="xp-letterbox is-opening" aria-hidden="true"><span /><span /></div>
 }
 
+function Portrait() {
+  const [proof, setProof] = useState(false)
+  useEffect(() => {
+    if (!proof) return
+    const id = window.setTimeout(() => setProof(false), 2600)
+    return () => window.clearTimeout(id)
+  }, [proof])
+  return (
+    <figure className="xp-portrait" onDoubleClick={() => setProof(true)}>
+      {/* A plain image: no optimizer round-trip and no filters, just the photograph. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" width={1200} height={1600} loading="eager" fetchPriority="high" decoding="async" />
+      <figcaption key={String(proof)}>{proof ? "Yes, that\u2019s really me." : "IIIT Dharwad, 2024"}</figcaption>
+    </figure>
+  )
+}
+
 export function Hero() {
   const [now, setNow] = useState<ReturnType<typeof tempeNow> | null>(null)
   useEffect(() => {
@@ -37,7 +54,7 @@ export function Hero() {
       <Letterbox />
       <div className="xp-hero-text">
         <p className="xp-hero-meta">
-          <span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} aria-hidden="true" />
+          <span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} title="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." aria-hidden="true" />
           Tempe, Arizona{now && <> · {now.part}, {now.time}</>}
         </p>
         <h1 id="xp-hero-title">Hi, I&apos;m <em>Rithwik</em>.</h1>
@@ -49,12 +66,7 @@ export function Hero() {
         </div>
       </div>
 
-      <figure className="xp-portrait">
-        {/* A plain image: no optimizer round-trip and no filters, just the photograph. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" width={1200} height={1600} loading="eager" fetchPriority="high" decoding="async" />
-        <figcaption>IIIT Dharwad, 2024</figcaption>
-      </figure>
+      <Portrait />
 
       <a href="#work" className="xp-scroll-cue" aria-label="Scroll to the work"><span /></a>
       <Note className="is-hero">The letterbox plays once per visit and is skipped entirely if you prefer reduced motion. The sky icon follows the real hour in Tempe.</Note>

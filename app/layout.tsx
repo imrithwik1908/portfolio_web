@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { XpNav } from '@/components/xp/nav'
 import { Ambient } from '@/components/xp/ambient'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
-import { PortfolioInteractions } from '@/components/portfolio-interactions'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -25,22 +24,22 @@ const instrumentSerif = Instrument_Serif({ subsets: ['latin'], weight: '400', st
 export const metadata: Metadata = {
   metadataBase: new URL('https://sairithwikreddy.vercel.app'),
   title: {
-    default: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
+    default: 'Sai Rithwik Reddy Chirra — ML systems and the software around them',
     template: '%s — Sai Rithwik Reddy Chirra',
   },
-  description: 'Rithwik works on APIs, databases, evaluations, and ML systems — the engineering around data and AI.',
+  description: 'Rithwik builds machine learning systems and the software around them. M.S. CS at Arizona State, AAAI 2026 co-author, looking for ML engineering and data science roles.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
-    description: 'APIs, databases, evaluations, and ML systems.',
+    title: 'Sai Rithwik Reddy Chirra',
+    description: 'ML systems and the software around them. AAAI 2026. M.S. CS at Arizona State.',
     url: '/',
     siteName: 'Sai Rithwik Reddy Chirra',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sai Rithwik Reddy Chirra — Engineering around data and AI',
-    description: 'APIs, databases, evaluations, and ML systems.',
+    title: 'Sai Rithwik Reddy Chirra',
+    description: 'ML systems and the software around them. AAAI 2026. M.S. CS at Arizona State.',
   },
 }
 
@@ -63,7 +62,6 @@ export default function RootLayout({
             <Ambient />
             <XpNav />
             <div className="flex-1">{children}</div>
-            <PortfolioInteractions />
             <ResumeDossier />
             <PrintResume />
           </div>

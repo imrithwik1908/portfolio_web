@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
 import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
+import { Figures } from "@/components/xp/figures"
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
 import { RepoSection } from "@/components/xp/repo-section"
@@ -22,13 +22,6 @@ const chapterCopy: Record<string, { opening: string; system: string; decisions: 
   "course-catalog": { opening: "The same course means two different jobs", system: "One data model, two paths through it", decisions: "Small choices that shaped the flow", debugging: "Enrollment touched both sides", results: "What the repository implements", limits: "What would need hardening" },
 }
 
-// Real artifacts from each project. AgentGuard has none here: its interactive demo replaces the sign-in screenshot.
-const figures: Partial<Record<string, { src: string; alt: string; caption: string }>> = {
-  "x-mutest": { src: "/xmutest-annotation.png", alt: "The iterative rationale annotation process used for X-MuTeST", caption: "From the paper: the iterative annotation process." },
-  "tensor-fusion": { src: "/tensor_fusion.jpg", alt: "Tensor fusion network architecture diagram", caption: "The fusion architecture used in the notebooks." },
-  "course-catalog": { src: "/course_catalog.jpg", alt: "Course Catalog landing page", caption: "The application's landing page." },
-}
-
 export function generateStaticParams() { return projects.map((project) => ({ slug: project.slug })) }
 
 export function generateMetadata({ params }: ProjectPageProps): Metadata {
@@ -42,7 +35,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   if (!project) notFound()
   const meta = projectMeta[project.slug]
   const labels = chapterCopy[project.slug]
-  const figure = figures[project.slug]
   const index = projects.findIndex((p) => p.slug === project.slug)
   const next = projects[(index + 1) % projects.length]
 
@@ -91,7 +83,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <>
           {project.system.map((p) => <p key={p}>{p}</p>)}
           <Pipeline nodes={project.architecture} label={`${project.title} architecture`} />
-          {figure && <figure className="xp-figure"><div><Image src={figure.src} alt={figure.alt} fill sizes="(max-width: 767px) 100vw, 760px" /></div><figcaption>{figure.caption}</figcaption></figure>}
         </>
       ),
     },
@@ -141,6 +132,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <AgentGuardBench />
         </section>
       )}
+
+      <Figures slug={project.slug} />
 
       <RepoSection detail={repoDetail[project.slug]} github={project.github} />
 
