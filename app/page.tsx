@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
-import { CopyEmail, EMAIL } from "@/components/xp/copy-email"
+import { About } from "@/components/xp/about"
+import { Contact } from "@/components/xp/contact"
+import { EMAIL } from "@/components/xp/copy-email"
 import { Education } from "@/components/xp/education"
 import { Experience } from "@/components/xp/experience"
 import { Hero } from "@/components/xp/hero"
@@ -59,24 +61,13 @@ export default function Home() {
       </section>
 
       <section id="about" className="xp-section" aria-label="About">
-        <SectionHead index="06" label="About" title="Outside the résumé." />
-        <div className="xp-about-slots">
-          <p className="xp-placeholder-note">Placeholder: a short personal story from you.</p>
-          <p className="xp-placeholder-note">Placeholder: interests outside work.</p>
-          <p className="xp-placeholder-note">Placeholder: photos you&apos;d like to share.</p>
-        </div>
+        <SectionHead index="06" label="About" title="How I got here." />
+        <About />
       </section>
 
       <section id="contact" className="xp-section xp-contact" aria-label="Contact">
-        <p className="xp-head-label"><span>07</span>Contact</p>
-        <h2>Say hello.</h2>
-        <p>Roles, research, or an interesting engineering problem are all good reasons to write.</p>
-        <div className="xp-contact-actions">
-          <CopyEmail className="xp-button" label={EMAIL} />
-          <a className="xp-link" href="https://github.com/imrithwik1908" target="_blank" rel="noreferrer">GitHub <Arrow dir="out" /></a>
-          <a className="xp-link" href="https://www.linkedin.com/in/sairithwikreddy" target="_blank" rel="noreferrer">LinkedIn <Arrow dir="out" /></a>
-          <a className="xp-link" href="https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing" target="_blank" rel="noreferrer">Résumé <Arrow dir="out" /></a>
-        </div>
+        <SectionHead index="07" label="Contact" title="Write to me." />
+        <Contact />
       </section>
     </main>
   )

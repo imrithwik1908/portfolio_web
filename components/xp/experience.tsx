@@ -1,36 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { useGlider } from "@/components/xp/use-glider"
+import { useInView } from "@/components/xp/use-in-view"
 import { earlierExperience, experiences } from "@/lib/portfolio-data"
 
 const roles = [
-  ...experiences.map((e) => ({ key: e.company, period: e.period, role: e.role, company: e.company, summary: e.summary, note: e.aside as string | undefined })),
-  { key: earlierExperience.company, period: earlierExperience.period, role: earlierExperience.role, company: earlierExperience.company, summary: earlierExperience.summary, note: undefined },
+  ...experiences.map((e) => ({ key: e.company, year: e.year, period: e.period, role: e.role, company: e.company, summary: e.summary, note: e.aside as string | undefined })),
+  { key: earlierExperience.company, year: "2023", period: earlierExperience.period, role: earlierExperience.role, company: earlierExperience.company, summary: earlierExperience.summary, note: undefined },
 ]
 
-// Roles as rows. The shared glider follows the pointer; a row opens to show what the work involved.
+// Each role is a ticket stub: the year on a perforated stub, the role on the body.
+// Tearing (clicking) a ticket opens what the work actually involved.
 export function Experience() {
-  const [hovered, setHovered] = useState<string | null>(null)
-  const [open, setOpen] = useState<string | null>(roles[0].key)
-  const glider = useGlider<HTMLLIElement>(hovered)
+  const [open, setOpen] = useState<string>(roles[0].key)
+  const { ref, inView } = useInView<HTMLOListElement>()
 
   return (
-    <ol className="xp-roles" ref={glider.container as React.Ref<HTMLOListElement>} onPointerLeave={() => setHovered(null)}>
-      <span className="xp-glider is-soft" style={glider.style} aria-hidden="true" />
-      {roles.map((r) => {
+    <ol ref={ref} className={`xp-tickets ${inView ? "is-in" : ""}`}>
+      {roles.map((r, i) => {
         const isOpen = open === r.key
         return (
-          <li key={r.key} ref={glider.register(r.key)} className={isOpen ? "is-open" : undefined} onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(r.key)}>
-            <button type="button" className="xp-role-row" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : r.key)}>
-              <span className="xp-role-period">{r.period}</span>
-              <span className="xp-role-title"><strong>{r.role}</strong><span>{r.company}</span></span>
-              <span className="xp-role-icon" aria-hidden="true" />
+          <li key={r.key} className={`xp-ticket ${isOpen ? "is-open" : ""}`} style={{ "--i": i } as React.CSSProperties}>
+            <button type="button" className="xp-ticket-face" aria-expanded={isOpen} onClick={() => setOpen(r.key)}>
+              <span className="xp-ticket-stub"><span>{r.year}</span><small>No. {String(i + 1).padStart(3, "0")}</small></span>
+              <span className="xp-ticket-body">
+                <span className="xp-ticket-company">{r.company}</span>
+                <strong>{r.role}</strong>
+                <span className="xp-ticket-period">{r.period}</span>
+              </span>
             </button>
-            <div className="xp-role-detail">
+            <div className="xp-ticket-detail">
               <div>
                 <p>{r.summary}</p>
-                {r.note && <p className="xp-role-note">{r.note}</p>}
+                {r.note && <p className="xp-ticket-note">{r.note}</p>}
               </div>
             </div>
           </li>
