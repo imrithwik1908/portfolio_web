@@ -997,3 +997,69 @@ html.is-blinking .xp-nav-eye .xp-eye { animation: xp-blink 1400ms ease; }
 .xp-play-note { margin: 12px 0 0; color: var(--xp-ink-2); font-size: 0.92rem; }
 .xp-play-note.is-bad { color: #e07a5f; }
 @media (max-width: 720px) { .xp-play-grid, .xp-play-docs { grid-template-columns: 1fr; } .xp-play-out { flex-direction: column; gap: 4px; } }
+
+/* ── Final pass: details ─────────────────────────────────────── */
+::selection { color: #1a1917; background: var(--xp-lamp); }
+.xp-skip { position: fixed; top: 14px; left: 14px; z-index: 200; padding: 10px 16px; border-radius: 999px; color: #1a1917; background: var(--xp-lamp); font: 500 0.9rem var(--xp-sans); transform: translateY(-160%); transition: transform 300ms var(--xp-spring); }
+.xp-skip:focus-visible { transform: none; outline: none; }
+
+/* The eye follows the pointer */
+.xp-eye::after { transform: translate(calc(-50% + var(--ex, 0px)), calc(-50% + var(--ey, 0px))); transition: transform 180ms ease-out; }
+[aria-pressed="true"] > .xp-eye::after, .is-on > .xp-eye::after { transform: translate(calc(-50% + var(--ex, 0px)), calc(-50% + var(--ey, 0px))) scale(1.5); }
+
+/* A soft lamp that follows the pointer in the hero */
+.xp-hero { position: relative; }
+.xp-hero::before { content: ""; position: absolute; inset: -80px 0; z-index: -1; pointer-events: none; background: radial-gradient(420px 420px at var(--mx, 70%) var(--my, 30%), rgba(233, 194, 123, 0.07), transparent 70%); transition: background 0s; }
+
+/* A projector beam sweeping very slowly, and a faint flicker in the top light */
+.xp-light::before { content: ""; position: absolute; top: -20%; left: 50%; width: 46vw; height: 140%; background: linear-gradient(90deg, transparent, rgba(233, 194, 123, 0.035) 40%, rgba(233, 194, 123, 0.05) 50%, rgba(233, 194, 123, 0.035) 60%, transparent); filter: blur(30px); transform-origin: 50% 0; animation: xp-beam 48s ease-in-out infinite alternate; }
+.xp-light::after { content: ""; position: absolute; inset: 0; background: radial-gradient(900px 500px at 50% -8%, rgba(233, 194, 123, 0.05), transparent 70%); animation: xp-flicker 9s steps(1) infinite; }
+@keyframes xp-beam { from { transform: translateX(-80%) rotate(14deg); } to { transform: translateX(-20%) rotate(-14deg); } }
+@keyframes xp-flicker { 0%, 100% { opacity: 1; } 31% { opacity: 0.7; } 32% { opacity: 1; } 63% { opacity: 0.85; } 64% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .xp-light::before, .xp-light::after { animation: none; } }
+
+/* Rewind: a quick film jitter */
+html.is-rewinding .xp { animation: xp-rewind 900ms steps(6) both; }
+@keyframes xp-rewind { 0% { filter: none; } 20% { filter: sepia(0.5) contrast(1.15); transform: translateY(-2px); } 40% { transform: translateY(2px); } 60% { filter: sepia(0.35) contrast(1.1); transform: translateY(-1px); } 100% { filter: none; transform: none; } }
+
+/* Timecode */
+.xp-timecode { position: fixed; left: 20px; bottom: 18px; z-index: 60; display: flex; gap: 8px; align-items: center; margin: 0; color: var(--xp-muted); font: 0.7rem var(--xp-mono, ui-monospace, monospace); letter-spacing: 0.08em; opacity: 0; transition: opacity 500ms ease; pointer-events: none; }
+.xp-timecode.is-on { opacity: 0.8; }
+.xp-timecode i { width: 6px; height: 6px; border-radius: 50%; background: #e05a4a; animation: xp-rec 1s steps(1) infinite; }
+@keyframes xp-rec { 50% { opacity: 0.2; } }
+@media (max-width: 720px) { .xp-timecode { display: none; } }
+
+/* Hero: typed line, the name in Telugu, the clock */
+.xp-typed { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 18px 0 0; color: var(--xp-ink-2); font: 0.92rem var(--xp-mono, ui-monospace, monospace); min-height: 1.6em; }
+.xp-typed > span:first-child { color: var(--xp-lamp); }
+.xp-caret { display: inline-block; width: 7px; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: var(--xp-lamp); animation: xp-rec 1s steps(1) infinite; }
+.xp-name { position: relative; display: inline-grid; outline: none; }
+.xp-name > span { grid-area: 1 / 1; transition: opacity 500ms ease, filter 500ms ease, transform 600ms var(--xp-spring); }
+.xp-name > span + span { opacity: 0; filter: blur(8px); transform: translateY(8px); font-style: normal; font-size: 0.82em; align-self: center; }
+.xp-name:hover > span:first-child, .xp-name:focus-visible > span:first-child { opacity: 0; filter: blur(8px); transform: translateY(-8px); }
+.xp-name:hover > span + span, .xp-name:focus-visible > span + span { opacity: 1; filter: none; transform: none; }
+.xp-clock { padding: 0; border: 0; color: inherit; background: none; font: inherit; cursor: pointer; border-bottom: 1px dotted transparent; transition: border-color 250ms ease; }
+.xp-clock:hover { border-bottom-color: currentColor; }
+.xp-offset { margin-left: 10px; color: var(--xp-lamp); opacity: 0; transition: opacity 400ms ease; }
+.xp-offset.is-on { opacity: 1; }
+.xp-tip.is-text { border-bottom: 1px dotted rgba(233, 194, 123, 0.5); cursor: help; }
+
+/* Education */
+.xp-degree-progress { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+.xp-degree-progress span { position: relative; flex: 1; height: 2px; border-radius: 2px; background: var(--xp-line); overflow: hidden; }
+.xp-degree-progress span::after { content: ""; position: absolute; inset: 0; background: var(--xp-lamp); box-shadow: 0 0 8px var(--xp-lamp); transform-origin: left; transform: scaleX(var(--done)); animation: xp-grow 1600ms 300ms cubic-bezier(0.2, 0.8, 0.1, 1) both; }
+.xp-degree-progress.is-done span::after { background: var(--xp-muted); box-shadow: none; }
+.xp-degree-progress small { color: var(--xp-muted); font: 0.72rem var(--xp-mono, ui-monospace, monospace); }
+@keyframes xp-grow { from { transform: scaleX(0); } }
+.xp-degree-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.xp-degree-chips span { padding: 3px 10px; border: 1px solid var(--xp-line); border-radius: 999px; font-size: 0.85rem; transition: border-color 250ms ease, color 250ms ease; }
+.xp-degree-chips span:hover { border-color: var(--xp-lamp); color: var(--xp-lamp); }
+
+/* Project hints */
+.xp-hint { margin: 10px 0 0; color: var(--xp-muted); font-size: 0.8rem; }
+.xp-fig.is-inline { position: relative; }
+.xp-fig-zoom { position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 999px; color: #f6f3ee; background: rgba(26, 25, 23, 0.75); font-size: 0.75rem; opacity: 0; transition: opacity 250ms ease; pointer-events: none; }
+.xp-fig.is-inline:hover .xp-fig-zoom { opacity: 1; }
+.xp-tip.is-text { display: inline; width: auto; height: auto; margin: 0; border-radius: 0; }
+.xp-tip.is-text::after { transform: translate(-50%, 4px); }
+.xp-tip.is-text:hover::after, .xp-tip.is-text:focus-visible::after { transform: translate(-50%, 0); }

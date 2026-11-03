@@ -15,6 +15,7 @@ const SHORTCUTS = [
   ["← →", "Step through experience, figures and the demo"],
   ["Esc", "Close the résumé or a figure"],
   ["⌘ / Ctrl + P", "Print the résumé, wherever you are"],
+  ["g g  /  G", "Top of the page / the very end"],
 ]
 
 // Our own eased scroll: native smooth scrolling isn't reliable everywhere, and the target can move
@@ -83,23 +84,68 @@ export function Ambient() {
     document.addEventListener("copy", onCopy)
 
     // Selecting the email by hand gets pointed at the button that copies it.
-    let selectHinted = false
+    let selectHinted = 0
     const onSelect = () => {
-      if (selectHinted || !document.getSelection()?.toString().includes("@gmail.com")) return
-      selectHinted = true
+      if (performance.now() - selectHinted < 15_000 || !document.getSelection()?.toString().includes("@gmail.com")) return
+      selectHinted = performance.now()
       toast("The button next to it copies it in one click.")
     }
     document.addEventListener("selectionchange", onSelect)
 
-    // Reaching the very bottom within a few seconds of arriving.
-    const arrived = performance.now()
+    // Reaching the very bottom within a few seconds of leaving the top. Back at the top, the clock resets.
+    let leftTop = performance.now()
     let sped = false
+    let lastY = window.scrollY, lastT = performance.now(), rewound = 0
     const onBottom = () => {
+      const y = window.scrollY, t = performance.now()
+      // Scrolling back up fast from deep in the page: the film rewinds for a moment.
+      const speed = (lastY - y) / Math.max(1, t - lastT)
+      if (speed > 6 && y > 600 && t - rewound > 12_000) {
+        rewound = t
+        document.documentElement.classList.add("is-rewinding")
+        window.setTimeout(() => document.documentElement.classList.remove("is-rewinding"), 900)
+        toast("Rewinding.")
+      }
+      lastY = y; lastT = t
+      if (y < 200) { leftTop = t; sped = false; jumped = false; return }
       if (sped || jumped || location.pathname !== "/") return
-      if (window.innerHeight + window.scrollY < document.documentElement.scrollHeight - 4) return
+      if (window.innerHeight + y < document.documentElement.scrollHeight - 4) return
       sped = true
-      if (performance.now() - arrived < 8000) toast("Speedrun. The good parts were in the middle.")
+      if (t - leftTop < 8000) toast("Speedrun. The good parts were in the middle.")
     }
+
+    // The eye in the navigation watches the pointer; the hero lamp follows it too.
+    let eyeFrame = 0
+    const onPointer = (event: PointerEvent) => {
+      if (eyeFrame) return
+      eyeFrame = requestAnimationFrame(() => {
+        eyeFrame = 0
+        const eye = document.querySelector<HTMLElement>(".xp-eye")
+        if (eye) {
+          const r = eye.getBoundingClientRect()
+          const dx = event.clientX - (r.left + r.width / 2), dy = event.clientY - (r.top + r.height / 2)
+          const d = Math.max(1, Math.hypot(dx, dy))
+          eye.style.setProperty("--ex", `${(dx / d) * Math.min(3.5, d / 40)}px`)
+          eye.style.setProperty("--ey", `${(dy / d) * Math.min(2, d / 60)}px`)
+        }
+        const hero = document.querySelector<HTMLElement>(".xp-hero")
+        if (hero) {
+          const r = hero.getBoundingClientRect()
+          hero.style.setProperty("--mx", `${event.clientX - r.left}px`)
+          hero.style.setProperty("--my", `${event.clientY - r.top}px`)
+        }
+      })
+    }
+    window.addEventListener("pointermove", onPointer, { passive: true })
+
+    // First visit only: once the opening has played, a whisper that there's more than meets the eye.
+    let whisper = 0
+    try {
+      if (!sessionStorage.getItem("whispered")) {
+        sessionStorage.setItem("whispered", "1")
+        whisper = window.setTimeout(() => toast("Press ? at any time. Not everything here is on the surface."), 7000)
+      }
+    } catch { /* no storage, no whisper */ }
     window.addEventListener("scroll", onBottom, { passive: true })
 
     // Leave the page alone for a minute and the eye in the navigation blinks.
@@ -107,9 +153,9 @@ export function Ambient() {
     const blink = () => {
       document.documentElement.classList.add("is-blinking")
       window.setTimeout(() => document.documentElement.classList.remove("is-blinking"), 1400)
-      idle = window.setTimeout(blink, 45_000)
+      idle = window.setTimeout(blink, 12_000)
     }
-    const resetIdle = () => { window.clearTimeout(idle); idle = window.setTimeout(blink, 45_000) }
+    const resetIdle = () => { window.clearTimeout(idle); idle = window.setTimeout(blink, 12_000) }
     resetIdle()
     window.addEventListener("pointermove", resetIdle, { passive: true })
     window.addEventListener("scroll", resetIdle, { passive: true })
@@ -146,6 +192,9 @@ export function Ambient() {
       window.removeEventListener("xp:toast", onToast)
       document.removeEventListener("copy", onCopy)
       document.removeEventListener("selectionchange", onSelect)
+      window.removeEventListener("pointermove", onPointer)
+      cancelAnimationFrame(eyeFrame)
+      window.clearTimeout(whisper)
       window.removeEventListener("scroll", onBottom)
       window.removeEventListener("pointermove", resetIdle)
       window.removeEventListener("scroll", resetIdle)
@@ -164,17 +213,40 @@ export function Ambient() {
         ))}
       </div>
       <div className="xp-grain" aria-hidden="true" />
+      <Timecode />
       <div className={`xp-fog-roll ${fog ? "is-on" : ""}`} aria-hidden="true" />
       <p className={`xp-toast ${note ? "is-on" : ""}`} role="status" aria-live="polite">{note}</p>
       {help && (
         <div className="xp-help" role="dialog" aria-label="Keyboard shortcuts">
           <p className="xp-help-title">Keyboard</p>
           <dl>{SHORTCUTS.map(([k, v]) => <div key={k}><dt><kbd>{k}</kbd></dt><dd>{v}</dd></div>)}</dl>
-          <p className="xp-help-foot">Some things aren&apos;t listed. Press ? or Esc to close.</p>
+          <p className="xp-help-foot">A few words do things if you type them. One is three letters and lives in the 404 page; one is what you&apos;d say to a candidate. Press ? or Esc to close.</p>
         </div>
       )}
     </>
   )
+}
+
+// A projector's timecode in the corner: time since you arrived, shown only while the film is moving.
+function Timecode() {
+  const [shown, setShown] = useState(false)
+  const [text, setText] = useState("")
+  useEffect(() => {
+    const start = performance.now()
+    let hide = 0
+    const onScroll = () => {
+      const t = Math.floor((performance.now() - start) / 1000)
+      const pad = (n: number) => String(n).padStart(2, "0")
+      const reel = Math.min(99, Math.floor((window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)) * 100))
+      setText(`${pad(Math.floor(t / 3600))}:${pad(Math.floor(t / 60) % 60)}:${pad(t % 60)} · ${pad(reel)}%`)
+      setShown(true)
+      window.clearTimeout(hide)
+      hide = window.setTimeout(() => setShown(false), 1200)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(hide) }
+  }, [])
+  return <p className={`xp-timecode ${shown ? "is-on" : ""}`} aria-hidden="true"><i />{text}</p>
 }
 
 // x%, y%, size px, drift seconds, phase seconds. Fixed values so server and client render identically.

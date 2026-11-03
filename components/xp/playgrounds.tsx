@@ -33,7 +33,7 @@ export function PolicyPlayground() {
 
   return (
     <div className="xp-play">
-      <p className="xp-col-label">Try the policy · flip what went wrong in a release</p>
+      <p className="xp-col-label">Tick what went wrong. The verdict follows the real policy.</p>
       <div className="xp-play-grid">
         {[{ name: "Blocking checks", items: blocking }, { name: "Evidence gaps", items: incomplete }].map((group) => (
           <fieldset key={group.name}>
@@ -75,7 +75,7 @@ export function EnrollmentDemo() {
 
   return (
     <div className="xp-play">
-      <p className="xp-col-label">Try it · one enrollment, two documents</p>
+      <p className="xp-col-label">Press Enroll. Then tick the crash, reset, and enroll again.</p>
       <div className="xp-play-docs">
         <pre className={!consistent ? "is-bad" : undefined}>{`student 42 {\n  enrolledCourses: [${student.map((c) => `"${c}"`).join(", ")}]\n}`}</pre>
         <pre className={!consistent ? "is-bad" : undefined}>{`course CSE 512 {\n  enrolledStudents: [${course.map((c) => `"${c}"`).join(", ")}]\n}`}</pre>

@@ -60,7 +60,8 @@ export default function RootLayout({
         >
           <div className="site-shell relative flex min-h-screen flex-col">
             <Ambient />
-            <XpNav />
+            <a href="#work" className="xp-skip">Skip to the work</a>
+        <XpNav />
             <div className="flex-1">{children}</div>
             <ResumeDossier />
             <PrintResume />

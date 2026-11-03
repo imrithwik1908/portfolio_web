@@ -37,6 +37,7 @@ export function Pipeline({ nodes, label }: { nodes: { label: string; detail: str
           </li>
         ))}
       </ol>
+      <p className="xp-hint">Point at a stage to stop the flow there.</p>
       <p className="xp-pipe-detail" aria-live="polite" key={active}>
         <strong>{nodes[active].label}</strong>{nodes[active].detail}
       </p>

@@ -176,7 +176,7 @@ const figures: Record<string, Figure[]> = {
   "x-mutest": [
     { chapter: "system", title: "The LLM-consulted explanation framework", caption: "Human rationales and n-gram scores guide attention; LLaMA 3.1 adds contextual rationale tokens.", source: "X-MuTeST repository README", src: "/xmutest-architecture.png", alt: "X-MuTeST framework overview diagram" },
     { chapter: "debugging", title: "The iterative annotation process", caption: "Guidelines, three annotators, review and feedback until agreement held.", source: "X-MuTeST paper", src: "/xmutest-annotation.png", alt: "Iterative annotation process" },
-    { chapter: "debugging", title: "How much the annotators agreed", caption: "Pairwise Cohen's kappa and overall Fleiss' kappa per language, after iterative re-annotation.", source: "X-MuTeST repository README", draw: Agreement },
+    { chapter: "debugging", title: "How much the annotators agreed", caption: "Point at a bar to follow one pair of annotators. Pairwise Cohen's kappa and overall Fleiss' kappa per language, after iterative re-annotation.", source: "X-MuTeST repository README", draw: Agreement },
   ],
   "tensor-fusion": [
     { chapter: "results", title: "Where each task landed", caption: "Binary sentiment is solid; five-class is far harder, though still above a uniform guess.", source: "Combination_binary, LA_combination_5class and Combination_regression notebooks", draw: TensorResults },
@@ -221,6 +221,7 @@ export function ChapterFigures({ slug, chapter }: { slug: string; chapter: strin
           <button type="button" className="xp-fig-frame" onClick={(e) => { back.current = e.currentTarget; setOpen(n) }} aria-label={`Enlarge figure ${n + 1}: ${fig.title}`}>
             <FigureBody fig={fig} />
           </button>
+          <span className="xp-fig-zoom" aria-hidden="true">Click to enlarge</span>
           <figcaption><strong>Fig. {n + 1} · {fig.title}</strong>{fig.caption}<span>Source: {fig.source}</span></figcaption>
         </figure>
       ))}
