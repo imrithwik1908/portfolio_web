@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Command, FileText, FlaskConical, Mail, Moon, Search, Sun, X } from "lucide-react"
 import { useTheme } from "next-themes"
 
-const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
 const projectSlugs = ["agentguard", "x-mutest", "tensor-fusion", "course-catalog"] as const
 
 export function PortfolioInteractions() {
@@ -21,7 +20,7 @@ export function PortfolioInteractions() {
     { label: "All projects", hint: "Case studies", icon: Command, run: () => router.push("/projects") },
     { label: "About Rithwik", hint: "Point of view", icon: Command, run: () => router.push("/#about") },
     { label: "Email Rithwik", hint: "Start a conversation", icon: Mail, run: () => window.location.href = "mailto:sairithwikreddy.chirra@gmail.com" },
-    { label: "Open resume", hint: "Google Drive", icon: FileText, run: () => window.open(resumeUrl, "_blank", "noopener,noreferrer") },
+    { label: "Open resume", hint: "Google Drive", icon: FileText, run: () => window.dispatchEvent(new Event("resume:open")) },
     { label: "Open the lab", hint: "Small experiments", icon: FlaskConical, run: () => router.push("/lab") },
     {
       label: resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode",

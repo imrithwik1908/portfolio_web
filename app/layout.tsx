@@ -6,6 +6,7 @@ import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { XpNav } from '@/components/xp/nav'
 import { Ambient } from '@/components/xp/ambient'
+import { ResumeDossier } from '@/components/xp/resume'
 import { PortfolioInteractions } from '@/components/portfolio-interactions'
 
 const geistSans = localFont({
@@ -63,6 +64,7 @@ export default function RootLayout({
             <XpNav />
             <div className="flex-1">{children}</div>
             <PortfolioInteractions />
+            <ResumeDossier />
           </div>
         </ThemeProvider>
       </body>

@@ -5,11 +5,11 @@ import { tempeNow } from "@/components/xp/ambient"
 import { Arrow } from "@/components/xp/arrow"
 import { EMAIL } from "@/components/xp/copy-email"
 import { Note } from "@/components/xp/note"
+import { ResumeLink } from "@/components/xp/resume"
 
 const links = [
   ["GitHub", "https://github.com/imrithwik1908"],
   ["LinkedIn", "https://www.linkedin.com/in/sairithwikreddy"],
-  ["Résumé", "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"],
 ] as const
 
 // A small coded line in the credits. It looks like noise; clicking it decodes, letter by letter.
@@ -41,6 +41,33 @@ function Cipher() {
     <button type="button" className={`xp-cipher ${open ? "is-open" : ""}`} onClick={toggle} aria-label={open ? SECRET : "A coded line. Select to decode it."}>
       <span aria-hidden="true">{text}</span>
     </button>
+  )
+}
+
+// A post-credits scene: stay at the very bottom for a few seconds and one more story appears.
+function PostCredits() {
+  const sentinel = useRef<HTMLDivElement>(null)
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const node = sentinel.current
+    if (!node) return
+    let timer = 0
+    const observer = new IntersectionObserver(([entry]) => {
+      window.clearTimeout(timer)
+      if (entry.isIntersecting) timer = window.setTimeout(() => setShown(true), 3200)
+    })
+    observer.observe(node)
+    return () => { observer.disconnect(); window.clearTimeout(timer) }
+  }, [])
+  return (
+    <>
+      <div className={`xp-postcredits ${shown ? "is-shown" : ""}`} aria-hidden={!shown}>
+        <p className="xp-postcredits-kicker">After the credits</p>
+        <p>The bug that took longest to find in AgentGuard wasn&apos;t a crash. Old evaluation runs were quietly leaking into new comparisons, making two versions look better supported than they were. The fix was to pair only the latest finished job for the same suite, version, evaluator and case, and then test exactly those boundaries.</p>
+        <a href="/projects/agentguard" tabIndex={shown ? 0 : -1} className="xp-link">The full story <Arrow /></a>
+      </div>
+      <div ref={sentinel} className="xp-postcredits-sentinel" aria-hidden="true" />
+    </>
   )
 }
 
@@ -94,6 +121,7 @@ export function Contact() {
 
         <ul className="xp-finale-links">
           <li><a href={`mailto:${EMAIL}`} className="xp-link">Write an email <Arrow dir="out" /></a></li>
+          <li><ResumeLink>Résumé <Arrow /></ResumeLink></li>
           {links.map(([label, href]) => <li key={label}><a href={href} target="_blank" rel="noreferrer" className="xp-link">{label} <Arrow dir="out" /></a></li>)}
         </ul>
       </div>
@@ -103,6 +131,7 @@ export function Contact() {
         <Cipher />
         <span><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} aria-hidden="true" />{now ? `${now.part} in Tempe, ${now.time}` : "Tempe, Arizona"}</span>
       </footer>
+      <PostCredits />
       <Note className="is-contact">Copy uses the Clipboard API and falls back to your mail app if the browser blocks it.</Note>
     </div>
   )

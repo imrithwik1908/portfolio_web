@@ -29,18 +29,28 @@ export function Skills() {
       <div className={`xp-kit-text ${active ? "has-active" : ""}`} onMouseLeave={() => setActive(null)}>
         {story.map((line, li) => (
           <p key={li}>
-            {line.map((seg, si) => typeof seg === "string" ? <Fragment key={si}>{seg}</Fragment> : (
-              <button
-                key={si}
-                type="button"
-                className={`xp-kit-tool ${active?.name === seg.name ? "is-active" : ""} ${seg.in.length ? "" : "is-plain"}`}
-                onMouseEnter={() => setActive(seg)}
-                onFocus={() => setActive(seg)}
-                onClick={() => setActive(seg)}
-              >
-                {seg.name}
-              </button>
-            ))}
+            {line.map((seg, si) => {
+              if (typeof seg === "string") {
+                // Punctuation that follows a tool is rendered with the tool, so it never starts a line.
+                const prev = line[si - 1]
+                return <Fragment key={si}>{prev && typeof prev !== "string" ? seg.replace(/^[,.;:]+/, "") : seg}</Fragment>
+              }
+              const next = line[si + 1]
+              const punct = typeof next === "string" ? next.match(/^[,.;:]+/)?.[0] ?? "" : ""
+              return (
+                <span key={si} className="xp-kit-chunk">
+                  <button
+                    type="button"
+                    className={`xp-kit-tool ${active?.name === seg.name ? "is-active" : ""} ${seg.in.length ? "" : "is-plain"}`}
+                    onMouseEnter={() => setActive(seg)}
+                    onFocus={() => setActive(seg)}
+                    onClick={() => setActive(seg)}
+                  >
+                    {seg.name}
+                  </button>{punct}
+                </span>
+              )
+            })}
           </p>
         ))}
       </div>

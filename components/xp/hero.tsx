@@ -5,8 +5,7 @@ import { useEffect, useState } from "react"
 import { tempeNow } from "@/components/xp/ambient"
 import { Arrow } from "@/components/xp/arrow"
 import { Note } from "@/components/xp/note"
-
-const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
+import { ResumeLink } from "@/components/xp/resume"
 
 // The opening shot: letterbox bars part once per visit, the name comes into focus, and the
 // portrait settles. Nothing here waits on the visitor or blocks the page.
@@ -46,7 +45,7 @@ export function Hero() {
         <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an AAAI 2026 paper, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
         <div className="xp-hero-actions">
           <Link href="/#work" className="xp-button">See what I&apos;ve built <Arrow dir="down" /></Link>
-          <a href={resumeUrl} target="_blank" rel="noreferrer" className="xp-link">Résumé <Arrow dir="out" /></a>
+          <ResumeLink>Open my résumé <Arrow /></ResumeLink>
         </div>
       </div>
 

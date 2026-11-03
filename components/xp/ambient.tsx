@@ -24,7 +24,7 @@ export function Ambient() {
     document.addEventListener("visibilitychange", onVisibility)
 
     console.info(
-      "%cCase file #001%c\nSubject opened the developer tools.\nMotive: curiosity. Verdict: welcome.\n\nFour more things are hidden on the page. One answers to a single key.\nThere is also something past the edge of the map.",
+      "%cCase file #001%c\nSubject opened the developer tools.\nMotive: curiosity. Verdict: welcome.\n\nA few more things are hidden on the page. One answers to a single key,\none waits until the credits have rolled, and one lives past the edge of the map.",
       "font: 600 14px/1.8 Georgia, serif; color: #e9c27b",
       "font: 12px/1.6 ui-monospace, monospace; color: #b4ada1",
     )
