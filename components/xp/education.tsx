@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
+import { Globe } from "@/components/xp/globe"
 
 // Degrees from the résumé, joined by the real great-circle distance between the two campuses.
 const GRADUATION = new Date("2027-05-15T00:00:00-07:00")
@@ -32,9 +33,8 @@ export function Education() {
         </dl>
       </article>
 
-      <div className="xp-degree-route" aria-hidden="true">
-        <span className="xp-degree-line"><i /></span>
-        <span className="xp-degree-km" title="Great-circle distance between the two campuses">14,530 km</span>
+      <div className="xp-degree-route">
+        <Globe />
       </div>
 
       <article className="xp-degree is-now">

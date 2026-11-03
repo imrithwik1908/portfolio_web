@@ -1062,3 +1062,43 @@ html.is-rewinding .xp { animation: xp-rewind 900ms steps(6) both; }
 .xp-tip.is-text { display: inline; width: auto; height: auto; margin: 0; border-radius: 0; }
 .xp-tip.is-text::after { transform: translate(-50%, 4px); }
 .xp-tip.is-text:hover::after, .xp-tip.is-text:focus-visible::after { transform: translate(-50%, 0); }
+
+/* Globe between the two degrees */
+.xp-degrees { grid-template-columns: minmax(0, 1fr) clamp(200px, 20vw, 260px) minmax(0, 1fr); gap: 16px; }
+.xp-globe { display: grid; justify-items: center; gap: 6px; width: 100%; }
+.xp-globe canvas { width: 100%; aspect-ratio: 1; cursor: grab; touch-action: pan-y; }
+.xp-globe canvas:active { cursor: grabbing; }
+.xp-globe-label { margin: 0; color: var(--xp-ink-2); font-size: 0.78rem; }
+.xp-globe .xp-degree-km { position: static; opacity: 0.8; }
+@media (max-width: 900px) { .xp-degrees { grid-template-columns: minmax(0, 1fr); } .xp-globe { width: min(240px, 70vw); margin: 0 auto; } }
+
+/* Hero breathing room */
+.xp-name::after { top: auto; bottom: calc(100% + 2px); left: 0.1em; padding: 6px 12px; border: 1px solid var(--xp-line-strong); border-radius: 10px; color: var(--xp-ink); background: rgba(22, 22, 20, 0.96); font-size: 0.8rem; transform: translateY(4px); z-index: 5; }
+.xp-typed { margin: 26px 0 30px; padding-top: 18px; border-top: 1px solid var(--xp-line); font-size: 0.85rem; }
+.xp-typed + .xp-hero-actions { margin-top: 0; }
+
+/* The background moves: a broad glow travels across the room, no edges anywhere */
+.xp-light::before { inset: -40% -60%; background: radial-gradient(40% 45% at 50% 20%, rgba(233, 194, 123, 0.09), transparent 70%); animation: xp-drift 36s ease-in-out infinite alternate; }
+@keyframes xp-drift { 0% { transform: translate(-18%, 0) scale(1); } 50% { transform: translate(4%, 6%) scale(1.15); } 100% { transform: translate(18%, -2%) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .xp-light::before { animation: none; } }
+
+/* Nav: a little air between the monogram and the links */
+.xp-nav-home { margin-right: 10px; }
+.xp-light { overflow: hidden; }
+.xp-degrees { grid-template-columns: minmax(0, 1fr) 210px minmax(0, 1fr); gap: 8px; }
+.xp-degree-route { align-self: center; }
+@media (max-width: 1100px) { .xp-degrees { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .xp-degree-route { grid-column: 1 / -1; grid-row: 2; } .xp-degree.is-now { grid-row: 1; grid-column: 2; } .xp-globe { width: 220px; margin: 8px auto 0; } }
+@media (max-width: 900px) { .xp-degrees { grid-template-columns: minmax(0, 1fr); } .xp-degree.is-now { grid-column: 1; grid-row: auto; } .xp-degree-route { grid-row: auto; } }
+.xp-typed { margin: 22px 0 0; padding-top: 0; border-top: 0; opacity: 0.85; }
+.xp-typed + .xp-hero-actions { margin-top: 34px; }
+/* Hover the name: a single sweep of light passes through the letters */
+.xp-name::after { content: none; }
+.xp-hero h1 .xp-name { background: linear-gradient(100deg, var(--xp-lamp) 40%, #fff6e0 50%, var(--xp-lamp) 60%) 0 0 / 300% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.06em; }
+.xp-name:hover { animation: xp-sheen 1100ms ease both; }
+@keyframes xp-sheen { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.xp-typed { animation: xp-fade 1200ms 1150ms ease both; }
+.xp-hero .xp-hero-text .xp-typed { margin: 26px 0 0; }
+@media (max-width: 900px) {
+  .xp-degree-route { height: auto !important; padding: 8px 0; }
+  .xp-degree dl div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
