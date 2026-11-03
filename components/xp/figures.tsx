@@ -81,19 +81,22 @@ function Agreement() {
   const series = ["A1 & A2", "A2 & A3", "A3 & A1", "Overall"]
   const colors = ["#d9c7a3", "#c9a96b", "#b7791f", INK]
   const y = (v: number) => 340 - ((v - 70) / 25) * 280
+  // Pointing at a bar or legend entry lights that annotator pair across all three languages.
+  const [hot, setHot] = useState<number | null>(null)
+  const dim = (i: number) => (hot !== null && hot !== i ? 0.22 : 1)
   return (
-    <svg viewBox="0 0 820 400" role="img" aria-label="Inter-annotator agreement for Telugu, Hindi and English">
+    <svg viewBox="0 0 820 400" role="img" aria-label="Inter-annotator agreement for Telugu, Hindi and English" onMouseLeave={() => setHot(null)}>
       {[70, 75, 80, 85, 90, 95].map((t) => <g key={t}><line x1="70" x2="800" y1={y(t)} y2={y(t)} stroke={LINE} strokeWidth="0.6" /><text x="60" y={y(t) + 4} fontSize="11" fill={MUTED} textAnchor="end">{t}</text></g>)}
       {rows.map(([lang, vals], g) => (
         <g key={lang}>
           {vals.map((v, i) => {
             const bx = 110 + g * 240 + i * 44
-            return <g key={i}><rect x={bx} y={y(v)} width="36" height={340 - y(v)} rx="4" fill={colors[i]} /><text x={bx + 18} y={y(v) - 6} fontSize="10.5" fill={INK} textAnchor="middle">{v}</text></g>
+            return <g key={i} opacity={dim(i)} style={{ transition: "opacity 250ms ease" }} onMouseEnter={() => setHot(i)}><rect x={bx} y={y(v)} width="36" height={340 - y(v)} rx="4" fill={colors[i]} /><text x={bx + 18} y={y(v) - 6} fontSize="10.5" fill={INK} textAnchor="middle">{v}</text></g>
           })}
           <text x={110 + g * 240 + 86} y="366" fontSize="13" fontWeight="600" fill={INK} textAnchor="middle">{lang}</text>
         </g>
       ))}
-      {series.map((s, i) => <g key={s}><rect x={110 + i * 120} y="384" width="10" height="10" rx="2" fill={colors[i]} /><text x={126 + i * 120} y="393" fontSize="11.5" fill={MUTED}>{s}</text></g>)}
+      {series.map((s, i) => <g key={s} opacity={dim(i)} onMouseEnter={() => setHot(i)}><rect x={110 + i * 120} y="384" width="10" height="10" rx="2" fill={colors[i]} /><text x={126 + i * 120} y="393" fontSize="11.5" fill={MUTED}>{s}</text></g>)}
     </svg>
   )
 }
@@ -163,26 +166,26 @@ function Enrollment() {
   )
 }
 
-type Figure = { title: string; caption: string; source: string; draw?: () => JSX.Element; src?: string; alt?: string }
+type Figure = { chapter: string; title: string; caption: string; source: string; draw?: () => JSX.Element; src?: string; alt?: string }
 
 const figures: Record<string, Figure[]> = {
   agentguard: [
-    { title: "How a release decision is made", caption: "Blocking checks win over everything; missing evidence asks for a human instead of guessing.", source: "apps/api/agentguard_api/services/evaluations.py", draw: ReleaseLogic },
-    { title: "The life of a trace", caption: "Ingestion is one transaction; evaluation happens off the request path on a queue.", source: "README architecture and the API services", draw: TraceLife },
+    { chapter: "decisions", title: "How a release decision is made", caption: "Blocking checks win over everything; missing evidence asks for a human instead of guessing.", source: "apps/api/agentguard_api/services/evaluations.py", draw: ReleaseLogic },
+    { chapter: "system", title: "The life of a trace", caption: "Ingestion is one transaction; evaluation happens off the request path on a queue.", source: "README architecture and the API services", draw: TraceLife },
   ],
   "x-mutest": [
-    { title: "The LLM-consulted explanation framework", caption: "Human rationales and n-gram scores guide attention; LLaMA 3.1 adds contextual rationale tokens.", source: "X-MuTeST repository README", src: "/xmutest-architecture.png", alt: "X-MuTeST framework overview diagram" },
-    { title: "How much the annotators agreed", caption: "Pairwise Cohen's kappa and overall Fleiss' kappa per language, after iterative re-annotation.", source: "X-MuTeST repository README", draw: Agreement },
-    { title: "The iterative annotation process", caption: "Guidelines, three annotators, review and feedback until agreement held.", source: "X-MuTeST paper", src: "/xmutest-annotation.png", alt: "Iterative annotation process" },
+    { chapter: "system", title: "The LLM-consulted explanation framework", caption: "Human rationales and n-gram scores guide attention; LLaMA 3.1 adds contextual rationale tokens.", source: "X-MuTeST repository README", src: "/xmutest-architecture.png", alt: "X-MuTeST framework overview diagram" },
+    { chapter: "debugging", title: "The iterative annotation process", caption: "Guidelines, three annotators, review and feedback until agreement held.", source: "X-MuTeST paper", src: "/xmutest-annotation.png", alt: "Iterative annotation process" },
+    { chapter: "debugging", title: "How much the annotators agreed", caption: "Pairwise Cohen's kappa and overall Fleiss' kappa per language, after iterative re-annotation.", source: "X-MuTeST repository README", draw: Agreement },
   ],
   "tensor-fusion": [
-    { title: "Where each task landed", caption: "Binary sentiment is solid; five-class is far harder, though still above a uniform guess.", source: "Combination_binary, LA_combination_5class and Combination_regression notebooks", draw: TensorResults },
-    { title: "The fusion architecture", caption: "Modality-specific extractors feed a single fusion model.", source: "Project reference diagram", src: "/tensor_fusion.jpg", alt: "Tensor fusion network architecture" },
+    { chapter: "results", title: "Where each task landed", caption: "Binary sentiment is solid; five-class is far harder, though still above a uniform guess.", source: "Combination_binary, LA_combination_5class and Combination_regression notebooks", draw: TensorResults },
+    { chapter: "system", title: "The fusion architecture", caption: "Modality-specific extractors feed a single fusion model.", source: "Project reference diagram", src: "/tensor_fusion.jpg", alt: "Tensor fusion network architecture" },
   ],
   "course-catalog": [
-    { title: "The data model", caption: "Three Mongoose schemas with references instead of copies.", source: "models/Student.js, Course.js, Professor.js", draw: CourseSchema },
-    { title: "Enrolling in a course", caption: "Selection lives in the session until the student confirms.", source: "server.js, config/passport.js", draw: Enrollment },
-    { title: "The landing page", caption: "Server-rendered with EJS.", source: "Project screenshot", src: "/course_catalog.jpg", alt: "Course Catalog landing page" },
+    { chapter: "system", title: "The data model", caption: "Three Mongoose schemas with references instead of copies.", source: "models/Student.js, Course.js, Professor.js", draw: CourseSchema },
+    { chapter: "debugging", title: "Enrolling in a course", caption: "Selection lives in the session until the student confirms.", source: "server.js, config/passport.js", draw: Enrollment },
+    { chapter: "problem", title: "The landing page", caption: "Server-rendered with EJS.", source: "Project screenshot", src: "/course_catalog.jpg", alt: "Course Catalog landing page" },
   ],
 }
 
@@ -191,48 +194,46 @@ function FigureBody({ fig }: { fig: Figure }) {
   return fig.draw ? <fig.draw /> : <img src={fig.src} alt={fig.alt ?? ""} loading="lazy" decoding="async" />
 }
 
-export function Figures({ slug }: { slug: string }) {
-  const list = figures[slug] ?? []
+const ORDER = ["problem", "system", "decisions", "debugging", "results", "limits", "next"]
+
+// Figures placed inside the chapter they explain, numbered across the page.
+export function ChapterFigures({ slug, chapter }: { slug: string; chapter: string }) {
+  // Numbered in reading order, whatever order they're listed in.
+  const all = [...(figures[slug] ?? [])].sort((a, b) => ORDER.indexOf(a.chapter) - ORDER.indexOf(b.chapter))
   const [open, setOpen] = useState<number | null>(null)
   const back = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (open === null) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null)
-      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : (i + 1) % list.length))
-      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : (i - 1 + list.length) % list.length))
-    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(null) }
     window.addEventListener("keydown", onKey)
     document.documentElement.classList.add("is-dossier-open")
     return () => { window.removeEventListener("keydown", onKey); document.documentElement.classList.remove("is-dossier-open"); back.current?.focus() }
-  }, [open, list.length])
+  }, [open])
 
-  if (!list.length) return null
+  const here = all.map((fig, n) => ({ fig, n })).filter(({ fig }) => fig.chapter === chapter)
+  if (!here.length) return null
 
   return (
-    <section className="xp-figs" aria-label="Figures">
-      <p className="xp-head-label"><span>Fig.</span>Figures</p>
-      <div className={`xp-fig-grid is-${list.length}`}>
-        {list.map((fig, i) => (
-          <figure key={fig.title} className="xp-fig">
-            <button type="button" className="xp-fig-frame" onClick={(e) => { back.current = e.currentTarget; setOpen(i) }} aria-label={`Enlarge figure ${i + 1}: ${fig.title}`}>
-              <FigureBody fig={fig} />
-            </button>
-            <figcaption><strong>Fig. {i + 1} · {fig.title}</strong>{fig.caption}<span>Source: {fig.source}</span></figcaption>
-          </figure>
-        ))}
-      </div>
+    <>
+      {here.map(({ fig, n }) => (
+        <figure key={fig.title} className="xp-fig is-inline">
+          <button type="button" className="xp-fig-frame" onClick={(e) => { back.current = e.currentTarget; setOpen(n) }} aria-label={`Enlarge figure ${n + 1}: ${fig.title}`}>
+            <FigureBody fig={fig} />
+          </button>
+          <figcaption><strong>Fig. {n + 1} · {fig.title}</strong>{fig.caption}<span>Source: {fig.source}</span></figcaption>
+        </figure>
+      ))}
       {open !== null && createPortal(
-        <div className="xp-lightbox" role="dialog" aria-modal="true" aria-label={list[open].title} onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(null) }}>
+        <div className="xp-lightbox" role="dialog" aria-modal="true" aria-label={all[open].title} onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(null) }}>
           <figure>
-            <div className="xp-lightbox-frame"><FigureBody fig={list[open]} /></div>
-            <figcaption><strong>Fig. {open + 1} · {list[open].title}</strong> {list[open].caption}</figcaption>
+            <div className="xp-lightbox-frame"><FigureBody fig={all[open]} /></div>
+            <figcaption><strong>Fig. {open + 1} · {all[open].title}</strong> {all[open].caption}</figcaption>
           </figure>
           <button type="button" className="xp-dossier-close" onClick={() => setOpen(null)} autoFocus>Close <kbd>Esc</kbd></button>
         </div>,
         document.body,
       )}
-    </section>
+    </>
   )
 }

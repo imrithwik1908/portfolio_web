@@ -4,7 +4,8 @@ import { Arrow } from "@/components/xp/arrow"
 import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
-import { Figures } from "@/components/xp/figures"
+import { ChapterFigures } from "@/components/xp/figures"
+import { PolicyPlayground, EnrollmentDemo } from "@/components/xp/playgrounds"
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
 import { RepoSection } from "@/components/xp/repo-section"
@@ -133,8 +134,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         </section>
       )}
 
-      <Figures slug={project.slug} />
-
       <RepoSection detail={repoDetail[project.slug]} github={project.github} />
 
       <div className="xp-read">
@@ -146,6 +145,9 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             <div className="xp-chapter-body">
               <h2 id={`ch-${c.id}`}>{c.title}</h2>
               {c.body}
+              <ChapterFigures slug={project.slug} chapter={c.id} />
+              {project.slug === "agentguard" && c.id === "decisions" && <PolicyPlayground />}
+              {project.slug === "course-catalog" && c.id === "debugging" && <EnrollmentDemo />}
             </div>
           </section>
         ))}

@@ -129,7 +129,7 @@ export function Contact() {
       <footer className="xp-credits">
         <span>Sai Rithwik Reddy Chirra</span>
         <Cipher />
-        <span><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} title="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." aria-hidden="true" />{now ? `${now.part} in Tempe, ${now.time}` : "Tempe, Arizona"}</span>
+        <span><span className="xp-tip" tabIndex={0} role="img" aria-label="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." data-tip="Arizona skips daylight saving, so Tempe’s clock never jumps."><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} /></span>{now ? `${now.part} in Tempe, ${now.time}` : "Tempe, Arizona"}</span>
       </footer>
       <PostCredits />
       <Note className="is-contact">Copy uses the Clipboard API and falls back to your mail app if the browser blocks it.</Note>

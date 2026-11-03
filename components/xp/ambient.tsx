@@ -17,6 +17,23 @@ const SHORTCUTS = [
   ["⌘ / Ctrl + P", "Print the résumé, wherever you are"],
 ]
 
+// Our own eased scroll: native smooth scrolling isn't reliable everywhere, and the target can move
+// while sections reveal on the way, so the destination is re-read every frame.
+function glide(target: () => number, ms = 1100) {
+  const html = document.documentElement
+  const from = window.scrollY, start = performance.now()
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  html.style.scrollBehavior = "auto"
+  const step = (now: number) => {
+    const t = reduce ? 1 : Math.min(1, (now - start) / ms)
+    const ease = 1 - Math.pow(1 - t, 3)
+    window.scrollTo(0, from + (target() - from) * ease)
+    if (t < 1) requestAnimationFrame(step)
+    else html.style.scrollBehavior = ""
+  }
+  requestAnimationFrame(step)
+}
+
 export function Ambient() {
   const [note, setNote] = useState<string | null>(null)
   const [help, setHelp] = useState(false)
@@ -31,10 +48,22 @@ export function Ambient() {
       if (key === "x") toggleCloser()
       if (event.key === "?") setHelp((v) => !v)
       if (event.key === "Escape") setHelp(false)
-      // Typing "fog" anywhere lets the fog roll in for a moment.
-      typed = (typed + key).slice(-3)
-      if (typed === "fog") { setFog(true); window.setTimeout(() => setFog(false), 3200); toast("Fog of war, briefly. My chess bot lives like this.") }
+      // Typing "fog" anywhere lets the fog roll in for a moment; "hire" heads for the contact section.
+      typed = (typed + key).slice(-4)
+      if (typed.endsWith("fog")) { setFog(true); window.setTimeout(() => setFog(false), 3200); toast("Fog of war, briefly. My chess bot lives like this.") }
+      if (typed === "hire") {
+        const contact = document.getElementById("contact")
+        if (contact) { glide(() => window.scrollY + contact.getBoundingClientRect().top); toast("Good instinct. This is the part with my email.") }
+        else toast("Good instinct. My email is on the home page, at the very end.")
+      }
+      // Vim motions: gg to the top, G to the bottom.
+      if (event.key === "G") { jumped = true; glide(() => document.documentElement.scrollHeight - window.innerHeight); toast("G. Straight to the credits.") }
+      else if (key === "g") {
+        if (performance.now() - lastG < 450) { glide(() => 0); toast("gg. Back to the top."); lastG = 0 }
+        else lastG = performance.now()
+      }
     }
+    let lastG = 0, jumped = false
     window.addEventListener("keydown", onKey)
 
     let toastTimer = 0
@@ -53,14 +82,34 @@ export function Ambient() {
     }
     document.addEventListener("copy", onCopy)
 
+    // Selecting the email by hand gets pointed at the button that copies it.
+    let selectHinted = false
+    const onSelect = () => {
+      if (selectHinted || !document.getSelection()?.toString().includes("@gmail.com")) return
+      selectHinted = true
+      toast("The button next to it copies it in one click.")
+    }
+    document.addEventListener("selectionchange", onSelect)
+
+    // Reaching the very bottom within a few seconds of arriving.
+    const arrived = performance.now()
+    let sped = false
+    const onBottom = () => {
+      if (sped || jumped || location.pathname !== "/") return
+      if (window.innerHeight + window.scrollY < document.documentElement.scrollHeight - 4) return
+      sped = true
+      if (performance.now() - arrived < 8000) toast("Speedrun. The good parts were in the middle.")
+    }
+    window.addEventListener("scroll", onBottom, { passive: true })
+
     // Leave the page alone for a minute and the eye in the navigation blinks.
     let idle = 0
     const blink = () => {
       document.documentElement.classList.add("is-blinking")
-      window.setTimeout(() => document.documentElement.classList.remove("is-blinking"), 700)
-      idle = window.setTimeout(blink, 60_000)
+      window.setTimeout(() => document.documentElement.classList.remove("is-blinking"), 1400)
+      idle = window.setTimeout(blink, 45_000)
     }
-    const resetIdle = () => { window.clearTimeout(idle); idle = window.setTimeout(blink, 60_000) }
+    const resetIdle = () => { window.clearTimeout(idle); idle = window.setTimeout(blink, 45_000) }
     resetIdle()
     window.addEventListener("pointermove", resetIdle, { passive: true })
     window.addEventListener("scroll", resetIdle, { passive: true })
@@ -73,7 +122,7 @@ export function Ambient() {
         github: "https://github.com/imrithwik1908",
         looking_for: "ML engineering and data science roles",
         resume: () => { window.dispatchEvent(new Event("resume:open")); return "Opening it on the page." },
-        hint: () => "Try typing fog. Then wait at the very end of the page.",
+        hint: () => "Try typing fog, or hire. Vim users: gg and G. Then wait at the very end of the page.",
       }),
     })
 
@@ -96,6 +145,8 @@ export function Ambient() {
       window.removeEventListener("keydown", onKey)
       window.removeEventListener("xp:toast", onToast)
       document.removeEventListener("copy", onCopy)
+      document.removeEventListener("selectionchange", onSelect)
+      window.removeEventListener("scroll", onBottom)
       window.removeEventListener("pointermove", resetIdle)
       window.removeEventListener("scroll", resetIdle)
       window.clearTimeout(idle)
@@ -128,9 +179,9 @@ export function Ambient() {
 
 // x%, y%, size px, drift seconds, phase seconds. Fixed values so server and client render identically.
 const MOTES: [number, number, number, number, number][] = [
-  [38, 8, 2, 46, 3], [44, 22, 1.5, 58, 17], [52, 14, 2, 52, 29], [57, 30, 1, 64, 8], [48, 6, 2.5, 72, 40],
-  [61, 18, 1.5, 49, 22], [41, 34, 1, 61, 12], [55, 40, 1.5, 55, 33], [47, 26, 1, 68, 5], [63, 9, 1, 57, 45],
-  [36, 20, 1.5, 63, 26], [59, 28, 2, 50, 37],
+  [38, 8, 2.5, 46, 3], [44, 22, 2, 58, 17], [52, 14, 2.5, 52, 29], [57, 30, 1.5, 64, 8], [48, 6, 3, 72, 40],
+  [61, 18, 2, 49, 22], [41, 34, 1.5, 61, 12], [55, 40, 2, 55, 33], [47, 26, 1.5, 68, 5], [63, 9, 1.5, 57, 45],
+  [36, 20, 2, 63, 26], [59, 28, 2.5, 50, 37], [50, 46, 1.5, 66, 19], [43, 12, 2, 59, 51],
 ]
 
 export function toggleCloser() {

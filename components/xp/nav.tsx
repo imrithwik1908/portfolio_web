@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { toggleCloser } from "@/components/xp/ambient"
+import { toast, toggleCloser } from "@/components/xp/ambient"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
 
@@ -29,8 +29,15 @@ function Monogram() {
   }
   const stop = () => { window.clearInterval(timer.current); setI(0) }
   useEffect(() => () => window.clearInterval(timer.current), [])
+  // Five quick clicks and it explains itself.
+  const clicks = useRef<number[]>([])
+  const onClick = () => {
+    const now = performance.now()
+    clicks.current = [...clicks.current.filter((t) => now - t < 1600), now]
+    if (clicks.current.length >= 5) { clicks.current = []; toast("R, ర, र: one letter in English, Telugu and Hindi, the three languages X-MuTeST covers.") }
+  }
   return (
-    <Link href="/" className="xp-nav-home" aria-label="Sai Rithwik Reddy Chirra, home" onMouseEnter={start} onMouseLeave={stop} onFocus={start} onBlur={stop}>
+    <Link href="/" className="xp-nav-home" aria-label="Sai Rithwik Reddy Chirra, home" onClick={onClick} onMouseEnter={start} onMouseLeave={stop} onFocus={start} onBlur={stop}>
       <span key={i} aria-hidden="true">{scripts[i]}</span>
     </Link>
   )

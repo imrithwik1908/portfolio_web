@@ -54,7 +54,7 @@ export function Hero() {
       <Letterbox />
       <div className="xp-hero-text">
         <p className="xp-hero-meta">
-          <span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} title="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." aria-hidden="true" />
+          <span className="xp-tip" tabIndex={0} role="img" aria-label="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." data-tip="Arizona skips daylight saving, so Tempe’s clock never jumps."><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} /></span>
           Tempe, Arizona{now && <> · {now.part}, {now.time}</>}
         </p>
         <h1 id="xp-hero-title">Hi, I&apos;m <em>Rithwik</em>.</h1>
