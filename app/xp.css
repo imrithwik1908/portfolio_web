@@ -1007,14 +1007,15 @@ html.is-blinking .xp-nav-eye .xp-eye { animation: xp-blink 1400ms ease; }
 .xp-eye::after { transform: translate(calc(-50% + var(--ex, 0px)), calc(-50% + var(--ey, 0px))); transition: transform 180ms ease-out; }
 [aria-pressed="true"] > .xp-eye::after, .is-on > .xp-eye::after { transform: translate(calc(-50% + var(--ex, 0px)), calc(-50% + var(--ey, 0px))) scale(1.5); }
 
-/* A soft lamp that follows the pointer in the hero */
-.xp-hero { position: relative; }
-.xp-hero::before { content: ""; position: absolute; inset: -80px 0; z-index: -1; pointer-events: none; background: radial-gradient(420px 420px at var(--mx, 70%) var(--my, 30%), rgba(233, 194, 123, 0.07), transparent 70%); transition: background 0s; }
+/* A soft lamp that follows the pointer, drawn in the fixed light layer behind everything.
+   It only exists while the hero is on screen and stays dim. */
+.xp-light > b { position: absolute; inset: 0; background: radial-gradient(360px circle at var(--mx, 70vw) var(--my, 30vh), rgba(233, 194, 123, 0.045), transparent 70%); opacity: var(--lamp, 0); transition: opacity 600ms ease; }
 
-/* A projector beam sweeping very slowly, and a faint flicker in the top light */
-.xp-light::before { content: ""; position: absolute; top: -20%; left: 50%; width: 46vw; height: 140%; background: linear-gradient(90deg, transparent, rgba(233, 194, 123, 0.035) 40%, rgba(233, 194, 123, 0.05) 50%, rgba(233, 194, 123, 0.035) 60%, transparent); filter: blur(30px); transform-origin: 50% 0; animation: xp-beam 48s ease-in-out infinite alternate; }
-.xp-light::after { content: ""; position: absolute; inset: 0; background: radial-gradient(900px 500px at 50% -8%, rgba(233, 194, 123, 0.05), transparent 70%); animation: xp-flicker 9s steps(1) infinite; }
-@keyframes xp-beam { from { transform: translateX(-80%) rotate(14deg); } to { transform: translateX(-20%) rotate(-14deg); } }
+/* A slow, unframed sweep of light across the whole room, plus a faint projector flicker. */
+.xp-light::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60vw 120vh at var(--beam, 30%) -10%, rgba(233, 194, 123, 0.05), transparent 70%); animation: xp-beam 40s ease-in-out infinite alternate; }
+.xp-light::after { content: ""; position: absolute; inset: 0; background: radial-gradient(900px 500px at 50% -8%, rgba(233, 194, 123, 0.04), transparent 70%); animation: xp-flicker 9s steps(1) infinite; }
+@property --beam { syntax: "<percentage>"; inherits: false; initial-value: 30%; }
+@keyframes xp-beam { from { --beam: 20%; } to { --beam: 80%; } }
 @keyframes xp-flicker { 0%, 100% { opacity: 1; } 31% { opacity: 0.7; } 32% { opacity: 1; } 63% { opacity: 0.85; } 64% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .xp-light::before, .xp-light::after { animation: none; } }
 
@@ -1033,11 +1034,9 @@ html.is-rewinding .xp { animation: xp-rewind 900ms steps(6) both; }
 .xp-typed { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 18px 0 0; color: var(--xp-ink-2); font: 0.92rem var(--xp-mono, ui-monospace, monospace); min-height: 1.6em; }
 .xp-typed > span:first-child { color: var(--xp-lamp); }
 .xp-caret { display: inline-block; width: 7px; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: var(--xp-lamp); animation: xp-rec 1s steps(1) infinite; }
-.xp-name { position: relative; display: inline-grid; outline: none; }
-.xp-name > span { grid-area: 1 / 1; transition: opacity 500ms ease, filter 500ms ease, transform 600ms var(--xp-spring); }
-.xp-name > span + span { opacity: 0; filter: blur(8px); transform: translateY(8px); font-style: normal; font-size: 0.82em; align-self: center; }
-.xp-name:hover > span:first-child, .xp-name:focus-visible > span:first-child { opacity: 0; filter: blur(8px); transform: translateY(-8px); }
-.xp-name:hover > span + span, .xp-name:focus-visible > span + span { opacity: 1; filter: none; transform: none; }
+.xp-name { position: relative; outline: none; }
+.xp-name::after { content: attr(data-full); position: absolute; top: calc(100% + 4px); left: 0; color: var(--xp-muted); font: 0.85rem var(--xp-sans); font-style: normal; letter-spacing: 0.02em; white-space: nowrap; opacity: 0; transform: translateY(-4px); transition: opacity 400ms ease, transform 500ms var(--xp-spring); pointer-events: none; }
+.xp-name:hover::after, .xp-name:focus-visible::after { opacity: 1; transform: none; }
 .xp-clock { padding: 0; border: 0; color: inherit; background: none; font: inherit; cursor: pointer; border-bottom: 1px dotted transparent; transition: border-color 250ms ease; }
 .xp-clock:hover { border-bottom-color: currentColor; }
 .xp-offset { margin-left: 10px; color: var(--xp-lamp); opacity: 0; transition: opacity 400ms ease; }

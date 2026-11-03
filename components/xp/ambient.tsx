@@ -107,6 +107,7 @@ export function Ambient() {
         toast("Rewinding.")
       }
       lastY = y; lastT = t
+      if (y > window.innerHeight * 0.4) document.querySelector<HTMLElement>(".xp-light")?.style.setProperty("--lamp", "0")
       if (y < 200) { leftTop = t; sped = false; jumped = false; return }
       if (sped || jumped || location.pathname !== "/") return
       if (window.innerHeight + y < document.documentElement.scrollHeight - 4) return
@@ -128,11 +129,14 @@ export function Ambient() {
           eye.style.setProperty("--ex", `${(dx / d) * Math.min(3.5, d / 40)}px`)
           eye.style.setProperty("--ey", `${(dy / d) * Math.min(2, d / 60)}px`)
         }
+        // The lamp only lights while the hero fills most of the screen and the pointer isn't on the nav.
+        const light = document.querySelector<HTMLElement>(".xp-light")
         const hero = document.querySelector<HTMLElement>(".xp-hero")
-        if (hero) {
-          const r = hero.getBoundingClientRect()
-          hero.style.setProperty("--mx", `${event.clientX - r.left}px`)
-          hero.style.setProperty("--my", `${event.clientY - r.top}px`)
+        if (light) {
+          const on = hero && hero.getBoundingClientRect().bottom > window.innerHeight * 0.6 && event.clientY > 80
+          light.style.setProperty("--mx", `${event.clientX}px`)
+          light.style.setProperty("--my", `${event.clientY}px`)
+          light.style.setProperty("--lamp", on ? "1" : "0")
         }
       })
     }
@@ -207,6 +211,7 @@ export function Ambient() {
   return (
     <>
       <div className="xp-light" aria-hidden="true">
+        <b />
         {/* Dust in the light from above: a dozen motes drifting slowly; one glints now and then. */}
         {MOTES.map(([x, y, size, dur, delay], i) => (
           <i key={i} className={i === 4 ? "is-glint" : undefined} style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, animationDuration: `${dur}s`, animationDelay: `-${delay}s` }} />

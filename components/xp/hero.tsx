@@ -103,7 +103,7 @@ export function Hero() {
           <span className="xp-tip" tabIndex={0} role="img" aria-label="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." data-tip="Arizona skips daylight saving, so Tempe’s clock never jumps."><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} /></span>
           Tempe, Arizona{now && <> · <Offset label={`${now.part}, ${now.time}`} /></>}
         </p>
-        <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name" tabIndex={0}><span>Rithwik</span><span aria-hidden="true" lang="te">రిత్విక్</span></em>.</h1>
+        <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name" tabIndex={0} data-full="Sai Rithwik Reddy Chirra, in full.">Rithwik</em>.</h1>
         <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
         <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an <span className="xp-tip is-text" tabIndex={0} data-tip="X-MuTeST: explainable hate-speech detection in English, Hindi and Telugu.">AAAI 2026 paper</span>, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
         <Typed />
