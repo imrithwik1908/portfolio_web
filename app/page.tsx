@@ -5,7 +5,7 @@ import { Contact } from "@/components/xp/contact"
 import { EMAIL } from "@/components/xp/copy-email"
 import { Hero } from "@/components/xp/hero"
 import { Note } from "@/components/xp/note"
-import { Path } from "@/components/xp/path"
+import { Chapters } from "@/components/xp/chapters"
 import { ProjectDeck } from "@/components/xp/project-deck"
 import { Publication } from "@/components/xp/publication"
 import { SectionHead } from "@/components/xp/section-head"
@@ -48,9 +48,9 @@ export default function Home() {
       </section>
 
       <section id="path" className="xp-section" aria-label="Path">
-        <SectionHead index="03" label="Path" title="From Dharwad to Tempe, one question at a time." />
-        <Path />
-        <Note className="is-path">The line fills with your scroll position. Each question comes from my own notes on that work.</Note>
+        <SectionHead index="03" label="Chapters" title="From Dharwad to Tempe, one question at a time." />
+        <Chapters />
+        <Note className="is-path">Chapters advance on their own only while on screen and stop for good once you pick one. Each question comes from my own notes on that work.</Note>
       </section>
 
       <section id="toolkit" className="xp-section xp-section-tight" aria-label="Toolkit">
@@ -63,7 +63,7 @@ export default function Home() {
         <About />
       </section>
 
-      <section id="contact" className="xp-section" aria-label="Contact">
+      <section id="contact" className="xp-section xp-section-finale" aria-label="Contact">
         <Contact />
       </section>
     </main>

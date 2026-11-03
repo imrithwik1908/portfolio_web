@@ -29,7 +29,7 @@ export function Skills() {
 
   return (
     <div className="xp-kit">
-      <div className="xp-kit-text" onMouseLeave={() => setActive(null)}>
+      <div className={`xp-kit-text ${active ? "has-active" : ""}`} onMouseLeave={() => setActive(null)}>
         {lines.map((line) => (
           <p key={line.lead}>
             {line.lead}{" "}
@@ -50,8 +50,8 @@ export function Skills() {
         ))}
       </div>
 
-      <aside className="xp-kit-panel" aria-live="polite">
-        <p className="xp-kit-label">{active ? active[0] : "Where it was used"}</p>
+      <aside className={`xp-kit-panel ${active ? "is-active" : ""}`} aria-live="polite">
+        <p className="xp-kit-label" key={active?.[0] ?? "none"}>{active ? active[0] : "Where it was used"}</p>
         <ul>
           {projects.map((p) => {
             const on = !!active && active[1].includes(p.slug)
@@ -62,7 +62,7 @@ export function Skills() {
             )
           })}
         </ul>
-        <p className="xp-kit-hint">{!active ? "Point at any tool." : active[1].length ? `Used in ${active[1].length} of these.` : "Not in a project shown here."}</p>
+        <p className="xp-kit-hint">{!active ? "Point at, or tap, any tool." : active[1].length ? `Used in ${active[1].length} of ${projects.length} projects.` : "Not in a project shown here."}</p>
       </aside>
       <Note className="is-kit">A tool lights a project only if that project&apos;s repository lists it, so nothing here is claimed without a receipt.</Note>
     </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toggleCloser } from "@/components/xp/ambient"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
@@ -11,10 +11,30 @@ const watched = ["work", "research", "path", "toolkit", "about", "contact"]
 
 const sections = [
   ["work", "Work"],
-  ["path", "Path"],
+  ["path", "Story"],
   ["about", "About"],
   ["contact", "Contact"],
 ] as const
+
+// The R, written in the three languages of the X-MuTeST research. Rest the pointer on it
+// (or keep focus on it) and it slowly turns through English, Telugu and Hindi.
+const scripts = ["R", "ర", "र"]
+
+function Monogram() {
+  const [i, setI] = useState(0)
+  const timer = useRef<number>()
+  const start = () => {
+    window.clearInterval(timer.current)
+    timer.current = window.setInterval(() => setI((v) => (v + 1) % scripts.length), 1100)
+  }
+  const stop = () => { window.clearInterval(timer.current); setI(0) }
+  useEffect(() => () => window.clearInterval(timer.current), [])
+  return (
+    <Link href="/" className="xp-nav-home" aria-label="Sai Rithwik Reddy Chirra, home" onMouseEnter={start} onMouseLeave={stop} onFocus={start} onBlur={stop}>
+      <span key={i} aria-hidden="true">{scripts[i]}</span>
+    </Link>
+  )
+}
 
 export function XpNav() {
   const pathname = usePathname()
@@ -46,7 +66,7 @@ export function XpNav() {
 
   return (
     <nav className={`xp-nav ${raised ? "is-raised" : ""}`} aria-label="Main">
-      <Link href="/" className="xp-nav-home" aria-label="Sai Rithwik Reddy Chirra, home">R</Link>
+      <Monogram />
       <div className="xp-nav-links" ref={container as React.Ref<HTMLDivElement>}>
         <span className="xp-glider" style={style} aria-hidden="true" />
         {sections.map(([id, label]) => (
