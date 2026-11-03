@@ -6,9 +6,12 @@ import { useEffect, useState } from "react"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
 
+const watched = ["work", "experience", "education", "skills", "about", "contact"]
+
 const sections = [
   ["work", "Work"],
-  ["about", "About"],
+  ["experience", "Experience"],
+  ["skills", "Skills"],
   ["contact", "Contact"],
 ] as const
 
@@ -19,7 +22,7 @@ export function XpNav() {
   const { container, register, style } = useGlider<HTMLAnchorElement>(active)
 
   useEffect(() => {
-    if (pathname !== "/") return setActive(null)
+    if (pathname !== "/") return setActive(pathname.startsWith("/projects") ? "work" : null)
     const onScroll = () => setRaised(window.scrollY > 24)
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -27,9 +30,9 @@ export function XpNav() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => visible.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0))
       const best = Array.from(visible.entries()).sort((a, b) => b[1] - a[1])[0]
-      setActive(best && best[1] > 0 ? best[0] : null)
+      setActive(best && best[1] > 0 ? (best[0] === "education" ? "experience" : best[0] === "about" ? "skills" : best[0]) : null)
     }, { threshold: [0, 0.15, 0.4, 0.7], rootMargin: "-20% 0px -35% 0px" })
-    sections.forEach(([id]) => { const node = document.getElementById(id); if (node) observer.observe(node) })
+    watched.forEach((id) => { const node = document.getElementById(id); if (node) observer.observe(node) })
     return () => { observer.disconnect(); window.removeEventListener("scroll", onScroll) }
   }, [pathname])
 

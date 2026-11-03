@@ -1,34 +1,23 @@
 import type { Metadata } from "next"
-import { ProjectIndex, type ProjectPreview } from "@/components/project-index"
+import { ProjectCard } from "@/components/xp/project-card"
+import { SectionHead } from "@/components/xp/section-head"
 import { projects } from "@/lib/portfolio-data"
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Case studies in backend systems, data infrastructure, LLM evaluation, and multimodal machine learning.",
+  description: "LLM reliability, explainable NLP research, multimodal ML and a role-based web application.",
   alternates: { canonical: "/projects" },
 }
 
 export default function ProjectsPage() {
-  const projectPreviews: ProjectPreview[] = projects.map(({ slug, title, eyebrow, status, question, summary, image, imageFit, capabilities }) => ({
-    slug,
-    title,
-    eyebrow,
-    status,
-    question,
-    summary,
-    image,
-    imageFit,
-    capabilities,
-  }))
-
   return (
-    <main id="main-content" className="projects-page page-shell">
-      <header className="projects-hero">
-        <p className="section-kicker">Projects</p>
-        <h1>The details matter more than the launch copy.</h1>
-        <p>Four records of what I was trying to solve, how the implementation changed, and what the finished version still does not do.</p>
-      </header>
-      <ProjectIndex projects={projectPreviews} />
+    <main id="main-content" className="xp">
+      <section className="xp-section xp-page-top" aria-label="All projects">
+        <SectionHead index="01" label="Projects" title="Everything, with the decisions behind it." />
+        <div className="pc-gallery">
+          {projects.map((project, i) => <ProjectCard key={project.slug} project={project} index={i} total={projects.length} variant="grid" />)}
+        </div>
+      </section>
     </main>
   )
 }

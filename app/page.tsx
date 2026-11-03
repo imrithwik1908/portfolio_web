@@ -1,7 +1,12 @@
 import Link from "next/link"
-import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { CopyEmail, EMAIL } from "@/components/xp/copy-email"
+import { Education } from "@/components/xp/education"
+import { Experience } from "@/components/xp/experience"
 import { Hero } from "@/components/xp/hero"
+import { ProjectCard } from "@/components/xp/project-card"
+import { SectionHead } from "@/components/xp/section-head"
+import { Skills } from "@/components/xp/skills"
+import { projects } from "@/lib/portfolio-data"
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -16,49 +21,56 @@ const personSchema = {
   sameAs: ["https://github.com/imrithwik1908", "https://www.linkedin.com/in/sairithwikreddy"],
 }
 
-const otherWork = [
-  ["x-mutest", "X-MuTeST", "Explainable hate-speech detection in three languages"],
-  ["tensor-fusion", "Tensor Fusion", "Sentiment from language, voice and expression"],
-  ["course-catalog", "Course Catalog", "One course system for students and professors"],
-] as const
+const featured = ["agentguard", "x-mutest", "tensor-fusion"]
 
 export default function Home() {
+  const shown = projects.filter((p) => featured.includes(p.slug))
+
   return (
     <main id="main-content" className="xp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       <Hero />
 
-      <section id="work" className="xp-section xp-work" aria-labelledby="xp-work-title">
-        <header className="xp-intro">
-          <p className="xp-eyebrow">Selected work · 01</p>
-          <h2 id="xp-work-title">AgentGuard asks one question of every release: <em>what changed, and is it safe?</em></h2>
-          <p>It&apos;s a regression-testing and release gate for LLM applications. Its demo runs a support assistant twice on the same ten policy questions. The candidate reads more documents than the baseline. Pick a question to see what each version read and said, then run the release check.</p>
-        </header>
-        <AgentGuardBench />
-
-        <nav className="xp-more-work" aria-label="More projects">
-          <p className="xp-eyebrow">More work</p>
-          <ul>
-            {otherWork.map(([slug, title, line]) => (
-              <li key={slug}><Link href={`/projects/${slug}`}><strong>{title}</strong><span>{line}</span><i aria-hidden="true">→</i></Link></li>
-            ))}
-          </ul>
-        </nav>
+      <section id="work" className="xp-section" aria-label="Selected work">
+        <SectionHead index="01" label="Selected work" title="Things I've built, and what they taught me." aside={<Link href="/projects" className="xp-link">All {projects.length} projects →</Link>} />
+        <div className="pc-deck">
+          {shown.map((project, i) => <ProjectCard key={project.slug} project={project} index={i} total={shown.length} variant="stack" />)}
+        </div>
       </section>
 
-      <section id="about" className="xp-section xp-about" aria-labelledby="xp-about-title">
-        <p className="xp-eyebrow">About</p>
-        <h2 id="xp-about-title">Placeholder</h2>
-        <p className="xp-placeholder-note">This section is waiting on you: two or three personal stories, interests outside work, and any photos you&apos;d like to share. Nothing here will be written until you provide it.</p>
+      <section id="experience" className="xp-section" aria-label="Experience">
+        <SectionHead index="02" label="Experience" title="Where the work happened." />
+        <Experience />
       </section>
 
-      <section id="contact" className="xp-section xp-contact" aria-labelledby="xp-contact-title">
-        <h2 id="xp-contact-title">Say hello.</h2>
+      <section id="education" className="xp-section" aria-label="Education">
+        <SectionHead index="03" label="Education" title="Two degrees, two continents." />
+        <Education />
+      </section>
+
+      <section id="skills" className="xp-section" aria-label="Skills">
+        <SectionHead index="04" label="Skills" title="Tools, with receipts." />
+        <Skills />
+      </section>
+
+      <section id="about" className="xp-section" aria-label="About">
+        <SectionHead index="05" label="About" title="Outside the résumé." />
+        <div className="xp-about-slots">
+          <p className="xp-placeholder-note">Placeholder: a short personal story from you.</p>
+          <p className="xp-placeholder-note">Placeholder: interests outside work.</p>
+          <p className="xp-placeholder-note">Placeholder: photos you&apos;d like to share.</p>
+        </div>
+      </section>
+
+      <section id="contact" className="xp-section xp-contact" aria-label="Contact">
+        <p className="xp-head-label"><span>06</span>Contact</p>
+        <h2>Say hello.</h2>
         <p>Roles, research, or an interesting engineering problem are all good reasons to write.</p>
         <div className="xp-contact-actions">
           <CopyEmail className="xp-button" label={EMAIL} />
           <a className="xp-link" href="https://github.com/imrithwik1908" target="_blank" rel="noreferrer">GitHub ↗</a>
           <a className="xp-link" href="https://www.linkedin.com/in/sairithwikreddy" target="_blank" rel="noreferrer">LinkedIn ↗</a>
+          <a className="xp-link" href="https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing" target="_blank" rel="noreferrer">Résumé ↗</a>
         </div>
       </section>
     </main>
