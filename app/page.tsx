@@ -1,12 +1,7 @@
-import Image from "next/image"
 import Link from "next/link"
-import { SelectedWork } from "@/components/selected-work"
-import { Experience } from "@/components/Experience"
-import { Skills } from "@/components/Skills"
-import { Education } from "@/components/Education"
-import { ContactSection } from "@/components/ContactSection"
-
-const resumeUrl = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
+import { AgentGuardBench } from "@/components/xp/agentguard-bench"
+import { CopyEmail, EMAIL } from "@/components/xp/copy-email"
+import { Hero } from "@/components/xp/hero"
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -14,67 +9,58 @@ const personSchema = {
   name: "Sai Rithwik Reddy Chirra",
   alternateName: "Rithwik",
   url: "https://sairithwikreddy.vercel.app",
-  email: "mailto:sairithwikreddy.chirra@gmail.com",
+  email: `mailto:${EMAIL}`,
   jobTitle: "Computer Science graduate student",
-  alumniOf: [
-    { "@type": "CollegeOrUniversity", name: "Indian Institute of Information Technology Dharwad" },
-  ],
+  alumniOf: [{ "@type": "CollegeOrUniversity", name: "Indian Institute of Information Technology Dharwad" }],
   affiliation: { "@type": "CollegeOrUniversity", name: "Arizona State University" },
-  sameAs: [
-    "https://github.com/imrithwik1908",
-    "https://www.linkedin.com/in/sairithwikreddy",
-  ],
-  knowsAbout: ["backend systems", "data systems", "machine learning", "LLM evaluation"],
+  sameAs: ["https://github.com/imrithwik1908", "https://www.linkedin.com/in/sairithwikreddy"],
 }
+
+const otherWork = [
+  ["x-mutest", "X-MuTeST", "Explainable hate-speech detection in three languages"],
+  ["tensor-fusion", "Tensor Fusion", "Sentiment from language, voice and expression"],
+  ["course-catalog", "Course Catalog", "One course system for students and professors"],
+] as const
 
 export default function Home() {
   return (
-    <>
+    <main id="main-content" className="xp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
-      <main id="main-content">
-        <section className="hero page-shell" aria-labelledby="hero-title">
-          <div className="hero-name">
-            <p>Hi, I&apos;m</p>
-            <h1 id="hero-title" aria-label="Sai Rithwik Reddy Chirra"><span aria-hidden="true">Sai Rithwik</span><span aria-hidden="true">Reddy Chirra.</span></h1>
-          </div>
-          <div className="hero-intro">
-            <h2>I work on the software around data and AI.</h2>
-            <p>That usually means APIs, databases, evaluation, and ML systems. I like the point where a model stops being a notebook result and has to behave like ordinary software.</p>
-          </div>
-          <div className="hero-actions" aria-label="Primary links">
-            <Link href="/#work">Projects <span aria-hidden="true">↓</span></Link>
-            <a href={resumeUrl} target="_blank" rel="noreferrer">Resume <span aria-hidden="true">↗</span></a>
-            <a href="mailto:sairithwikreddy.chirra@gmail.com">Email <span aria-hidden="true">↗</span></a>
-          </div>
-          <div className="hero-context">
-            <p>M.S. Computer Science @ ASU <span aria-hidden="true">·</span> Tempe, Arizona <span aria-hidden="true">·</span> graduating May 2027</p>
-            <p>Currently working on reliability for LLM applications.</p>
-          </div>
-        </section>
+      <Hero />
 
-        <SelectedWork />
+      <section id="work" className="xp-section xp-work" aria-labelledby="xp-work-title">
+        <header className="xp-intro">
+          <p className="xp-eyebrow">Selected work · 01</p>
+          <h2 id="xp-work-title">AgentGuard asks one question of every release: <em>what changed, and is it safe?</em></h2>
+          <p>It&apos;s a regression-testing and release gate for LLM applications. Its demo runs a support assistant twice on the same ten policy questions. The candidate reads more documents than the baseline. Pick a question to see what each version read and said, then run the release check.</p>
+        </header>
+        <AgentGuardBench />
 
-        <section id="about" className="about-section page-shell" aria-labelledby="about-title">
-          <div className="about-photo-wrap">
-            <div className="about-photo"><Image src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" fill sizes="(max-width: 767px) 76vw, 26vw" className="object-cover" /></div>
-            <span>IIIT Dharwad · 2024</span>
-          </div>
-          <div className="about-copy">
-            <p className="section-kicker">A little context</p>
-            <h2 id="about-title">I&apos;m Rithwik.</h2>
-            <p className="about-lede">I came to computer science through machine learning, but the surrounding engineering kept pulling me in.</p>
-            <p>At IIT Indore, I worked on multilingual hate-speech detection in English, Hindi, and Telugu. Getting the label right was only half the problem; we also needed to inspect which words supported it. That work became X-MuTeST, an AAAI 2026 paper and rationale benchmark.</p>
-            <p>Blackcoffer was much less tidy. Customer trajectories and advertising data arrived as business questions first, modelling problems second. Working through that ambiguity made me care more about the data and assumptions behind an answer, not only the score at the end.</p>
-            <p>I&apos;m now doing my M.S. in Computer Science at ASU. Recent work has moved further into APIs, databases, background jobs, and evaluation systems. AgentGuard is the clearest example: what started as an LLM-testing idea became a system about traces, stored evidence, and release decisions.</p>
-            <div className="about-links"><Link href="/projects/x-mutest">Read the research <span aria-hidden="true">↗</span></Link><Link href="/projects/agentguard">Open AgentGuard <span aria-hidden="true">↗</span></Link></div>
-          </div>
-        </section>
+        <nav className="xp-more-work" aria-label="More projects">
+          <p className="xp-eyebrow">More work</p>
+          <ul>
+            {otherWork.map(([slug, title, line]) => (
+              <li key={slug}><Link href={`/projects/${slug}`}><strong>{title}</strong><span>{line}</span><i aria-hidden="true">→</i></Link></li>
+            ))}
+          </ul>
+        </nav>
+      </section>
 
-        <Experience />
-        <Skills />
-        <Education />
-      </main>
-      <ContactSection />
-    </>
+      <section id="about" className="xp-section xp-about" aria-labelledby="xp-about-title">
+        <p className="xp-eyebrow">About</p>
+        <h2 id="xp-about-title">Placeholder</h2>
+        <p className="xp-placeholder-note">This section is waiting on you: two or three personal stories, interests outside work, and any photos you&apos;d like to share. Nothing here will be written until you provide it.</p>
+      </section>
+
+      <section id="contact" className="xp-section xp-contact" aria-labelledby="xp-contact-title">
+        <h2 id="xp-contact-title">Say hello.</h2>
+        <p>Roles, research, or an interesting engineering problem are all good reasons to write.</p>
+        <div className="xp-contact-actions">
+          <CopyEmail className="xp-button" label={EMAIL} />
+          <a className="xp-link" href="https://github.com/imrithwik1908" target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a className="xp-link" href="https://www.linkedin.com/in/sairithwikreddy" target="_blank" rel="noreferrer">LinkedIn ↗</a>
+        </div>
+      </section>
+    </main>
   )
 }

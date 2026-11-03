@@ -1,0 +1,379 @@
+{
+ "source": "Recorded run of examples/alice-llm-app/alice_demo_result.json in github.com/imrithwik1908/AgentGuard (deterministic mock LLM). Answers regenerated from run_alice_demo.py and verified against the recording: 0 mismatches.",
+ "cases": [
+  {
+   "name": "opened laptop after a month",
+   "question": "I opened a laptop 32 days ago. Can I still get a refund?",
+   "expected": "repair",
+   "requiredDoc": "returns-laptop-exception",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "returns-laptop-exception",
+      "returns-standard",
+      "shipping-expedited"
+     ],
+     "answer": "After 14 days, support should offer warranty repair options instead of a refund.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "returns-laptop-exception",
+      "returns-standard",
+      "shipping-expedited",
+      "price-match",
+      "holiday-extension",
+      "marketing-laptop-sale"
+     ],
+     "answer": "The sale page says laptop accessories are discounted, but return eligibility still depends on the return policy. I would check the standard return window.",
+     "answerPassed": false,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "holiday return timing",
+   "question": "I bought headphones on December 12. Is January 20 still inside the return window?",
+   "expected": "January 31",
+   "requiredDoc": "holiday-extension",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "holiday-extension",
+      "warranty",
+      "returns-laptop-exception"
+     ],
+     "answer": "Holiday purchases can be returned until January 31 unless an exclusion applies.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "holiday-extension",
+      "marketing-laptop-sale",
+      "warranty",
+      "returns-laptop-exception",
+      "final-sale",
+      "price-match"
+     ],
+     "answer": "Holiday purchases can be returned until January 31 unless an exclusion applies.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "final sale defective exception",
+   "question": "A final-sale item arrived defective. Is any return allowed?",
+   "expected": "defective",
+   "requiredDoc": "final-sale",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "final-sale",
+      "holiday-extension",
+      "marketing-laptop-sale"
+     ],
+     "answer": "Final-sale items cannot be returned unless the item arrived defective.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "final-sale",
+      "holiday-extension",
+      "marketing-laptop-sale",
+      "returns-laptop-exception",
+      "price-match"
+     ],
+     "answer": "Final-sale items cannot be returned unless the item arrived defective.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "weekend shipping wording",
+   "question": "Does standard shipping count Saturday and Sunday?",
+   "expected": "Weekends do not count",
+   "requiredDoc": "shipping-basic",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "shipping-basic",
+      "returns-standard",
+      "shipping-expedited"
+     ],
+     "answer": "Standard shipping is measured in business days. Weekends do not count.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "shipping-basic",
+      "marketing-laptop-sale",
+      "returns-standard",
+      "shipping-expedited",
+      "holiday-extension",
+      "price-match"
+     ],
+     "answer": "Standard shipping is measured in business days. Weekends do not count.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "expedited weather delay",
+   "question": "Can bad weather delay two-day expedited shipping?",
+   "expected": "weather",
+   "requiredDoc": "shipping-expedited",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "shipping-expedited",
+      "returns-standard",
+      "holiday-extension"
+     ],
+     "answer": "Yes. Weather and carrier disruption can delay expedited shipping.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "shipping-expedited",
+      "holiday-extension",
+      "returns-standard",
+      "shipping-basic",
+      "price-match"
+     ],
+     "answer": "Yes. Weather and carrier disruption can delay expedited shipping.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "price match similar item",
+   "question": "Can support price-match a similar but not identical item?",
+   "expected": "identical",
+   "requiredDoc": "price-match",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "price-match",
+      "shipping-expedited",
+      "returns-standard"
+     ],
+     "answer": "A price match requires an identical item from an approved retailer within 7 days.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "price-match",
+      "holiday-extension",
+      "marketing-laptop-sale",
+      "shipping-expedited",
+      "returns-standard",
+      "returns-laptop-exception"
+     ],
+     "answer": "A price match requires an identical item from an approved retailer within 7 days.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "warranty accidental damage",
+   "question": "Does the one-year electronics warranty cover accidental damage?",
+   "expected": "excluded",
+   "requiredDoc": "warranty",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "warranty",
+      "returns-standard",
+      "returns-laptop-exception"
+     ],
+     "answer": "Accidental damage is excluded unless the customer bought protection.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "warranty",
+      "marketing-laptop-sale",
+      "returns-standard",
+      "returns-laptop-exception",
+      "final-sale",
+      "price-match"
+     ],
+     "answer": "Accidental damage is excluded unless the customer bought protection.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "holiday activated subscription",
+   "question": "Does the holiday return extension refund an activated subscription?",
+   "expected": "excludes activated subscriptions",
+   "requiredDoc": "holiday-extension",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "holiday-extension",
+      "returns-laptop-exception",
+      "marketing-laptop-sale"
+     ],
+     "answer": "The holiday extension excludes activated subscriptions, so it should not refund one.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "holiday-extension",
+      "marketing-laptop-sale",
+      "returns-laptop-exception",
+      "final-sale",
+      "warranty",
+      "price-match"
+     ],
+     "answer": "The holiday extension excludes activated subscriptions, so it should not refund one.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "unopened return window",
+   "question": "How long do I have to return an unopened speaker?",
+   "expected": "30 days",
+   "requiredDoc": "returns-standard",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "returns-standard",
+      "returns-laptop-exception",
+      "marketing-laptop-sale"
+     ],
+     "answer": "Unopened items can be returned within 30 days.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "marketing-laptop-sale",
+      "returns-standard",
+      "returns-laptop-exception"
+     ],
+     "answer": "Unopened items can be returned within 30 days.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    }
+   }
+  },
+  {
+   "name": "laptop marketing distractor",
+   "question": "The spring laptop sale mentions accessories. Does that change laptop return eligibility?",
+   "expected": "does not change",
+   "requiredDoc": "marketing-laptop-sale",
+   "versions": {
+    "baseline": {
+     "retrieved": [
+      "marketing-laptop-sale",
+      "returns-laptop-exception",
+      "final-sale"
+     ],
+     "answer": "Based on the retrieved policies: Laptop bags and accessories are discounted this spring. This marketing page does not change return eligibility. Opened laptops are eligible for refund only within 14 days. After 14 days, support should offer warranty repair options instead of promising a refund. Final-sale clearance items cannot be returned unless the item arrived defective.",
+     "answerPassed": true,
+     "retrievalPassed": true
+    },
+    "candidate": {
+     "retrieved": [
+      "marketing-laptop-sale",
+      "holiday-extension",
+      "returns-laptop-exception",
+      "final-sale",
+      "returns-standard",
+      "warranty"
+     ],
+     "answer": "The sale page says laptop accessories are discounted, but return eligibility still depends on the return policy. I would check the standard return window.",
+     "answerPassed": false,
+     "retrievalPassed": true
+    }
+   }
+  }
+ ],
+ "corpus": {
+  "returns-standard": {
+   "title": "Standard Returns",
+   "body": "Unopened items can be returned within 30 days. Opened electronics can be returned within 14 days when accessories and packaging are included."
+  },
+  "returns-laptop-exception": {
+   "title": "Laptop Return Exception",
+   "body": "Opened laptops are eligible for refund only within 14 days. After 14 days, support should offer warranty repair options instead of promising a refund."
+  },
+  "holiday-extension": {
+   "title": "Holiday Extension",
+   "body": "Purchases made between November 1 and December 24 can be returned until January 31. This extension excludes activated subscriptions and final-sale clearance."
+  },
+  "final-sale": {
+   "title": "Final Sale",
+   "body": "Final-sale clearance items cannot be returned unless the item arrived defective."
+  },
+  "shipping-basic": {
+   "title": "Shipping Basics",
+   "body": "Standard shipping takes 5 to 7 business days. Weekends do not count as business days."
+  },
+  "shipping-expedited": {
+   "title": "Expedited Shipping",
+   "body": "Expedited shipping usually takes 2 business days, but weather and carrier disruption can delay delivery."
+  },
+  "warranty": {
+   "title": "Warranty",
+   "body": "Electronics include a one-year limited warranty for manufacturing defects. Accidental damage is excluded unless the customer bought protection."
+  },
+  "price-match": {
+   "title": "Price Match",
+   "body": "A price match can be requested within 7 days when the lower price is from an approved retailer and the item is identical and in stock."
+  },
+  "marketing-laptop-sale": {
+   "title": "Spring Laptop Sale",
+   "body": "Laptop bags and accessories are discounted this spring. This marketing page does not change return eligibility."
+  }
+ },
+ "pairedCounts": {
+  "regressed": 2,
+  "improved": 0,
+  "unchanged": 18,
+  "not_comparable": 0
+ },
+ "release": {
+  "decision": "BLOCK",
+  "summary": "Candidate should not ship under the current release criteria.",
+  "reasons": [
+   "2 paired test cases regressed.",
+   "Candidate introduced 2 paired regressions; maximum allowed is 0.",
+   "Candidate average score changed by -0.0650, beyond allowed drop 0.0000."
+  ]
+ },
+ "configs": {
+  "baseline": {
+   "version": "baseline-balanced",
+   "name": "Baseline balanced retrieval",
+   "top_k": 3,
+   "answer_style": "careful",
+   "retrieval_bias": "policy"
+  },
+  "candidate": {
+   "version": "candidate-broader-context",
+   "name": "Candidate broader context",
+   "top_k": 6,
+   "answer_style": "direct",
+   "retrieval_bias": "recency"
+  }
+ }
+}

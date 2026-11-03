@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { Instrument_Sans, Instrument_Serif } from 'next/font/google'
 import './globals.css'
+import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
-import { SiteHeader } from '@/components/site-header'
+import { XpNav } from '@/components/xp/nav'
 import { PortfolioInteractions } from '@/components/portfolio-interactions'
 
 const geistSans = localFont({
@@ -14,6 +16,9 @@ const geistMono = localFont({
   src: './fonts/GeistMonoVF.woff',
   variable: '--font-geist-mono',
 })
+
+const instrumentSans = Instrument_Sans({ subsets: ['latin'], variable: '--font-instrument-sans' })
+const instrumentSerif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-instrument-serif' })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://sairithwikreddy.vercel.app'),
@@ -44,7 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} bg-background font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} bg-background font-sans`}>
         <ThemeProvider
           attribute="class"
           storageKey="portfolio-theme-v3"
@@ -53,7 +58,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="site-shell relative flex min-h-screen flex-col">
-            <SiteHeader />
+            <XpNav />
             <div className="flex-1">{children}</div>
             <PortfolioInteractions />
           </div>
