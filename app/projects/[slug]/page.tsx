@@ -1,11 +1,14 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
+import { Arrow } from "@/components/xp/arrow"
 import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
+import { RepoSection } from "@/components/xp/repo-section"
 import { getProject, projects } from "@/lib/portfolio-data"
 import { projectMeta } from "@/lib/project-highlights"
+import { repoDetail } from "@/lib/project-repo"
 
 type ProjectPageProps = { params: { slug: string } }
 
@@ -64,15 +67,15 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     <main id="main-content" className="xp xp-project" style={{ "--tint": meta.tint, "--accent": meta.accent } as React.CSSProperties}>
       <header className="xp-project-hero">
         <div className="xp-project-hero-text">
-          <Link href="/projects" className="xp-back">← All projects</Link>
+          <Link href="/projects" className="xp-back"><Arrow dir="left" /> All projects</Link>
           <p className="xp-head-label"><span>{String(index + 1).padStart(2, "0")}</span>{project.eyebrow} · {project.year}</p>
           <h1>{project.title}</h1>
           <p className="xp-project-question">{project.question}</p>
           <p className="xp-project-summary">{project.summary}</p>
           <div className="xp-project-links">
-            <a href={project.github} target="_blank" rel="noreferrer" className="xp-button">Source code ↗</a>
-            {project.paper && <a href={project.paper} target="_blank" rel="noreferrer" className="xp-link">Read the paper ↗</a>}
-            {project.live && <a href={project.live} target="_blank" rel="noreferrer" className="xp-link">Live app ↗</a>}
+            <a href={project.github} target="_blank" rel="noreferrer" className="xp-button">Source code <Arrow dir="out" /></a>
+            {project.paper && <a href={project.paper} target="_blank" rel="noreferrer" className="xp-link">Read the paper <Arrow dir="out" /></a>}
+            {project.live && <a href={project.live} target="_blank" rel="noreferrer" className="xp-link">Live app <Arrow dir="out" /></a>}
           </div>
         </div>
         <div className="xp-project-visual pc is-live"><ProjectVisual slug={project.slug} /></div>
@@ -93,6 +96,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         </section>
       )}
 
+      <RepoSection detail={repoDetail[project.slug]} github={project.github} />
+
       <article className="xp-chapters">
         {chapters.map((c, i) => (
           <section key={c.id} className="xp-chapter" aria-labelledby={`ch-${c.id}`}>
@@ -108,7 +113,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       <Link href={`/projects/${next.slug}`} className="xp-next" style={{ "--tint": projectMeta[next.slug].tint, "--accent": projectMeta[next.slug].accent } as React.CSSProperties}>
         <span className="xp-head-label">Next project</span>
         <strong>{next.title}</strong>
-        <span>{projectMeta[next.slug].tagline} →</span>
+        <span>{projectMeta[next.slug].tagline} <Arrow /></span>
       </Link>
     </main>
   )

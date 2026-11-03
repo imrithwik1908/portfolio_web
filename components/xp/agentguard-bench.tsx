@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { Arrow } from "@/components/xp/arrow"
 import { useEffect, useRef, useState } from "react"
 import demo from "@/lib/agentguard-demo.json"
 import { useGlider } from "@/components/xp/use-glider"
@@ -200,8 +201,8 @@ export function AgentGuardBench() {
 
       <p className="xp-source">
         Recorded output of the AgentGuard repository&apos;s demo app (<code>examples/alice-llm-app</code>, deterministic mock model). Every answer above is regenerated from that code and matches the recording.{" "}
-        <Link href="/projects/agentguard" className="xp-link">Case study →</Link>{" "}
-        <a href="https://github.com/imrithwik1908/AgentGuard" target="_blank" rel="noreferrer" className="xp-link">Source ↗</a>
+        <Link href="/projects/agentguard" className="xp-link">Case study <Arrow /></Link>{" "}
+        <a href="https://github.com/imrithwik1908/AgentGuard" target="_blank" rel="noreferrer" className="xp-link">Source <Arrow dir="out" /></a>
       </p>
     </div>
   )
