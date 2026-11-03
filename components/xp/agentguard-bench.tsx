@@ -67,6 +67,7 @@ export function AgentGuardBench() {
   const [phase, setPhase] = useState<"idle" | "running" | "done">("idle")
   const [scanned, setScanned] = useState(0)
   const [mobileSide, setMobileSide] = useState<Side>("candidate")
+  const [runs, setRuns] = useState(0)
   const timer = useRef<number>()
   const list = useGlider<HTMLButtonElement>(String(selected))
   const toggle = useGlider<HTMLButtonElement>(mobileSide)
@@ -81,6 +82,7 @@ export function AgentGuardBench() {
 
   const runCheck = () => {
     window.clearTimeout(timer.current)
+    setRuns((n) => n + 1)
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     setSeen(new Set())
     if (reduce) {
@@ -196,6 +198,7 @@ export function AgentGuardBench() {
         <p className="xp-insight">
           Both regressions have one cause: the candidate&apos;s recency weighting pulled the spring-sale marketing page into context, and its direct answer style leaned on it. The baseline never retrieved that page for the refund question.
           <button type="button" className="xp-link" onClick={runCheck}>Run it again</button>
+          {runs >= 3 && <span className="xp-determinism">Run {runs}. Same inputs, same verdict, every time. A release gate that changed its mind would be the bug.</span>}
         </p>
       )}
 

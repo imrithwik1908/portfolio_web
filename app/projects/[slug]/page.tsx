@@ -5,6 +5,8 @@ import { Arrow } from "@/components/xp/arrow"
 import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
+import { Pipeline } from "@/components/xp/pipeline"
+import { ProjectReader } from "@/components/xp/project-reader"
 import { RepoSection } from "@/components/xp/repo-section"
 import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
@@ -44,6 +46,42 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const index = projects.findIndex((p) => p.slug === project.slug)
   const next = projects[(index + 1) % projects.length]
 
+  // The first sentence of a passage, for the brief.
+  const lead = (text: string) => (text.match(/^.*?[.!?](\s|$)/)?.[0] ?? text).trim()
+  const facts = repoDetail[project.slug].facts
+
+  const brief = (
+    <>
+      <section className="xp-brief-block">
+        <p className="xp-brief-label">The question</p>
+        <p className="xp-brief-lede">{project.question} {lead(project.problem[0])}</p>
+      </section>
+      <section className="xp-brief-block">
+        <p className="xp-brief-label">The pipeline</p>
+        <Pipeline nodes={project.architecture} label={`${project.title} architecture`} />
+      </section>
+      <section className="xp-brief-block">
+        <p className="xp-brief-label">Decisions that mattered</p>
+        <ol className="xp-brief-decisions">{project.decisions.map((d) => <li key={d.title}><strong>{d.title}</strong>{d.body}</li>)}</ol>
+      </section>
+      <section className="xp-brief-grid">
+        <div>
+          <p className="xp-brief-label">What it does today</p>
+          <ul>{project.results.map((r) => <li key={r}>{r}</li>)}</ul>
+        </div>
+        <div>
+          <p className="xp-brief-label">By the numbers</p>
+          <dl>{facts.map((f) => <div key={f.label}><dt>{f.value}</dt><dd>{f.label}</dd></div>)}</dl>
+        </div>
+      </section>
+      <section className="xp-brief-block">
+        <p className="xp-brief-label">Known limits</p>
+        <ul className="xp-brief-limits">{project.limitations.slice(0, 3).map((l) => <li key={l}>{l}</li>)}</ul>
+        <p className="xp-brief-stack">{project.stack.join(" · ")}</p>
+      </section>
+    </>
+  )
+
   const chapters: { id: string; title: string; body: React.ReactNode }[] = [
     { id: "problem", title: labels.opening, body: project.problem.map((p) => <p key={p}>{p}</p>) },
     {
@@ -52,7 +90,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       body: (
         <>
           {project.system.map((p) => <p key={p}>{p}</p>)}
-          <ol className="xp-flow">{project.architecture.map((n, i) => <li key={n.label} style={{ "--i": i } as React.CSSProperties}><span>{String(i + 1).padStart(2, "0")}</span><strong>{n.label}</strong><em>{n.detail}</em></li>)}</ol>
+          <Pipeline nodes={project.architecture} label={`${project.title} architecture`} />
           {figure && <figure className="xp-figure"><div><Image src={figure.src} alt={figure.alt} fill sizes="(max-width: 767px) 100vw, 760px" /></div><figcaption>{figure.caption}</figcaption></figure>}
         </>
       ),
@@ -88,6 +126,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <div><dt>Built with</dt><dd>{project.stack.join(", ")}</dd></div>
       </dl>
 
+      <ProjectReader brief={brief}>
       <section className="xp-inshort" aria-label="In short">
         <div><p>The problem</p><span>{project.problem[0]}</span></div>
         <div><p>How it works</p><span>{project.system[0]}</span></div>
@@ -119,6 +158,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         ))}
       </article>
       </div>
+
+      </ProjectReader>
 
       <Link href={`/projects/${next.slug}`} className="xp-next" style={{ "--tint": projectMeta[next.slug].tint, "--accent": projectMeta[next.slug].accent } as React.CSSProperties}>
         <span className="xp-head-label">Next project</span>

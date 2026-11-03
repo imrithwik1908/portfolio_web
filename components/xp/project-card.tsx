@@ -65,10 +65,10 @@ export function ProjectCard({ project, index, total, variant }: { project: Proje
       {variant === "stack" && (
         <>
           <button type="button" className="pc-beneath-toggle" aria-pressed={beneath} onClick={() => setBeneath((v) => !v)}>
-            <span className="xp-eye" aria-hidden="true" />{beneath ? "Back to the surface" : "How it works"}
+            <span className="xp-eye" aria-hidden="true" />{beneath ? "Back" : "How it works"}
           </button>
           <div className={`pc-beneath ${beneath ? "is-open" : ""}`} aria-hidden={!beneath}>
-            <p className="pc-beneath-label">Beneath {project.title}</p>
+            <p className="pc-beneath-label">How {project.title} is wired</p>
             <ol>
               {project.architecture.map((node, i) => (
                 <li key={node.label} style={{ "--i": i } as React.CSSProperties}><span>{String(i + 1).padStart(2, "0")}</span><strong>{node.label}</strong><em>{node.detail}</em></li>

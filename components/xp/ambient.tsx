@@ -18,13 +18,13 @@ export function Ambient() {
     const onVisibility = () => {
       if (document.hidden) {
         title = document.title
-        document.title = "The lights are still on."
+        document.title = "[1]+ Stopped — fg to resume"
       } else document.title = title
     }
     document.addEventListener("visibilitychange", onVisibility)
 
     console.info(
-      "%cCase file #001%c\nSubject opened the developer tools.\nMotive: curiosity. Verdict: welcome.\n\nA few more things are hidden on the page. One answers to a single key,\none waits until the credits have rolled, and one lives past the edge of the map.",
+      "%cHi, fellow console reader.%c\nThis site is Next.js with no animation libraries, no trackers and no cookies.\nEvery number on it comes from a repository, a notebook output or my résumé.\n\nA few things are hidden. One answers to a single key, one waits until the credits\nhave rolled, one lives past the edge of the map, and Cmd/Ctrl+P does something useful.",
       "font: 600 14px/1.8 Georgia, serif; color: #e9c27b",
       "font: 12px/1.6 ui-monospace, monospace; color: #b4ada1",
     )

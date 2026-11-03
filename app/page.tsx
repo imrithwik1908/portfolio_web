@@ -49,7 +49,7 @@ export default function Home() {
       </section>
 
       <section id="path" className="xp-section" aria-label="Path">
-        <SectionHead index="03" label="Experience" title="Where I&apos;ve worked, and what each place asked of me." />
+        <SectionHead index="03" label="Experience" title="Where I&apos;ve worked." />
         <Chapters />
         <Note className="is-path">Entries advance on their own only while on screen and stop for good once you pick one. Results are the numbers I report on my résumé.</Note>
       </section>

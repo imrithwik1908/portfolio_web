@@ -10,7 +10,7 @@ export default function NotFound() {
           <p className="xp-head-label"><span>404</span>Off the map</p>
           <h1>You&apos;ve walked into the fog.</h1>
           <p className="xp-lost-text">This page doesn&apos;t exist, or I can&apos;t see it from here. It&apos;s the same problem my chess bot has. Move across the board to clear it, or head back.</p>
-          <Link href="/" className="xp-button">Back to the light <Arrow /></Link>
+          <Link href="/" className="xp-button">Back to the homepage <Arrow /></Link>
         </div>
         <FogBoard />
       </section>

@@ -5,14 +5,25 @@ import { useEffect, useState } from "react"
 // A sticky contents rail for long project pages; the current chapter lights up as you read.
 export function Toc({ items }: { items: { id: string; title: string }[] }) {
   const [active, setActive] = useState(items[0]?.id)
+  // The current chapter is the last heading that has passed a line a third of the way down the screen.
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
-      if (hit) setActive(hit.target.id.replace("ch-", ""))
-    }, { rootMargin: "-20% 0px -65% 0px" })
-    items.forEach((item) => { const node = document.getElementById(`ch-${item.id}`); if (node) observer.observe(node) })
-    return () => observer.disconnect()
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const line = window.innerHeight * 0.33
+      let current = items[0]?.id
+      for (const item of items) {
+        const node = document.getElementById(`ch-${item.id}`)
+        if (node && node.getBoundingClientRect().top <= line) current = item.id
+      }
+      setActive(current)
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll) }
   }, [items])
+
   return (
     <nav className="xp-toc" aria-label="On this page">
       <p>On this page</p>

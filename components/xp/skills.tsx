@@ -69,7 +69,7 @@ export function Skills() {
         </ul>
         <p className="xp-kit-hint">{!active ? "Point at, or tap, any tool." : active.in.length ? `Used in ${active.in.length} of ${projects.length} projects.` : active.where ?? "Not in a project shown here."}</p>
       </aside>
-      <Note className="is-kit">A tool lights a project only if that project&apos;s repository lists it, so nothing here is claimed without a receipt.</Note>
+      <Note className="is-kit">A tool lights a project only if that project&apos;s repository lists it, so every claim here has code behind it.</Note>
     </div>
   )
 }
