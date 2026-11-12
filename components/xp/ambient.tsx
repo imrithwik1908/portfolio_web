@@ -187,8 +187,8 @@ export function Ambient() {
 
     console.info(
       "%cHi, fellow console reader.%c\nThis site is Next.js with no animation libraries, no trackers and no cookies.\nEvery number on it comes from a repository, a notebook output or my résumé.\n\nA few things are hidden. One answers to a single key, one waits until the credits\nhave rolled, one lives past the edge of the map, and Cmd/Ctrl+P does something useful.\nOr just type: rithwik",
-      "font: 600 14px/1.8 Georgia, serif; color: #e9c27b",
-      "font: 12px/1.6 ui-monospace, monospace; color: #b4ada1",
+      "font: 600 14px/1.8 Georgia, serif; color: #c8f55a",
+      "font: 12px/1.6 ui-monospace, monospace; color: #b3b1bd",
     )
 
     return () => {

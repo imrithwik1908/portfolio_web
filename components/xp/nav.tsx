@@ -11,6 +11,7 @@ const watched = ["work", "research", "path", "education", "toolkit", "about", "c
 
 const sections = [
   ["work", "Work"],
+  ["projects", "Projects"],
   ["path", "Career"],
   ["about", "About"],
   ["contact", "Contact"],
@@ -57,7 +58,7 @@ export function XpNav() {
   const { container, register, style } = useGlider<HTMLAnchorElement>(active)
 
   useEffect(() => {
-    if (pathname !== "/") return setActive(pathname.startsWith("/projects") ? "work" : null)
+    if (pathname !== "/") return setActive(pathname.startsWith("/projects") ? "projects" : null)
     const onScroll = () => setRaised(window.scrollY > 24)
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -77,7 +78,7 @@ export function XpNav() {
       <div className="xp-nav-links" ref={container as React.Ref<HTMLDivElement>}>
         <span className="xp-glider" style={style} aria-hidden="true" />
         {sections.map(([id, label]) => (
-          <Link key={id} href={`/#${id}`} ref={register(id)} className={active === id ? "is-active" : undefined} aria-current={active === id ? "true" : undefined}>{label}</Link>
+          <Link key={id} href={id === "projects" ? "/projects" : `/#${id}`} ref={register(id)} className={active === id ? "is-active" : undefined} aria-current={active === id ? "true" : undefined}>{label}</Link>
         ))}
       </div>
       <span className="xp-nav-rule" aria-hidden="true" />

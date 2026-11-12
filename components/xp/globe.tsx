@@ -65,38 +65,38 @@ export function Globe() {
 
       // Atmosphere
       const halo = ctx.createRadialGradient(size / 2, size / 2, R * 0.9, size / 2, size / 2, R * 1.08)
-      halo.addColorStop(0, "rgba(233,194,123,0.18)"); halo.addColorStop(1, "rgba(233,194,123,0)")
+      halo.addColorStop(0, "rgba(200, 245, 90,0.18)"); halo.addColorStop(1, "rgba(200, 245, 90,0)")
       ctx.fillStyle = halo; ctx.fillRect(0, 0, size, size)
 
       // Ocean, lit from the upper left
       const ocean = ctx.createRadialGradient(size * 0.36, size * 0.32, R * 0.1, size / 2, size / 2, R)
-      ocean.addColorStop(0, "#2a2620"); ocean.addColorStop(1, "#0f0e0c")
+      ocean.addColorStop(0, "#1c1c26"); ocean.addColorStop(1, "#0b0b10")
       ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = ocean; ctx.fill()
 
-      ctx.beginPath(); path(geoGraticule10()); ctx.strokeStyle = "rgba(235,230,220,0.05)"; ctx.lineWidth = 0.6; ctx.stroke()
-      ctx.beginPath(); path(land); ctx.fillStyle = "#5b5040"; ctx.fill()
-      ctx.strokeStyle = "rgba(233,194,123,0.25)"; ctx.lineWidth = 0.5; ctx.stroke()
+      ctx.beginPath(); path(geoGraticule10()); ctx.strokeStyle = "rgba(238, 237, 242,0.05)"; ctx.lineWidth = 0.6; ctx.stroke()
+      ctx.beginPath(); path(land); ctx.fillStyle = "#3f3f52"; ctx.fill()
+      ctx.strokeStyle = "rgba(200, 245, 90,0.25)"; ctx.lineWidth = 0.5; ctx.stroke()
 
       // The real night side right now
       const [sl, sp] = subsolar(new Date())
-      ctx.beginPath(); path(geoCircle().center([sl + 180, -sp]).radius(90)()); ctx.fillStyle = "rgba(5,5,4,0.55)"; ctx.fill()
+      ctx.beginPath(); path(geoCircle().center([sl + 180, -sp]).radius(90)()); ctx.fillStyle = "rgba(4,4,8,0.6)"; ctx.fill()
 
       // Route with a light travelling along it
       const arc = { type: "LineString" as const, coordinates: Array.from({ length: 65 }, (_, i) => route(i / 64)) }
-      ctx.beginPath(); path(arc); ctx.strokeStyle = "rgba(233,194,123,0.55)"; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([])
+      ctx.beginPath(); path(arc); ctx.strokeStyle = "rgba(200, 245, 90,0.55)"; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([])
       const p = route(((t / 360) % 1))
       const center: [number, number] = [-rot.current[0], -rot.current[1]]
       const dot = (c: [number, number], r: number, color: string) => {
         if (geoDistance(c, center) > Math.PI / 2) return
         const [x, y] = proj(c)!
         const g = ctx.createRadialGradient(x, y, 0, x, y, r * 4)
-        g.addColorStop(0, color); g.addColorStop(1, "rgba(233,194,123,0)")
+        g.addColorStop(0, color); g.addColorStop(1, "rgba(200, 245, 90,0)")
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2); ctx.fill()
-        ctx.fillStyle = "#fff4dc"; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
+        ctx.fillStyle = "#f4ffd9"; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
       }
-      dot(p, 1.6, "rgba(233,194,123,0.9)")
-      dot(DHARWAD, 2.4, "rgba(233,194,123,0.8)")
-      dot(TEMPE, 2.4, "rgba(233,194,123,0.8)")
+      dot(p, 1.6, "rgba(200, 245, 90,0.9)")
+      dot(DHARWAD, 2.4, "rgba(200, 245, 90,0.8)")
+      dot(TEMPE, 2.4, "rgba(200, 245, 90,0.8)")
 
       // Rim shading for depth
       const rim = ctx.createRadialGradient(size / 2, size / 2, R * 0.6, size / 2, size / 2, R)
