@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useRef, useEffect, useState } from "react"
 
 // The room: a still light from above, a vignette and film grain. Plus a few quiet details for
 // people who wander: X shows how things were built, the tab speaks when you leave, and the
@@ -187,7 +187,7 @@ export function Ambient() {
 
     console.info(
       "%cHi, fellow console reader.%c\nThis site is Next.js with no animation libraries, no trackers and no cookies.\nEvery number on it comes from a repository, a notebook output or my résumé.\n\nA few things are hidden. One answers to a single key, one waits until the credits\nhave rolled, one lives past the edge of the map, and Cmd/Ctrl+P does something useful.\nOr just type: rithwik",
-      "font: 600 14px/1.8 Georgia, serif; color: #c8f55a",
+      "font: 600 14px/1.8 Georgia, serif; color: #ff7a59",
       "font: 12px/1.6 ui-monospace, monospace; color: #b3b1bd",
     )
 
@@ -212,6 +212,7 @@ export function Ambient() {
     <>
       <div className="xp-light" aria-hidden="true">
         <b />
+        <s className="xp-blob is-a" /><s className="xp-blob is-b" /><s className="xp-blob is-c" />
         {/* Dust in the light from above: a dozen motes drifting slowly; one glints now and then. */}
         {MOTES.map(([x, y, size, dur, delay], i) => (
           <i key={i} className={i === 4 ? "is-glint" : undefined} style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, animationDuration: `${dur}s`, animationDelay: `-${delay}s` }} />
@@ -219,6 +220,7 @@ export function Ambient() {
       </div>
       <div className="xp-grain" aria-hidden="true" />
       <Timecode />
+      <Cursor />
       <div className={`xp-fog-roll ${fog ? "is-on" : ""}`} aria-hidden="true" />
       <p className={`xp-toast ${note ? "is-on" : ""}`} role="status" aria-live="polite">{note}</p>
       {help && (
@@ -275,4 +277,41 @@ export function tempeNow() {
   const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: "America/Phoenix" }).format(date)) % 24
   const part = hour < 5 ? "late night" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : hour < 21 ? "evening" : "night"
   return { time, day: hour >= 6 && hour < 19, part }
+}
+
+// A coral dot that sits on the pointer and a mint ring that follows it a beat behind.
+// The ring swells over anything clickable and squeezes on press. Mouse and trackpad only.
+function Cursor() {
+  const dot = useRef<HTMLDivElement>(null)
+  const ring = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    document.documentElement.classList.add("has-cursor")
+    let x = -100, y = -100, rx = -100, ry = -100, frame = 0
+    const move = (e: PointerEvent) => {
+      x = e.clientX; y = e.clientY
+      const hot = (e.target as Element | null)?.closest?.("a, button, label, summary, [role=button], input, canvas")
+      ring.current?.classList.toggle("is-hot", !!hot)
+      dot.current?.classList.add("is-on"); ring.current?.classList.add("is-on")
+    }
+    const leave = () => { dot.current?.classList.remove("is-on"); ring.current?.classList.remove("is-on") }
+    const press = (on: boolean) => () => ring.current?.classList.toggle("is-down", on)
+    const down = press(true), up = press(false)
+    const tick = () => {
+      frame = requestAnimationFrame(tick)
+      rx += (x - rx) * 0.18; ry += (y - ry) * 0.18
+      if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`
+      if (ring.current) ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`
+    }
+    tick()
+    window.addEventListener("pointermove", move, { passive: true })
+    document.addEventListener("pointerleave", leave)
+    window.addEventListener("pointerdown", down); window.addEventListener("pointerup", up)
+    return () => {
+      cancelAnimationFrame(frame); document.documentElement.classList.remove("has-cursor")
+      window.removeEventListener("pointermove", move); document.removeEventListener("pointerleave", leave)
+      window.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up)
+    }
+  }, [])
+  return <><div ref={ring} className="xp-cursor-ring" aria-hidden="true" /><div ref={dot} className="xp-cursor-dot" aria-hidden="true" /></>
 }
