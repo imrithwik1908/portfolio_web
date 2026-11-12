@@ -23,6 +23,19 @@ function Letterbox() {
   return <div className="xp-letterbox is-opening" aria-hidden="true"><span /><span /></div>
 }
 
+// A slowly turning ring of text on the portrait's corner; it speeds up when you point at it.
+function Badge() {
+  const text = "OPEN TO ML ROLES · GRADUATING MAY 2027 · "
+  return (
+    <svg className="xp-badge" viewBox="0 0 120 120" role="img" aria-label="Open to ML roles, graduating May 2027">
+      <defs><path id="xp-badge-ring" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0" /></defs>
+      <circle cx="60" cy="60" r="58" />
+      <text><textPath href="#xp-badge-ring" textLength="289">{text}</textPath></text>
+      <circle className="xp-badge-dot" cx="60" cy="60" r="4" />
+    </svg>
+  )
+}
+
 function Portrait() {
   const [proof, setProof] = useState(false)
   useEffect(() => {
@@ -31,12 +44,15 @@ function Portrait() {
     return () => window.clearTimeout(id)
   }, [proof])
   return (
+    <div className="xp-portrait-wrap">
+    <Badge />
     <figure className="xp-portrait" onDoubleClick={() => setProof(true)}>
       {/* A plain image: no optimizer round-trip and no filters, just the photograph. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" width={1200} height={1600} loading="eager" fetchPriority="high" decoding="async" />
       <figcaption key={String(proof)}>{proof ? "Yes, that\u2019s really me." : "IIIT Dharwad, 2024"}</figcaption>
     </figure>
+    </div>
   )
 }
 

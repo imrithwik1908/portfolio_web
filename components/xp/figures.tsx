@@ -238,3 +238,25 @@ export function ChapterFigures({ slug, chapter }: { slug: string; chapter: strin
     </>
   )
 }
+
+// A strip of film along the top of the projects index: one frame per figure, each opening the
+// chapter it belongs to.
+const NAMES: Record<string, string> = { agentguard: "AgentGuard", "x-mutest": "X-MuTeST", "tensor-fusion": "Tensor Fusion", "course-catalog": "Course Catalog" }
+
+export function FilmStrip() {
+  const frames = Object.entries(figures).flatMap(([slug, list]) => list.map((fig) => ({ slug, fig })))
+  return (
+    <nav className="xp-strip" aria-label="Figures from every project">
+      <ol>
+        {frames.map(({ slug, fig }, i) => (
+          <li key={fig.title} style={{ "--i": i } as React.CSSProperties}>
+            <a href={`/projects/${slug}#ch-${fig.chapter}`}>
+              <span className="xp-strip-frame"><FigureBody fig={fig} /></span>
+              <span className="xp-strip-cap"><em>{NAMES[slug]}</em>{fig.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { FilmStrip } from "@/components/xp/figures"
 import { ProjectCard } from "@/components/xp/project-card"
 import { SectionHead } from "@/components/xp/section-head"
 import { projects } from "@/lib/portfolio-data"
@@ -14,6 +15,7 @@ export default function ProjectsPage() {
     <main id="main-content" className="xp">
       <section className="xp-section xp-page-top" aria-label="All projects">
         <SectionHead index="01" label="Projects" title="Everything, with the decisions behind it." />
+        <FilmStrip />
         <div className="pc-gallery">
           {projects.map((project, i) => <ProjectCard key={project.slug} project={project} index={i} total={projects.length} variant="grid" />)}
         </div>
