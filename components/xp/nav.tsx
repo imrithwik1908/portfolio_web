@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { toast, toggleCloser } from "@/components/xp/ambient"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
+import { PALETTES } from "@/components/xp/palette"
 
 const watched = ["work", "research", "path", "education", "toolkit", "about", "contact"]
 
@@ -41,6 +42,29 @@ function Monogram() {
     <Link href="/" className="xp-nav-home" aria-label="Sai Rithwik Reddy Chirra, home" onClick={onClick} onMouseEnter={start} onMouseLeave={stop} onFocus={start} onBlur={stop}>
       <span key={i} aria-hidden="true">{scripts[i]}</span>
     </Link>
+  )
+}
+
+// One dot, four skies. Click to change the palette; the site remembers it on this device.
+function Swatch() {
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    let saved: string | null = null
+    try { saved = localStorage.getItem("xp-palette") } catch {}
+    const k = Math.max(0, PALETTES.findIndex((p) => p.id === saved))
+    setI(k); document.documentElement.dataset.palette = PALETTES[k].id
+  }, [])
+  const next = () => {
+    const k = (i + 1) % PALETTES.length
+    setI(k); document.documentElement.dataset.palette = PALETTES[k].id
+    try { localStorage.setItem("xp-palette", PALETTES[k].id) } catch {}
+    toast(`Palette: ${PALETTES[k].name}`)
+  }
+  const after = PALETTES[(i + 1) % PALETTES.length].name
+  return (
+    <button type="button" className="xp-swatch" onClick={next} title={`Change colours (next: ${after})`} data-cursor={after}>
+      <i aria-hidden="true" /><span className="sr-only">Change colours. Now {PALETTES[i].name}, next {after}.</span>
+    </button>
   )
 }
 
@@ -83,6 +107,7 @@ export function XpNav() {
       </div>
       <span className="xp-nav-rule" aria-hidden="true" />
       <CopyEmail className="xp-nav-copy" />
+      <Swatch />
       <button type="button" className={`xp-nav-eye ${closer ? "is-on" : ""}`} aria-pressed={closer} onClick={toggleCloser} title="Look closer (X)">
         <span className="xp-eye" aria-hidden="true" /><span className="sr-only">Look closer: show how each part was built</span>
       </button>

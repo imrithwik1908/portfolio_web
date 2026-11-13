@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
+import { currentPalette } from "@/components/xp/palette"
 
 // The room: a still light from above, a vignette and film grain. Plus a few quiet details for
 // people who wander: X shows how things were built, the tab speaks when you leave, and the
@@ -279,8 +280,9 @@ export function tempeNow() {
   return { time, day: hour >= 6 && hour < 19, part }
 }
 
-// Deep space: three layers of stars that drift at different speeds and slide a little as you scroll,
-// a few that twinkle, and now and then a shooting star. One canvas, paused when the tab is hidden.
+// Deep space: three layers of stars drifting at different speeds, sliding as you scroll and leaning
+// slightly toward the pointer. A few twinkle, a shooting star crosses now and then, and the stars
+// nearest the pointer join into a faint constellation. One canvas, paused when the tab is hidden.
 function Stars() {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -288,82 +290,67 @@ function Stars() {
     if (!el) return
     const ctx = el.getContext("2d")!
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const fine = window.matchMedia("(pointer: fine)").matches
     let w = 0, h = 0, frame = 0, t = 0
     let rand = 7
     const rnd = () => ((rand = (rand * 16807) % 2147483647) / 2147483647)
-    type Star = { x: number; y: number; r: number; z: number; tw: number; hue: string }
+    type Star = { x: number; y: number; r: number; z: number; tw: number; tone: number; px: number; py: number }
     let stars: Star[] = []
-    const hues = ["232,236,244", "232,236,244", "232,236,244", "156,196,255", "244,183,106"]
     const resize = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1)
       w = window.innerWidth; h = window.innerHeight
       el.width = w * dpr; el.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       rand = 7
-      const n = Math.round((w * h) / 5200)
+      const n = Math.round((w * h) / 4800)
       stars = Array.from({ length: n }, () => {
-        const z = rnd() < 0.7 ? 0.25 : rnd() < 0.8 ? 0.55 : 1
-        return { x: rnd() * w, y: rnd() * h, r: 0.35 + z * 0.9 * rnd() + (z === 1 ? 0.3 : 0), z, tw: rnd() < 0.12 ? rnd() * 6.28 : -1, hue: hues[Math.floor(rnd() * hues.length)] }
+        const z = rnd() < 0.68 ? 0.25 : rnd() < 0.8 ? 0.55 : 1
+        return { x: rnd() * w, y: rnd() * h, r: 0.35 + z * 0.9 * rnd() + (z === 1 ? 0.3 : 0), z, tw: rnd() < 0.14 ? rnd() * 6.28 : -1, tone: rnd(), px: 0, py: 0 }
       })
     }
     resize()
+    let mx = w / 2, my = h / 2, lx = w / 2, ly = h / 2, near = 0
+    const onMove = (e: PointerEvent) => { mx = e.clientX; my = e.clientY; near = 1 }
+    const onLeave = () => { near = 0 }
     let shoot: { x: number; y: number; vx: number; vy: number; life: number } | null = null
-    let next = 600
-    // A distant black hole in the upper right: a dark core, a thin tilted accretion disk, and the
-    // lensed arc of the far side bent over the top. Very faint, slowly shimmering, drifts up as you scroll.
-    const hole = (sy: number) => {
-      const R = Math.max(34, Math.min(w, h) * 0.075)
-      const cx = w * (w < 760 ? 0.84 : 0.93), cy = h * (w < 760 ? 0.1 : 0.13) - sy * 0.06
-      if (cy < -R * 4) return
-      ctx.save()
-      ctx.globalAlpha = w < 760 ? 0.3 : 0.42
-      // soft halo
-      const halo = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 3.4)
-      halo.addColorStop(0, "rgba(244,183,106,0.10)"); halo.addColorStop(0.5, "rgba(120,90,160,0.04)"); halo.addColorStop(1, "rgba(0,0,0,0)")
-      ctx.fillStyle = halo; ctx.fillRect(cx - R * 3.5, cy - R * 3.5, R * 7, R * 7)
-      const ring = (rx: number, ry: number, start: number, end: number, width: number, alpha: number) => {
-        const steps = 90
-        for (let i = 0; i < steps; i++) {
-          const a0 = start + ((end - start) * i) / steps, a1 = start + ((end - start) * (i + 1)) / steps
-          const shimmer = 0.65 + 0.35 * Math.sin(a0 * 3 - t * 0.012) * Math.sin(a0 * 7 + t * 0.007)
-          const doppler = 0.55 + 0.45 * Math.cos(a0)   // one side brighter, as it moves toward you
-          ctx.strokeStyle = `rgba(255,${200 + 40 * doppler | 0},${150 + 80 * doppler | 0},${alpha * shimmer * doppler})`
-          ctx.lineWidth = width
-          ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, -0.18, a0, a1); ctx.stroke()
-        }
-      }
-      // far side of the disk, lensed up over the hole
-      ring(R * 1.15, R * 1.08, Math.PI * 1.02, Math.PI * 1.98, R * 0.07, 0.55)
-      // back half of the flat disk
-      ring(R * 2.4, R * 0.42, Math.PI, Math.PI * 2, R * 0.08, 0.5)
-      // the shadow
-      ctx.globalAlpha = 1
-      const core = ctx.createRadialGradient(cx, cy, R * 0.7, cx, cy, R * 1.05)
-      core.addColorStop(0, "rgba(2,2,3,0.96)"); core.addColorStop(1, "rgba(2,2,3,0)")
-      ctx.fillStyle = core; ctx.beginPath(); ctx.arc(cx, cy, R * 1.05, 0, Math.PI * 2); ctx.fill()
-      ctx.globalAlpha = w < 760 ? 0.3 : 0.42
-      // photon ring
-      ctx.strokeStyle = "rgba(255,226,180,0.4)"; ctx.lineWidth = 0.8
-      ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2); ctx.stroke()
-      // front half of the disk, crossing in front of the shadow
-      ring(R * 2.4, R * 0.42, 0, Math.PI, R * 0.1, 0.75)
-      ctx.restore()
-    }
+    let next = 300
     const draw = () => {
       frame = requestAnimationFrame(draw)
       if (document.hidden) return
       t += 1
+      const pal = currentPalette()
+      const tones = ["232,236,244", pal.popRgb.replace(/ /g, ""), pal.lampRgb.replace(/ /g, "")]
+      lx += (mx - lx) * 0.05; ly += (my - ly) * 0.05
+      const ox = (lx - w / 2) / w, oy = (ly - h / 2) / h
       ctx.clearRect(0, 0, w, h)
       const sy = window.scrollY
       for (const s of stars) {
-        const x = (s.x + (still ? 0 : t * 0.02 * s.z)) % w
-        const y = (((s.y - sy * 0.04 * s.z) % h) + h) % h
-        const a = s.tw < 0 ? 0.35 + s.z * 0.45 : 0.3 + 0.6 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.tw))
-        ctx.fillStyle = `rgba(${s.hue},${a})`
+        const x = ((((s.x + (still ? 0 : t * 0.025 * s.z) - ox * 24 * s.z) % w) + w) % w)
+        const y = ((((s.y - sy * 0.05 * s.z - oy * 16 * s.z) % h) + h) % h)
+        s.px = x; s.py = y
+        const a = s.tw < 0 ? 0.32 + s.z * 0.45 : 0.25 + 0.65 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.tw))
+        const tone = s.tone < 0.8 ? tones[0] : s.tone < 0.92 ? tones[1] : tones[2]
+        ctx.fillStyle = `rgba(${tone},${a})`
         ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill()
       }
-      hole(sy)
+      // Constellation around the pointer
+      if (fine && near) {
+        const close = stars.filter((s) => s.z > 0.3 && Math.hypot(s.px - lx, s.py - ly) < 170).slice(0, 9)
+        ctx.lineWidth = 0.6
+        for (let i = 0; i < close.length; i++) {
+          let best: Star | null = null, bd = 1e9
+          for (let j = 0; j < close.length; j++) {
+            if (i === j) continue
+            const d = Math.hypot(close[i].px - close[j].px, close[i].py - close[j].py)
+            if (d < bd && d < 130) { bd = d; best = close[j] }
+          }
+          if (!best) continue
+          const fade = 1 - Math.hypot(close[i].px - lx, close[i].py - ly) / 170
+          ctx.strokeStyle = `rgba(${tones[2]},${0.35 * fade})`
+          ctx.beginPath(); ctx.moveTo(close[i].px, close[i].py); ctx.lineTo(best.px, best.py); ctx.stroke()
+        }
+      }
       if (still) return
-      if (!shoot && --next <= 0) { shoot = { x: w * (0.2 + rnd() * 0.6), y: h * rnd() * 0.35, vx: 7 + rnd() * 4, vy: 2.4 + rnd() * 2, life: 1 }; next = 1200 + rnd() * 1800 }
+      if (!shoot && --next <= 0) { shoot = { x: w * (0.1 + rnd() * 0.7), y: h * rnd() * 0.4, vx: 7 + rnd() * 4, vy: 2.4 + rnd() * 2, life: 1 }; next = 500 + rnd() * 900 }
       if (shoot) {
         const g = ctx.createLinearGradient(shoot.x, shoot.y, shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14)
         g.addColorStop(0, `rgba(232,236,244,${0.85 * shoot.life})`); g.addColorStop(1, "rgba(232,236,244,0)")
@@ -375,7 +362,12 @@ function Stars() {
     }
     draw()
     window.addEventListener("resize", resize)
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize) }
+    window.addEventListener("pointermove", onMove, { passive: true })
+    document.documentElement.addEventListener("pointerleave", onLeave)
+    return () => {
+      cancelAnimationFrame(frame); window.removeEventListener("resize", resize)
+      window.removeEventListener("pointermove", onMove); document.documentElement.removeEventListener("pointerleave", onLeave)
+    }
   }, [])
   return <canvas ref={ref} className="xp-stars" />
 }

@@ -50,6 +50,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "try{var p=localStorage.getItem('xp-palette');if(p)document.documentElement.dataset.palette=p}catch(e){}" }} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} bg-background font-sans`}>
         <ThemeProvider
           attribute="class"
