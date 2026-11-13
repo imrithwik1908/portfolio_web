@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 import { currentPalette } from "@/components/xp/palette"
 
 // The room: a still light from above, a vignette and film grain. Plus a few quiet details for
@@ -222,6 +223,7 @@ export function Ambient() {
       <div className="xp-grain" aria-hidden="true" />
       <Timecode />
       <Cursor />
+      <Rocket />
       <div className={`xp-fog-roll ${fog ? "is-on" : ""}`} aria-hidden="true" />
       <p className={`xp-toast ${note ? "is-on" : ""}`} role="status" aria-live="polite">{note}</p>
       {help && (
@@ -304,7 +306,7 @@ function Stars() {
       const n = Math.round((w * h) / 4800)
       stars = Array.from({ length: n }, () => {
         const z = rnd() < 0.68 ? 0.25 : rnd() < 0.8 ? 0.55 : 1
-        return { x: rnd() * w, y: rnd() * h, r: 0.35 + z * 0.9 * rnd() + (z === 1 ? 0.3 : 0), z, tw: rnd() < 0.14 ? rnd() * 6.28 : -1, tone: rnd(), px: 0, py: 0 }
+        return { x: rnd() * w, y: rnd() * h, r: 0.35 + z * 0.9 * rnd() + (z === 1 ? 0.3 : 0), z, tw: rnd() < 0.3 ? rnd() * 6.28 : -1, tone: rnd(), px: 0, py: 0 }
       })
     }
     resize()
@@ -312,11 +314,16 @@ function Stars() {
     const onMove = (e: PointerEvent) => { mx = e.clientX; my = e.clientY; near = 1 }
     const onLeave = () => { near = 0 }
     let shoot: { x: number; y: number; vx: number; vy: number; life: number } | null = null
-    let next = 300
+    let next = 120
+    // Warp: on every page change the stars stretch into streaks for a moment, then settle.
+    let warp = 0
+    const onWarp = () => { if (!still) warp = 1 }
+    window.addEventListener("xp-warp", onWarp)
     const draw = () => {
       frame = requestAnimationFrame(draw)
       if (document.hidden) return
-      t += 1
+      t += 1 + warp * 30
+      warp *= 0.93
       const pal = currentPalette()
       const tones = ["232,236,244", pal.popRgb.replace(/ /g, ""), pal.lampRgb.replace(/ /g, "")]
       lx += (mx - lx) * 0.05; ly += (my - ly) * 0.05
@@ -324,13 +331,20 @@ function Stars() {
       ctx.clearRect(0, 0, w, h)
       const sy = window.scrollY
       for (const s of stars) {
-        const x = ((((s.x + (still ? 0 : t * 0.025 * s.z) - ox * 24 * s.z) % w) + w) % w)
+        const x = ((((s.x + (still ? 0 : t * 0.22 * s.z) - ox * 24 * s.z) % w) + w) % w)
         const y = ((((s.y - sy * 0.05 * s.z - oy * 16 * s.z) % h) + h) % h)
         s.px = x; s.py = y
-        const a = s.tw < 0 ? 0.32 + s.z * 0.45 : 0.25 + 0.65 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.tw))
+        const a = s.tw < 0 ? 0.32 + s.z * 0.45 : 0.25 + 0.65 * (0.5 + 0.5 * Math.sin(t * 0.05 + s.tw))
         const tone = s.tone < 0.8 ? tones[0] : s.tone < 0.92 ? tones[1] : tones[2]
-        ctx.fillStyle = `rgba(${tone},${a})`
-        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill()
+        if (warp > 0.02) {
+          const dx = x - w / 2, dy = y - h / 2, len = warp * warp * 90 * s.z
+          const d = Math.hypot(dx, dy) || 1
+          ctx.strokeStyle = `rgba(${tone},${Math.min(1, a + warp * 0.4)})`; ctx.lineWidth = s.r * 1.4
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (dx / d) * len, y + (dy / d) * len); ctx.stroke()
+        } else {
+          ctx.fillStyle = `rgba(${tone},${a})`
+          ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill()
+        }
       }
       // Constellation around the pointer
       if (fine && near) {
@@ -365,10 +379,16 @@ function Stars() {
     window.addEventListener("pointermove", onMove, { passive: true })
     document.documentElement.addEventListener("pointerleave", onLeave)
     return () => {
-      cancelAnimationFrame(frame); window.removeEventListener("resize", resize)
+      cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("xp-warp", onWarp)
       window.removeEventListener("pointermove", onMove); document.documentElement.removeEventListener("pointerleave", onLeave)
     }
   }, [])
+  const pathname = usePathname()
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    window.dispatchEvent(new Event("xp-warp"))
+  }, [pathname])
   return <canvas ref={ref} className="xp-stars" />
 }
 
@@ -434,5 +454,33 @@ function Cursor() {
       <div ref={ring} className="xp-cursor-ring" aria-hidden="true"><span>{label}</span></div>
       <div ref={dot} className="xp-cursor-dot" aria-hidden="true" />
     </>
+  )
+}
+
+// Back to the top, by rocket. Shows up once you are well down the page; launches when pressed.
+function Rocket() {
+  const [shown, setShown] = useState(false)
+  const [launch, setLaunch] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setShown(window.scrollY > window.innerHeight * 1.5)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+  const go = () => {
+    setLaunch(true)
+    window.dispatchEvent(new Event("xp-warp"))
+    glide(() => 0, 1000)
+    window.setTimeout(() => setLaunch(false), 1400)
+  }
+  return (
+    <button type="button" className={`xp-rocket ${shown ? "is-shown" : ""} ${launch ? "is-launch" : ""}`} onClick={go} aria-label="Back to top" data-cursor="Top" tabIndex={shown ? 0 : -1}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2c3 2.5 4.5 6 4.5 10.5L14.5 16h-5l-2-3.5C7.5 8 9 4.5 12 2Z" />
+        <circle cx="12" cy="9" r="1.7" />
+        <path d="M7.5 12.5 5 15.5l2.8.6M16.5 12.5l2.5 3-2.8.6" />
+      </svg>
+      <i aria-hidden="true" />
+    </button>
   )
 }
