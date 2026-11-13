@@ -1,5 +1,6 @@
 "use client"
 
+import { Mark } from "@/components/xp/hand"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { tempeNow } from "@/components/xp/ambient"
@@ -107,8 +108,8 @@ export function Hero() {
           Tempe, Arizona{now && <> · <Offset label={`${now.part}, ${now.time}`} /></>}
         </p>
         <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name">Rithwik</em>.</h1>
-        <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
-        <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an <span className="xp-tip is-text" tabIndex={0} data-tip="X-MuTeST: explainable hate-speech detection in English, Hindi and Telugu.">AAAI 2026 paper</span>, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
+        <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about <Mark>why a model fails</Mark> than about its best score.</p>
+        <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State<sup className="xp-wink">forks up</sup>, graduating May 2027. Before that, research at IIT Indore that became an <span className="xp-tip is-text" tabIndex={0} data-tip="X-MuTeST: explainable hate-speech detection in English, Hindi and Telugu."><Mark kind="circle">AAAI 2026 paper</Mark></span>, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
         <Typed />
         <div className="xp-hero-actions">
           <Link href="/#work" className="xp-button">See what I&apos;ve built <Arrow dir="down" /></Link>

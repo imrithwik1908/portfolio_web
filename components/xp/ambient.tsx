@@ -187,8 +187,8 @@ export function Ambient() {
 
     console.info(
       "%cHi, fellow console reader.%c\nThis site is Next.js with no animation libraries, no trackers and no cookies.\nEvery number on it comes from a repository, a notebook output or my résumé.\n\nA few things are hidden. One answers to a single key, one waits until the credits\nhave rolled, one lives past the edge of the map, and Cmd/Ctrl+P does something useful.\nOr just type: rithwik",
-      "font: 600 14px/1.8 Georgia, serif; color: #ff7a59",
-      "font: 12px/1.6 ui-monospace, monospace; color: #b3b1bd",
+      "font: 600 14px/1.8 Georgia, serif; color: #f4b76a",
+      "font: 12px/1.6 ui-monospace, monospace; color: #a7adbd",
     )
 
     return () => {
@@ -212,7 +212,7 @@ export function Ambient() {
     <>
       <div className="xp-light" aria-hidden="true">
         <b />
-        <s className="xp-blob is-a" /><s className="xp-blob is-b" /><s className="xp-blob is-c" />
+        <Stars />
         {/* Dust in the light from above: a dozen motes drifting slowly; one glints now and then. */}
         {MOTES.map(([x, y, size, dur, delay], i) => (
           <i key={i} className={i === 4 ? "is-glint" : undefined} style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, animationDuration: `${dur}s`, animationDelay: `-${delay}s` }} />
@@ -279,39 +279,127 @@ export function tempeNow() {
   return { time, day: hour >= 6 && hour < 19, part }
 }
 
-// A coral dot that sits on the pointer and a mint ring that follows it a beat behind.
-// The ring swells over anything clickable and squeezes on press. Mouse and trackpad only.
+// Deep space: three layers of stars that drift at different speeds and slide a little as you scroll,
+// a few that twinkle, and now and then a shooting star. One canvas, paused when the tab is hidden.
+function Stars() {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ctx = el.getContext("2d")!
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    let w = 0, h = 0, frame = 0, t = 0
+    let rand = 7
+    const rnd = () => ((rand = (rand * 16807) % 2147483647) / 2147483647)
+    type Star = { x: number; y: number; r: number; z: number; tw: number; hue: string }
+    let stars: Star[] = []
+    const hues = ["232,236,244", "232,236,244", "232,236,244", "156,196,255", "244,183,106"]
+    const resize = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      w = window.innerWidth; h = window.innerHeight
+      el.width = w * dpr; el.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      rand = 7
+      const n = Math.round((w * h) / 5200)
+      stars = Array.from({ length: n }, () => {
+        const z = rnd() < 0.7 ? 0.25 : rnd() < 0.8 ? 0.55 : 1
+        return { x: rnd() * w, y: rnd() * h, r: 0.35 + z * 0.9 * rnd() + (z === 1 ? 0.3 : 0), z, tw: rnd() < 0.12 ? rnd() * 6.28 : -1, hue: hues[Math.floor(rnd() * hues.length)] }
+      })
+    }
+    resize()
+    let shoot: { x: number; y: number; vx: number; vy: number; life: number } | null = null
+    let next = 600
+    const draw = () => {
+      frame = requestAnimationFrame(draw)
+      if (document.hidden) return
+      t += 1
+      ctx.clearRect(0, 0, w, h)
+      const sy = window.scrollY
+      for (const s of stars) {
+        const x = (s.x + (still ? 0 : t * 0.02 * s.z)) % w
+        const y = (((s.y - sy * 0.04 * s.z) % h) + h) % h
+        const a = s.tw < 0 ? 0.35 + s.z * 0.45 : 0.3 + 0.6 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.tw))
+        ctx.fillStyle = `rgba(${s.hue},${a})`
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill()
+      }
+      if (still) return
+      if (!shoot && --next <= 0) { shoot = { x: w * (0.2 + rnd() * 0.6), y: h * rnd() * 0.35, vx: 7 + rnd() * 4, vy: 2.4 + rnd() * 2, life: 1 }; next = 1200 + rnd() * 1800 }
+      if (shoot) {
+        const g = ctx.createLinearGradient(shoot.x, shoot.y, shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14)
+        g.addColorStop(0, `rgba(232,236,244,${0.85 * shoot.life})`); g.addColorStop(1, "rgba(232,236,244,0)")
+        ctx.strokeStyle = g; ctx.lineWidth = 1.2
+        ctx.beginPath(); ctx.moveTo(shoot.x, shoot.y); ctx.lineTo(shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14); ctx.stroke()
+        shoot.x += shoot.vx; shoot.y += shoot.vy; shoot.life -= 0.018
+        if (shoot.life <= 0) shoot = null
+      }
+    }
+    draw()
+    window.addEventListener("resize", resize)
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize) }
+  }, [])
+  return <canvas ref={ref} className="xp-stars" />
+}
+
+// The cursor: a small star that reads the room. Over a photo it offers to view, over a project to open,
+// over the globe to drag, over the email to copy; links get a ring; text gets a slim bar.
+// Authors can set data-cursor="Label" on anything. Mouse and trackpad only.
+const CURSOR_RULES: [string, string][] = [
+  ["[data-cursor]", ""],
+  [".xp-globe canvas", "Drag"],
+  [".xp-copy, .xp-nav-copy", "Copy"],
+  [".xp-strip a, .pc, a[href^='/projects/']", "Open"],
+  [".xp-portrait, .xp-about-photo, .xp-fig-zoom, figure img", "View"],
+  ["a[href^='http'], a[href^='mailto']", "Visit"],
+]
 function Cursor() {
   const dot = useRef<HTMLDivElement>(null)
   const ring = useRef<HTMLDivElement>(null)
+  const [label, setLabel] = useState("")
   useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (!window.matchMedia("(pointer: fine)").matches) return
     document.documentElement.classList.add("has-cursor")
     let x = -100, y = -100, rx = -100, ry = -100, frame = 0
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     const move = (e: PointerEvent) => {
       x = e.clientX; y = e.clientY
-      const hot = (e.target as Element | null)?.closest?.("a, button, label, summary, [role=button], input, canvas")
-      ring.current?.classList.toggle("is-hot", !!hot)
-      dot.current?.classList.add("is-on"); ring.current?.classList.add("is-on")
+      const t = e.target as Element | null
+      let mode = "", text = ""
+      for (const [sel, name] of CURSOR_RULES) {
+        const hit = t?.closest?.(sel)
+        if (hit) { mode = "label"; text = name || hit.getAttribute("data-cursor") || ""; break }
+      }
+      if (!mode && t?.closest?.("a, button, label, summary, [role=button], select, [tabindex='0']")) mode = "link"
+      if (!mode && t?.closest?.("p, h1, h2, h3, li, dd, blockquote, input, textarea")) mode = "text"
+      const r = ring.current, d = dot.current
+      if (r && d) {
+        r.dataset.mode = mode; d.dataset.mode = mode
+        r.classList.add("is-on"); d.classList.add("is-on")
+      }
+      setLabel(text)
     }
     const leave = () => { dot.current?.classList.remove("is-on"); ring.current?.classList.remove("is-on") }
-    const press = (on: boolean) => () => ring.current?.classList.toggle("is-down", on)
-    const down = press(true), up = press(false)
+    const down = () => ring.current?.classList.add("is-down")
+    const up = () => ring.current?.classList.remove("is-down")
     const tick = () => {
       frame = requestAnimationFrame(tick)
-      rx += (x - rx) * 0.18; ry += (y - ry) * 0.18
+      const k = reduce ? 1 : 0.22
+      rx += (x - rx) * k; ry += (y - ry) * k
       if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`
       if (ring.current) ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`
     }
     tick()
     window.addEventListener("pointermove", move, { passive: true })
-    document.addEventListener("pointerleave", leave)
+    document.documentElement.addEventListener("pointerleave", leave)
     window.addEventListener("pointerdown", down); window.addEventListener("pointerup", up)
     return () => {
       cancelAnimationFrame(frame); document.documentElement.classList.remove("has-cursor")
-      window.removeEventListener("pointermove", move); document.removeEventListener("pointerleave", leave)
+      window.removeEventListener("pointermove", move); document.documentElement.removeEventListener("pointerleave", leave)
       window.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up)
     }
   }, [])
-  return <><div ref={ring} className="xp-cursor-ring" aria-hidden="true" /><div ref={dot} className="xp-cursor-dot" aria-hidden="true" /></>
+  return (
+    <>
+      <div ref={ring} className="xp-cursor-ring" aria-hidden="true"><span>{label}</span></div>
+      <div ref={dot} className="xp-cursor-dot" aria-hidden="true" />
+    </>
+  )
 }
