@@ -308,6 +308,46 @@ function Stars() {
     resize()
     let shoot: { x: number; y: number; vx: number; vy: number; life: number } | null = null
     let next = 600
+    // A distant black hole in the upper right: a dark core, a thin tilted accretion disk, and the
+    // lensed arc of the far side bent over the top. Very faint, slowly shimmering, drifts up as you scroll.
+    const hole = (sy: number) => {
+      const R = Math.max(34, Math.min(w, h) * 0.075)
+      const cx = w * (w < 760 ? 0.84 : 0.93), cy = h * (w < 760 ? 0.1 : 0.13) - sy * 0.06
+      if (cy < -R * 4) return
+      ctx.save()
+      ctx.globalAlpha = w < 760 ? 0.3 : 0.42
+      // soft halo
+      const halo = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 3.4)
+      halo.addColorStop(0, "rgba(244,183,106,0.10)"); halo.addColorStop(0.5, "rgba(120,90,160,0.04)"); halo.addColorStop(1, "rgba(0,0,0,0)")
+      ctx.fillStyle = halo; ctx.fillRect(cx - R * 3.5, cy - R * 3.5, R * 7, R * 7)
+      const ring = (rx: number, ry: number, start: number, end: number, width: number, alpha: number) => {
+        const steps = 90
+        for (let i = 0; i < steps; i++) {
+          const a0 = start + ((end - start) * i) / steps, a1 = start + ((end - start) * (i + 1)) / steps
+          const shimmer = 0.65 + 0.35 * Math.sin(a0 * 3 - t * 0.012) * Math.sin(a0 * 7 + t * 0.007)
+          const doppler = 0.55 + 0.45 * Math.cos(a0)   // one side brighter, as it moves toward you
+          ctx.strokeStyle = `rgba(255,${200 + 40 * doppler | 0},${150 + 80 * doppler | 0},${alpha * shimmer * doppler})`
+          ctx.lineWidth = width
+          ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, -0.18, a0, a1); ctx.stroke()
+        }
+      }
+      // far side of the disk, lensed up over the hole
+      ring(R * 1.15, R * 1.08, Math.PI * 1.02, Math.PI * 1.98, R * 0.07, 0.55)
+      // back half of the flat disk
+      ring(R * 2.4, R * 0.42, Math.PI, Math.PI * 2, R * 0.08, 0.5)
+      // the shadow
+      ctx.globalAlpha = 1
+      const core = ctx.createRadialGradient(cx, cy, R * 0.7, cx, cy, R * 1.05)
+      core.addColorStop(0, "rgba(2,2,3,0.96)"); core.addColorStop(1, "rgba(2,2,3,0)")
+      ctx.fillStyle = core; ctx.beginPath(); ctx.arc(cx, cy, R * 1.05, 0, Math.PI * 2); ctx.fill()
+      ctx.globalAlpha = w < 760 ? 0.3 : 0.42
+      // photon ring
+      ctx.strokeStyle = "rgba(255,226,180,0.4)"; ctx.lineWidth = 0.8
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2); ctx.stroke()
+      // front half of the disk, crossing in front of the shadow
+      ring(R * 2.4, R * 0.42, 0, Math.PI, R * 0.1, 0.75)
+      ctx.restore()
+    }
     const draw = () => {
       frame = requestAnimationFrame(draw)
       if (document.hidden) return
@@ -321,6 +361,7 @@ function Stars() {
         ctx.fillStyle = `rgba(${s.hue},${a})`
         ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill()
       }
+      hole(sy)
       if (still) return
       if (!shoot && --next <= 0) { shoot = { x: w * (0.2 + rnd() * 0.6), y: h * rnd() * 0.35, vx: 7 + rnd() * 4, vy: 2.4 + rnd() * 2, life: 1 }; next = 1200 + rnd() * 1800 }
       if (shoot) {

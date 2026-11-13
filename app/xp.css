@@ -1155,24 +1155,3 @@ html.has-cursor, html.has-cursor * { cursor: none !important; }
 .xp-cursor-ring.is-down > span { transform: scale(0.85); }
 @media (pointer: coarse) { .xp-cursor-dot, .xp-cursor-ring { display: none; } }
 
-/* Hand-drawn marks: drawn in as they scroll into view. */
-.xp-mark-hand { position: relative; white-space: nowrap; }
-.xp-mark-hand svg { position: absolute; left: -4%; width: 108%; overflow: visible; pointer-events: none; }
-.xp-mark-hand.is-under svg { bottom: -0.32em; height: 0.5em; }
-.xp-mark-hand.is-circle svg { top: -28%; height: 156%; left: -9%; width: 118%; }
-.xp-mark-hand path { fill: none; stroke: var(--xp-lamp); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
-.xp-mark-hand.is-drawn path { animation: xp-draw 1100ms 300ms cubic-bezier(0.6, 0, 0.3, 1) forwards; }
-@keyframes xp-draw { to { stroke-dashoffset: 0; } }
-@media (prefers-reduced-motion: reduce) { .xp-mark-hand path { stroke-dashoffset: 0; } }
-.xp-scribble { display: inline-block; margin-left: 0.5em; color: var(--xp-pop); font: 1.15rem/1 var(--font-caveat), cursive; transform: rotate(-4deg); }
-sup.xp-wink { margin-left: 0.15em; color: var(--xp-pop); font: italic 0.8em var(--xp-serif); vertical-align: 0.55em; white-space: nowrap; }
-
-/* Side quests */
-.xp-quests { grid-column: 1 / -1; margin-top: 8px; }
-.xp-quests ul { display: grid; gap: 0; margin: 14px 0 0; padding: 0; list-style: none; }
-.xp-quests li { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed var(--xp-line); }
-.xp-quests li b { color: var(--xp-ink); font-weight: 500; }
-.xp-quests li span { color: var(--xp-muted); }
-.xp-quests li i { color: var(--xp-pop); font: 0.75rem var(--xp-mono); font-style: normal; }
-.xp-quests li a, .xp-quests li button { color: inherit; background: none; border: 0; padding: 0; font: inherit; text-decoration: underline dotted var(--xp-line-strong); text-underline-offset: 4px; }
-@media (max-width: 640px) { .xp-quests li { grid-template-columns: 1fr; gap: 2px; } }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-import { Caveat, Instrument_Sans, Instrument_Serif } from 'next/font/google'
+import { Instrument_Sans, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -18,7 +18,6 @@ const geistMono = localFont({
   variable: '--font-geist-mono',
 })
 
-const caveat = Caveat({ subsets: ['latin'], weight: '500', variable: '--font-caveat' })
 const instrumentSans = Instrument_Sans({ subsets: ['latin'], variable: '--font-instrument-sans' })
 const instrumentSerif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-instrument-serif' })
 
@@ -51,7 +50,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} ${caveat.variable} bg-background font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} bg-background font-sans`}>
         <ThemeProvider
           attribute="class"
           storageKey="portfolio-theme-v3"
