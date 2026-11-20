@@ -1914,7 +1914,7 @@ html.has-brief { overflow: hidden; }
 /* Opening: five quiet seconds in space, one line, then the page fades up. */
 .xp-opening { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; width: 100vw; height: 100vh; overflow: hidden; background: #040406; transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1); }
 html[data-intro="off"] .xp-opening { display: none; }
-.xp-opening.is-leaving { opacity: 0; pointer-events: none; }
+.xp-opening.is-leaving { opacity: 0; pointer-events: none; transition-duration: 1100ms; }
 .xp-opening canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .xp-opening-line { position: relative; margin: 0; color: rgba(226, 230, 238, 0.72); font: 400 0.82rem var(--xp-sans); letter-spacing: 0.42em; text-indent: 0.42em; text-transform: uppercase; animation: xp-opening-line 3600ms 900ms ease-in-out both; }
 @keyframes xp-opening-line { 0% { opacity: 0; } 20% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; } }
@@ -1923,31 +1923,30 @@ html[data-intro="off"] .xp-opening { display: none; }
 html.is-intro { overflow: hidden; }
 html.is-intro .xp-hero, html.is-intro .xp-hero *, html.is-intro .xp-nav, html.is-intro .xp-nav * { animation-play-state: paused !important; }
 
-/* Opening, act two: the name drifts closer and only the R stays in focus… */
-.xp-opening-line { transition: transform 1300ms cubic-bezier(0.45, 0, 0.25, 1); will-change: transform; }
-.xp-opening-line span { transition: color 600ms ease, opacity 1100ms ease, filter 1100ms ease; }
-.xp-opening-line.is-focus { transform: scale(1.75); }
-.xp-opening-line.is-focus span:not(.is-r) { opacity: 0; filter: blur(6px); }
-.xp-opening-line.is-focus span.is-r { color: #f2f4f8; text-shadow: 0 0 18px rgba(226, 230, 238, 0.35); }
-/* …then it travels to the hero and becomes the R of "Rithwik". */
-.xp-opening-flight { position: fixed; z-index: 201; display: grid; place-items: center; pointer-events: none; transform: translate(var(--dx), var(--dy)) scale(var(--k)); }
-.xp-opening-flight.is-flying { transform: none; transition: transform 1000ms cubic-bezier(0.65, 0, 0.35, 1); }
-.xp-opening-flight b, .xp-opening-flight em { grid-area: 1 / 1; line-height: 1; transition: opacity 1000ms ease; }
-.xp-opening-flight b { color: #f2f4f8; font: 400 1em var(--xp-sans); font-style: normal; letter-spacing: 0; }
+/* Opening, act two: the whole name drifts closer first; only later does everything but the R
+   soften away. The R's glide to the hero is animated from script (Web Animations). */
+.xp-opening-line { transition: transform 2200ms cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+.xp-opening-line span { transition: color 600ms ease, opacity 1300ms cubic-bezier(0.4, 0, 0.2, 1), filter 1300ms cubic-bezier(0.4, 0, 0.2, 1); }
+.xp-opening-line.is-zoom { transform: scale(1.6); }
+.xp-opening-line.is-isolate span:not(.is-r) { opacity: 0; filter: blur(5px); }
+.xp-opening-line.is-isolate span.is-r { color: #f4f6fa; text-shadow: 0 0 16px rgba(226, 230, 238, 0.3); }
+.xp-opening-flight { position: fixed; z-index: 201; display: grid; place-items: center; pointer-events: none; will-change: transform, opacity; transform-origin: 50% 50%; }
+.xp-opening-flight b, .xp-opening-flight em { grid-area: 1 / 1; line-height: inherit; will-change: opacity; }
+.xp-opening-flight b { color: #f4f6fa; font: 400 0.82em var(--xp-sans); font-style: normal; }
 .xp-opening-flight em { color: var(--xp-lamp); opacity: 0; }
-.xp-opening-flight.is-flying b { opacity: 0; }
-.xp-opening-flight.is-flying em { opacity: 1; }
 /* The hero waits for it: the heading fades in with "Rithwik" hidden, then unfolds from its R. */
 html.intro-done .xp-hero h1 { animation: none; }
 html.is-handoff .xp-hero h1 { animation: xp-fade 900ms ease both; }
 html.is-handoff .xp-hero h1 .xp-name { clip-path: inset(0 100% 0 0); }
-html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1000ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1200ms cubic-bezier(0.33, 0, 0.15, 1) both; }
 @keyframes xp-name-unfold { from { clip-path: inset(-0.25em calc(100% - var(--r-w, 0.6em)) -0.25em -0.25em); } to { clip-path: inset(-0.25em -0.3em -0.25em -0.25em); } }
-/* Sound toggle: three small bars that breathe while the score plays. */
-.xp-opening-sound { position: absolute; right: 26px; bottom: 24px; display: inline-flex; gap: 8px; align-items: center; padding: 6px 10px; border: 0; color: rgba(226, 230, 238, 0.45); background: none; font: 0.68rem var(--xp-mono); letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: color 300ms ease; animation: xp-fade 1200ms 600ms ease both; }
-.xp-opening-sound:hover, .xp-opening-sound.is-on { color: rgba(226, 230, 238, 0.85); }
+/* Sound hint and skip, quiet in the corners. */
+.xp-opening-sound { position: absolute; left: 50%; bottom: 26px; display: inline-flex; gap: 8px; align-items: center; margin: 0; color: rgba(226, 230, 238, 0.4); font: 0.66rem var(--xp-mono); letter-spacing: 0.18em; text-transform: uppercase; white-space: nowrap; transform: translateX(-50%); transition: color 400ms ease; animation: xp-fade 1200ms 700ms ease both; }
+.xp-opening-sound.is-on { color: rgba(226, 230, 238, 0.7); }
 .xp-opening-sound span { display: inline-flex; gap: 2px; align-items: flex-end; height: 10px; }
-.xp-opening-sound i { width: 2px; height: 3px; background: currentColor; transition: height 300ms ease; }
+.xp-opening-sound i { width: 2px; height: 3px; background: currentColor; }
 .xp-opening-sound.is-on i { animation: xp-sound-bar 1.4s ease-in-out infinite; }
 .xp-opening-sound.is-on i:nth-child(2) { animation-delay: 200ms; } .xp-opening-sound.is-on i:nth-child(3) { animation-delay: 450ms; }
 @keyframes xp-sound-bar { 50% { height: 10px; } }
+.xp-opening-skip { position: absolute; right: 22px; bottom: 20px; padding: 6px 10px; border: 0; color: rgba(226, 230, 238, 0.35); background: none; font: 0.66rem var(--xp-mono); letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: color 300ms ease; animation: xp-fade 1200ms 700ms ease both; }
+.xp-opening-skip:hover { color: rgba(226, 230, 238, 0.8); }

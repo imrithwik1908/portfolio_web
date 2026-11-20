@@ -2,7 +2,7 @@
 // chord swells in A minor under a few sparse, high, bell-like notes, in a large soft reverb.
 // No samples, nothing borrowed; the chords, voicings and timing are written here.
 
-type Score = { stop: (fade?: number) => void }
+export type Score = { start: () => Promise<boolean>; stop: (fade?: number) => void; running: () => boolean }
 
 const hz = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12)
 
@@ -25,23 +25,27 @@ function impulse(ctx: AudioContext, seconds: number) {
   return buf
 }
 
-export function playScore(volume = 0.22): Score | null {
+// Creates the score without making a sound. Browsers keep audio suspended until the visitor
+// interacts, so `start()` is called from a click or key press (or tried right away, in case the
+// browser already allows sound for this site). Everything is scheduled when it actually starts.
+export function createScore(volume = 0.85): Score | null {
   const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!AC) return null
   const ctx = new AC()
   const master = ctx.createGain()
   master.gain.value = 0
+  const limit = ctx.createDynamicsCompressor()
+  limit.threshold.value = -10; limit.knee.value = 8; limit.ratio.value = 6; limit.attack.value = 0.01; limit.release.value = 0.4
   const tone = ctx.createBiquadFilter()
-  tone.type = "lowpass"; tone.frequency.value = 2200; tone.Q.value = 0.3
+  tone.type = "lowpass"; tone.frequency.value = 2400; tone.Q.value = 0.3
   const verb = ctx.createConvolver(); verb.buffer = impulse(ctx, 4.5)
-  const wet = ctx.createGain(); wet.gain.value = 0.55
-  const dry = ctx.createGain(); dry.gain.value = 0.6
+  const wet = ctx.createGain(); wet.gain.value = 0.7
+  const dry = ctx.createGain(); dry.gain.value = 0.9
   tone.connect(dry).connect(master)
   tone.connect(verb).connect(wet).connect(master)
-  master.connect(ctx.destination)
+  master.connect(limit).connect(ctx.destination)
 
-  const now = ctx.currentTime + 0.05
-  master.gain.linearRampToValueAtTime(volume, now + 2.5)
+  let started = false, stopped = false
 
   // Organ-ish voice: a few harmonics of a sine, slow attack and release, a whisper of vibrato.
   const organ = (freq: number, start: number, dur: number, level: number) => {
@@ -75,19 +79,32 @@ export function playScore(volume = 0.22): Score | null {
     o.start(start); o.stop(start + 3.3)
   }
 
-  CHORDS.forEach((chord, c) => {
-    const at = now + c * HOLD
-    chord.forEach((n, i) => organ(hz(n), at, HOLD + 1.2, i === 0 ? 0.9 : 0.55))
-    // Two or three high notes from the chord, placed unevenly so nothing repeats like a loop.
-    const picks = [chord[3] + 12, chord[4] + 12, chord[2] + 24]
-    picks.slice(0, c % 2 ? 2 : 3).forEach((n, k) => bell(hz(n), at + 0.9 + k * (1.15 + c * 0.17)))
-  })
+  const schedule = () => {
+    const now = ctx.currentTime + 0.05
+    master.gain.setValueAtTime(0, now)
+    master.gain.linearRampToValueAtTime(volume, now + 2)
+    CHORDS.forEach((chord, c) => {
+      const at = now + c * HOLD
+      chord.forEach((n, i) => organ(hz(n), at, HOLD + 1.2, i === 0 ? 0.9 : 0.55))
+      // Two or three high notes from the chord, placed unevenly so nothing repeats like a loop.
+      const picks = [chord[3] + 12, chord[4] + 12, chord[2] + 24]
+      picks.slice(0, c % 2 ? 2 : 3).forEach((n, k) => bell(hz(n), at + 0.9 + k * (1.15 + c * 0.17)))
+    })
+  }
 
-  let stopped = false
   return {
+    async start() {
+      if (stopped) return false
+      try { await ctx.resume() } catch { return false }
+      if (ctx.state !== "running") return false
+      if (!started) { started = true; schedule() }
+      return true
+    },
+    running: () => started && !stopped && ctx.state === "running",
     stop(fade = 3) {
       if (stopped) return
       stopped = true
+      if (!started) { ctx.close().catch(() => {}); return }
       const t = ctx.currentTime
       master.gain.cancelScheduledValues(t)
       master.gain.setValueAtTime(master.gain.value, t)
