@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { XpNav } from '@/components/xp/nav'
 import { Ambient } from '@/components/xp/ambient'
 import { CommandMenu } from '@/components/xp/command'
-import { Ask } from '@/components/xp/ask'
 import { PageTransitions } from '@/components/xp/transitions'
 import { Brief } from '@/components/xp/brief'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
@@ -68,7 +67,6 @@ export default function RootLayout({
           <div className="site-shell relative flex min-h-screen flex-col">
             <Ambient />
             <CommandMenu />
-            <Ask />
             <PageTransitions />
             <Brief />
             <a href="#work" className="xp-skip">Skip to the work</a>

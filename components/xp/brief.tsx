@@ -55,7 +55,7 @@ export function Brief() {
   return (
     <div className={`xp-brief ${open ? "is-open" : ""}`} aria-hidden={!open} onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
       <div ref={box} className="xp-brief-sheet" role="dialog" aria-modal="true" aria-label="The 30-second version" tabIndex={-1}>
-        <button type="button" className="xp-ask-close xp-brief-close" onClick={() => setOpen(false)} aria-label="Close" tabIndex={open ? 0 : -1}>×</button>
+        <button type="button" className="xp-sheet-close xp-brief-close" onClick={() => setOpen(false)} aria-label="Close" tabIndex={open ? 0 : -1}>×</button>
         <p className="xp-brief-kicker" style={{ "--i": 0 } as React.CSSProperties}><span className="xp-roles-pulse" aria-hidden="true" /> The 30-second version</p>
         <h2 style={{ "--i": 1 } as React.CSSProperties}>Sai Rithwik Reddy Chirra builds ML systems and the software around them.</h2>
         <p className="xp-brief-facts" style={{ "--i": 2 } as React.CSSProperties}>
@@ -85,7 +85,6 @@ export function Brief() {
           <button type="button" className="xp-brief-ghost" tabIndex={open ? 0 : -1} onClick={copy}>Copy email</button>
           <a className="xp-brief-ghost" href="https://www.linkedin.com/in/sairithwikreddy" target="_blank" rel="noreferrer" tabIndex={open ? 0 : -1}>LinkedIn ↗</a>
           <a className="xp-brief-ghost" href="https://github.com/imrithwik1908" target="_blank" rel="noreferrer" tabIndex={open ? 0 : -1}>GitHub ↗</a>
-          <button type="button" className="xp-brief-ghost" tabIndex={open ? 0 : -1} onClick={() => { setOpen(false); window.dispatchEvent(new CustomEvent("xp:ask")) }}><span className="xp-ask-spark">✦</span> Ask a question</button>
         </div>
       </div>
     </div>

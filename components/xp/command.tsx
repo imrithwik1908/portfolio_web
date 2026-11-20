@@ -24,7 +24,6 @@ export function CommandMenu() {
   }
   const items: Item[] = useMemo(() => [
     { group: "Actions", label: "The 30-second version", hint: "Roles, proof, contact", run: () => window.dispatchEvent(new Event("xp:brief")) },
-    { group: "Actions", label: "Ask a question about me", hint: "Answers only from this site", run: () => window.dispatchEvent(new CustomEvent("xp:ask")) },
     { group: "Actions", label: "Open my résumé", hint: "Read it here, or print", run: openResume },
     { group: "Actions", label: "Copy my email", hint: EMAIL, run: () => { navigator.clipboard?.writeText(EMAIL).then(() => toast("Email copied."), () => { window.location.href = `mailto:${EMAIL}` }) } },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
