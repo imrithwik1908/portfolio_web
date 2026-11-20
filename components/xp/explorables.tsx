@@ -2,90 +2,201 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 
-// One explorable per project: the single idea that makes it work, small enough to play with.
-// Toy numbers are labelled as toy numbers; the rules, sizes and orderings come from each repository.
+// One explorable per project: the single idea that makes it work, told in short scenes,
+// each with one thing to try. Toy numbers are labelled as toy numbers; the rules, sizes and
+// orderings come from each repository.
 
 const fmt = (v: number, d = 2) => (v >= 0 ? "" : "−") + Math.abs(v).toFixed(d)
+const clamp = (v: number, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 
-/* ───────────────────────── Tensor Fusion: why append a 1 ───────────────────────── */
+/* ───────────────────────── Shared: a scene-by-scene frame ───────────────────────── */
 
-const SUB = ["₀", "₁", "₂"]
-type Vec = [number, number]
-
-function Slider({ label, value, onChange, color }: { label: string; value: number; onChange: (v: number) => void; color: string }) {
+function Guided({ titles, scene, setScene, children, caption }: {
+  titles: string[]; scene: number; setScene: (i: number) => void; children: React.ReactNode
+  caption: { title: React.ReactNode; body: React.ReactNode; tryit?: React.ReactNode; note?: React.ReactNode }
+}) {
   return (
-    <label className="ex-slider" style={{ "--c": color } as React.CSSProperties}>
-      <span>{label}</span>
-      <input type="range" min={-1} max={1} step={0.05} value={value} onChange={(e) => onChange(Number(e.target.value))} />
-      <output>{fmt(value)}</output>
-    </label>
+    <div className="ex ex-guided">
+      <ol className="ex-tabs" aria-label="Scenes">
+        {titles.map((t, i) => (
+          <li key={t}><button type="button" className={i === scene ? "is-on" : i < scene ? "is-done" : undefined} aria-current={i === scene ? "step" : undefined} onClick={() => setScene(i)}><span>{i + 1}</span>{t}</button></li>
+        ))}
+      </ol>
+      <div className="ex-scene" key={scene}>{children}</div>
+      <div className="ex-caption" key={`c${scene}`}>
+        <h3>{caption.title}</h3>
+        <p>{caption.body}</p>
+        {caption.tryit && <p className="ex-try"><b>Try it</b><span>{caption.tryit}</span></p>}
+        {caption.note && <p className="ex-note">{caption.note}</p>}
+        <div className="ex-nav">
+          {scene > 0 && <button type="button" className="ex-back" onClick={() => setScene(scene - 1)}>← Back</button>}
+          {scene < titles.length - 1 && <button type="button" className="ex-next" onClick={() => setScene(scene + 1)}>Next: {titles[scene + 1]} →</button>}
+        </div>
+      </div>
+    </div>
   )
 }
 
+// A short vector you can grab: each bar is one number, drag its tip up or down.
+function Bars({ values, color, names, onChange, height = 150 }: { values: number[]; color: string; names: string[]; onChange?: (v: number[]) => void; height?: number }) {
+  const svg = useRef<SVGSVGElement>(null)
+  const drag = useRef<number | null>(null)
+  const W = 46, mid = height / 2, amp = height / 2 - 14
+  const set = (e: React.PointerEvent) => {
+    if (drag.current === null || !svg.current || !onChange) return
+    const r = svg.current.getBoundingClientRect()
+    const y = ((e.clientY - r.top) / r.height) * height
+    const v = Math.round(clamp((mid - y) / amp) * 20) / 20
+    onChange(values.map((x, i) => (i === drag.current ? v : x)))
+  }
+  return (
+    <svg ref={svg} viewBox={`0 0 ${values.length * W + 8} ${height + 22}`} width={values.length * W + 8} className={`ex-bars ${onChange ? "is-live" : ""}`}
+      onPointerMove={set} onPointerUp={() => { drag.current = null }} onPointerLeave={() => { drag.current = null }} style={{ "--c": color } as React.CSSProperties}>
+      <line x1={0} x2={values.length * W + 8} y1={mid} y2={mid} className="ex-zero" />
+      {values.map((v, i) => {
+        const y = mid - v * amp
+        return (
+          <g key={i} onPointerDown={(e) => { (e.target as Element).setPointerCapture?.(e.pointerId); drag.current = i; set(e) }}>
+            <rect x={8 + i * W} y={0} width={W - 12} height={height} className="ex-hit" />
+            <rect x={8 + i * W + 6} y={Math.min(y, mid)} width={W - 24} height={Math.max(2, Math.abs(mid - y))} rx={4} className="ex-bar" />
+            {onChange && <circle cx={8 + i * W + (W - 12) / 2} cy={y} r={8} className="ex-handle" />}
+            <text x={8 + i * W + (W - 12) / 2} y={height + 16} className="ex-bname">{names[i]}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+const cellColor = (v: number) => (v >= 0 ? `rgba(88,196,221,${Math.min(0.92, 0.08 + Math.abs(v) * 0.85)})` : `rgba(252,98,85,${Math.min(0.92, 0.08 + Math.abs(v) * 0.85)})`)
+
+/* ───────────────────────── Tensor Fusion: why append a 1 ───────────────────────── */
+
 export function FusionExplorable() {
-  const [a, setA] = useState<Vec>([0.8, -0.4])
-  const [b, setB] = useState<Vec>([0.5, 0.9])
-  const [t, setT] = useState<Vec>([-0.6, 0.7])
+  const [scene, setScene] = useState(0)
+  const [v, setV] = useState([0.8, -0.4])
+  const [a, setA] = useState([0.5, 0.9])
+  const [t, setT] = useState([-0.6, 0.7])
   const [one, setOne] = useState(true)
-  const [hover, setHover] = useState<[number, number, number] | null>(null)
+  const [muted, setMuted] = useState(false)
+  const [apart, setApart] = useState(0.55)
 
-  const A = one ? [1, ...a] : [...a]
-  const B = one ? [1, ...b] : [...b]
-  const T = one ? [1, ...t] : [...t]
-  // How many real modalities a cell mixes: 0 is the constant, 1 unimodal, 2 bimodal, 3 trimodal.
-  const order = (i: number, j: number, k: number) => (one ? Number(i > 0) + Number(j > 0) + Number(k > 0) : 3)
-  const kinds = ["constant", "unimodal", "bimodal", "trimodal"]
-  const idx = (n: number) => (one ? n : n + 1)
-  const counts = [0, 0, 0, 0]
-  T.forEach((_, k) => A.forEach((_, i) => B.forEach((_, j) => { counts[order(i, j, k)]++ })))
+  const aa = muted ? [0, 0] : a
+  const V = one ? [1, ...v] : v, A = one ? [1, ...aa] : aa, T = one ? [1, ...t] : t
+  const vName = one ? ["1", "v₁", "v₂"] : ["v₁", "v₂"]
+  const aName = one ? ["1", "a₁", "a₂"] : ["a₁", "a₂"]
+  const kind = (i: number, j: number) => (!one ? "pair" : i === 0 && j === 0 ? "const" : i === 0 || j === 0 ? "solo" : "pair")
+  const lit = V.flatMap((x) => A.map((y) => x * y)).filter((x) => Math.abs(x) > 0.001).length
 
-  const cell = 46
-  const h = hover
-  const formula = h
-    ? `${one && h[0] === 0 ? "1" : `v${SUB[idx(h[0])]}`} · ${one && h[1] === 0 ? "1" : `a${SUB[idx(h[1])]}`} · ${one && h[2] === 0 ? "1" : `t${SUB[idx(h[2])]}`} = ${fmt(A[h[0]] * B[h[1]] * T[h[2]])}`
-    : "Point at a cell to see what it multiplies."
+  const grid = (k?: number) => (
+    <div className={`ex-grid ${one ? "" : "is-small"}`} style={{ gridTemplateColumns: `repeat(${A.length}, 1fr)` }}>
+      {V.map((x, i) => A.map((y, j) => {
+        const val = x * y * (k === undefined ? 1 : T[k])
+        return <span key={`${i}${j}`} className={`is-${kind(i, j)}`} style={{ background: cellColor(val), animationDelay: `${(i * A.length + j) * 45}ms` }}>{fmt(val, 2)}</span>
+      }))}
+    </div>
+  )
+
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (scene !== 3) return
+    let raf = 0; const start = performance.now()
+    const run = (now: number) => { const p = Math.min(1, (now - start) / 1600); setCount(Math.round(140481 * (1 - Math.pow(1 - p, 3)))); if (p < 1) raf = requestAnimationFrame(run) }
+    raf = requestAnimationFrame(run)
+    return () => cancelAnimationFrame(raf)
+  }, [scene])
+
+  const titles = ["Three vectors", "Multiply two", "Add the third", "At real size"]
+  const captions = [
+    {
+      title: <>Every clip becomes <em>three short lists of numbers</em>.</>,
+      body: "Before anything is fused, each modality runs through its own small network: the face, the voice and the words each come out as a vector. Here they have two numbers each, so you can see everything.",
+      tryit: "Grab the top of any bar and drag it. These are the numbers the next scenes multiply.",
+    },
+    {
+      title: <>Multiply every number by every number, <em>after adding a 1</em>.</>,
+      body: muted
+        ? one
+          ? "The voice is silent, so its row is all zeros. But the first column is still a perfect copy of the face, untouched. The 1 kept it alive."
+          : "Without the 1, a silent voice wipes out the whole grid. The face had something to say, and now it's gone."
+        : "Each vector gets a 1 at the front. The top row becomes a copy of the voice, the left column a copy of the face, and the yellow middle holds every face-times-voice pair.",
+      tryit: muted ? <>Now press <b>{one ? "Take the 1 away" : "Put the 1 back"}</b> and compare.</> : <>Press <b>Mute the voice</b> and watch which cells survive.</>,
+    },
+    {
+      title: <>A third vector turns the grid into <em>a cube</em>.</>,
+      body: "Multiply the grid by each number of the text vector and stack the results. The first layer is multiplied by the text's 1, so the whole grid from the last scene survives inside it, unchanged.",
+      tryit: "Drag the slider to pull the layers apart.",
+    },
+    {
+      title: <>The real cube holds <em>140,481</em> numbers per clip.</>,
+      body: "In the notebook the vectors are 32, 32 and 128 long, plus their 1s. Two dense layers of 128 squeeze that cube into a single prediction of the clip's sentiment.",
+      note: "On the balanced binary test set the notebook records 70.4% accuracy and an F1 of 0.709.",
+    },
+  ]
 
   return (
-    <div className="ex">
-      <div className="ex-stage ex-fusion">
-        <div className="ex-vectors">
-          <div><p className="ex-vlabel" style={{ color: "var(--ex-blue)" }}>visual <i>v</i></p><Slider label="v₁" value={a[0]} color="var(--ex-blue)" onChange={(v) => setA([v, a[1]])} /><Slider label="v₂" value={a[1]} color="var(--ex-blue)" onChange={(v) => setA([a[0], v])} /></div>
-          <div><p className="ex-vlabel" style={{ color: "var(--ex-yellow)" }}>acoustic <i>a</i></p><Slider label="a₁" value={b[0]} color="var(--ex-yellow)" onChange={(v) => setB([v, b[1]])} /><Slider label="a₂" value={b[1]} color="var(--ex-yellow)" onChange={(v) => setB([b[0], v])} /></div>
-          <div><p className="ex-vlabel" style={{ color: "var(--ex-green)" }}>text <i>t</i></p><Slider label="t₁" value={t[0]} color="var(--ex-green)" onChange={(v) => setT([v, t[1]])} /><Slider label="t₂" value={t[1]} color="var(--ex-green)" onChange={(v) => setT([t[0], v])} /></div>
+    <Guided titles={titles} scene={scene} setScene={setScene} caption={captions[scene]}>
+      {scene === 0 && (
+        <div className="ex-trio">
+          <figure><Bars values={v} color="var(--ex-blue)" names={["v₁", "v₂"]} onChange={setV} /><figcaption><b style={{ color: "var(--ex-blue)" }}>face</b> → visual <i>v</i></figcaption></figure>
+          <figure><Bars values={a} color="var(--ex-yellow)" names={["a₁", "a₂"]} onChange={setA} /><figcaption><b style={{ color: "var(--ex-yellow)" }}>voice</b> → acoustic <i>a</i></figcaption></figure>
+          <figure><Bars values={t} color="var(--ex-green)" names={["t₁", "t₂"]} onChange={setT} /><figcaption><b style={{ color: "var(--ex-green)" }}>words</b> → text <i>t</i></figcaption></figure>
         </div>
-        <div className="ex-slices" onPointerLeave={() => setHover(null)}>
-          {T.map((tk, k) => (
-            <figure key={`${one}-${k}`} className="ex-slice" style={{ animationDelay: `${k * 90}ms` }}>
-              <svg viewBox={`0 0 ${B.length * cell + 2} ${A.length * cell + 2}`} width={B.length * cell + 2}>
-                {A.map((ai, i) => B.map((bj, j) => {
-                  const v = ai * bj * tk, o = order(i, j, k)
-                  const on = h && h[0] === i && h[1] === j && h[2] === k
-                  return (
-                    <g key={`${i}${j}`} onPointerEnter={() => setHover([i, j, k])}>
-                      <rect x={1 + j * cell} y={1 + i * cell} width={cell - 3} height={cell - 3} rx={5}
-                        className={`ex-cell is-${kinds[o]} ${on ? "is-on" : ""}`}
-                        style={{ fill: v >= 0 ? `rgba(88,196,221,${Math.min(0.9, Math.abs(v))})` : `rgba(252,98,85,${Math.min(0.9, Math.abs(v))})` }} />
-                    </g>
-                  )
-                }))}
-              </svg>
-              <figcaption>× {one && k === 0 ? "1" : `t${SUB[idx(k)]}`}</figcaption>
-            </figure>
-          ))}
+      )}
+      {scene === 1 && (
+        <div className="ex-outer">
+          <div className="ex-outer-top">{aName.map((n, j) => <b key={n} className={one && j === 0 ? "is-one" : ""} style={{ color: "var(--ex-yellow)" }}>{n}<small>{fmt(A[j], 1)}</small></b>)}</div>
+          <div className="ex-outer-row">
+            <div className="ex-outer-left">{vName.map((n, i) => <b key={n} className={one && i === 0 ? "is-one" : ""} style={{ color: "var(--ex-blue)" }}>{n}<small>{fmt(V[i], 1)}</small></b>)}</div>
+            {grid()}
+          </div>
+          <div className="ex-legend">
+            {one && <span className="is-solo">copies of one vector</span>}
+            <span className="is-pair">face × voice</span>
+            <span className="ex-count">{lit} of {V.length * A.length} cells carry signal</span>
+          </div>
+          <div className="ex-actions">
+            <button type="button" className={`ex-toggle ${muted ? "is-on" : ""}`} onClick={() => setMuted((m) => !m)}>{muted ? "Unmute the voice" : "Mute the voice"}</button>
+            <button type="button" className={`ex-toggle ${one ? "" : "is-on"}`} onClick={() => setOne((o) => !o)}>{one ? "Take the 1 away" : "Put the 1 back"}</button>
+          </div>
         </div>
-        <p className="ex-formula" aria-live="polite">{formula}</p>
-      </div>
-      <div className="ex-side">
-        <p className="ex-kicker">The one idea</p>
-        <h3>Append a <em>1</em> before you multiply.</h3>
-        <p>Tensor fusion takes the outer product of the three vectors: every entry of one times every entry of the others. On its own that only keeps three-way terms. Put a constant 1 at the front of each vector and the product also carries each modality alone and every pair.</p>
-        <button type="button" className={`ex-toggle ${one ? "is-on" : ""}`} onClick={() => setOne((v) => !v)} aria-pressed={one}>{one ? "Remove the 1" : "Append the 1"}</button>
-        <ul className="ex-legend">
-          {kinds.map((k, i) => counts[i] > 0 && <li key={k} className={`is-${k}`}><b>{counts[i]}</b> {k}</li>)}
-        </ul>
-        <p className="ex-note">Toy vectors of two numbers each. In the notebook they are 32, 32 and 128 long, so the cube holds 33 × 33 × 129 = 140,481 numbers for every clip.</p>
-      </div>
-    </div>
+      )}
+      {scene === 2 && (
+        <div className="ex-cubewrap">
+          <div className="ex-cubeview">
+            <div className="ex-cube" style={{ "--apart": apart } as React.CSSProperties}>
+              {[1, ...t].map((tk, k) => (
+                <div key={k} className={`ex-layer ${k === 0 ? "is-first" : ""}`} style={{ "--k": k } as React.CSSProperties}>
+                  <div className="ex-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+                    {[1, ...v].map((x, i) => [1, ...a].map((y, j) => {
+                      const val = x * y * tk
+                      return <span key={`${i}${j}`} className={`is-${i === 0 && j === 0 ? "const" : i === 0 || j === 0 ? "solo" : "pair"}`} style={{ background: cellColor(val) }} />
+                    }))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <ol className="ex-layers">
+              <li className="is-first"><b>× 1</b> the grid from scene 2, untouched</li>
+              <li><b>× t₁</b> every cell times {fmt(t[0], 2)}</li>
+              <li><b>× t₂</b> every cell times {fmt(t[1], 2)}</li>
+            </ol>
+          </div>
+          <label className="ex-apart">Pull the layers apart <input type="range" min={0} max={1} step={0.01} value={apart} onChange={(e) => setApart(Number(e.target.value))} /></label>
+        </div>
+      )}
+      {scene === 3 && (
+        <div className="ex-real">
+          <div className="ex-dims">
+            <p><span className="ex-dim" style={{ width: "26%", background: "var(--ex-blue)" }} /> 32 + 1 = <b>33</b></p>
+            <p><span className="ex-dim" style={{ width: "26%", background: "var(--ex-yellow)" }} /> 32 + 1 = <b>33</b></p>
+            <p><span className="ex-dim" style={{ width: "100%", background: "var(--ex-green)" }} /> 128 + 1 = <b>129</b></p>
+          </div>
+          <p className="ex-big">{count.toLocaleString("en-US")}</p>
+          <p className="ex-chain"><span>140,481</span>→<span>128</span>→<span>128</span>→<span>sentiment</span></p>
+        </div>
+      )}
+    </Guided>
   )
 }
 
@@ -106,7 +217,7 @@ export function ProbeExplorable() {
   useEffect(() => {
     if (!playing) return
     if (k >= WINDOWS.length) { setPlaying(false); return }
-    const id = window.setTimeout(() => setK((v) => v + 1), 520)
+    const id = window.setTimeout(() => setK((v) => v + 1), 560)
     return () => window.clearTimeout(id)
   }, [playing, k])
 
@@ -124,43 +235,50 @@ export function ProbeExplorable() {
 
   const done = k >= WINDOWS.length
   const half = Math.floor(WORDS.length / 2)
-  const chosen = done ? new Set(scores.map((v, i) => [v, i] as const).sort((x, y) => x[0] - y[0]).slice(0, half).map(([, i]) => i)) : new Set<number>()
+  const order = scores.map((v, i) => [v, i] as const).sort((x, y) => x[0] - y[0])
+  const chosen = done ? new Set(order.slice(0, half).map(([, i]) => i)) : new Set<number>()
   const phraseP = cur ? prob(WORDS.slice(cur.s, cur.s + cur.n)) : null
   const max = Math.max(0.0001, ...scores)
+  const phase = cur?.n ?? 0
 
   return (
     <div className="ex">
       <div className="ex-stage ex-probe">
-        <div className="ex-bars">
+        <ol className="ex-phases">{["one word", "two words", "three words"].map((p, i) => <li key={p} className={phase === i + 1 ? "is-on" : phase > i + 1 || done ? "is-done" : undefined}>{p} <small>× {NW[i + 1]}</small></li>)}</ol>
+        <div className="ex-bars-p">
           <div className="ex-pbar"><span>whole post</span><i style={{ width: `${full * 100}%` }} /><b>{full.toFixed(2)}</b></div>
-          <div className="ex-pbar is-phrase"><span>{cur ? `“${WORDS.slice(cur.s, cur.s + cur.n).join(" ")}” alone` : "a phrase alone"}</span><i style={{ width: `${(phraseP ?? 0) * 100}%` }} /><b>{phraseP !== null ? phraseP.toFixed(2) : "—"}</b>
-            {phraseP !== null && <em className="ex-gap" style={{ left: `${Math.min(full, phraseP) * 100}%`, width: `${Math.abs(full - phraseP) * 100}%` }} />}
-          </div>
-          <p className="ex-formula">{cur ? <>|Δ| = {Math.abs(full - (phraseP ?? 0)).toFixed(2)} × weight {NW[cur.n]} → added to {cur.n === 1 ? "this word" : `each of these ${cur.n} words`}</> : "Each phrase is scored by how far it lands from the whole post."}</p>
+          <div className="ex-pbar is-phrase"><span>{cur ? `“${WORDS.slice(cur.s, cur.s + cur.n).join(" ")}” alone` : "a phrase alone"}</span><i style={{ width: `${(phraseP ?? 0) * 100}%` }} /><b>{phraseP !== null ? phraseP.toFixed(2) : "—"}</b></div>
+          <p className="ex-formula">{cur ? <>gap {Math.abs(full - (phraseP ?? 0)).toFixed(2)} × {NW[cur.n]} → added to {cur.n === 1 ? "this word" : `each of these ${cur.n} words`}</> : "Probability the post is offensive, from a toy model."}</p>
         </div>
         <div className="ex-words">
           {WORDS.map((w, i) => {
             const inWin = cur && i >= cur.s && i < cur.s + cur.n
             return (
               <div key={w} className={`ex-word ${inWin ? "is-in" : ""} ${chosen.has(i) ? "is-chosen" : ""}`}>
-                <span className="ex-score" style={{ height: `${(scores[i] / max) * 56}px` }} />
+                <span className="ex-score" style={{ height: `${(scores[i] / max) * 60}px` }} />
                 <b>{w}</b>
               </div>
             )
           })}
         </div>
+        <p className="ex-axis-note">bar = average gap so far · <em>shorter means the word alone stays closer to the whole post</em></p>
         <div className="ex-scrub">
-          <button type="button" onClick={() => { if (done) setK(0); setPlaying((p) => !p || done) }}>{playing ? "Pause" : done ? "Replay" : k ? "Resume" : "Probe"}</button>
+          <button type="button" onClick={() => { if (done) setK(0); setPlaying((p) => !p || done) }}>{playing ? "Pause" : done ? "Replay" : k ? "Resume" : "Start the probe"}</button>
           <input type="range" min={0} max={WINDOWS.length} value={k} onChange={(e) => { setPlaying(false); setK(Number(e.target.value)) }} aria-label="Phrases probed so far" />
-          <span>{cur ? `${["", "uni", "bi", "tri"][cur.n]}grams · ${k}/${WINDOWS.length}` : `0/${WINDOWS.length}`}</span>
+          <span>{k}/{WINDOWS.length}</span>
         </div>
+        {done && (
+          <p className="ex-reveal">Rationale: {WORDS.map((w, i) => <span key={w} className={chosen.has(i) ? "is-chosen" : ""}>{w} </span>)}</p>
+        )}
       </div>
       <div className="ex-side">
         <p className="ex-kicker">The one idea</p>
         <h3>Ask every phrase what it does <em>alone</em>.</h3>
-        <p>Each unigram, bigram and trigram is fed to the model by itself. A phrase that, alone, lands close to the whole post&apos;s prediction is carrying the decision. Gaps are weighted 0.5, 0.3 and 0.2 by length, averaged per word and normalized.</p>
-        <p>When the probe finishes, the words with the <em>smallest</em> scores become the rationale: the lower half here, the lowest five in longer posts.</p>
-        <p className="ex-note">A toy scorer stands in for the trained MuRIL model; the arithmetic is the repository&apos;s.</p>
+        <p>The model reads each word, each pair and each triple by itself. A phrase that, alone, lands close to the whole post&apos;s score is carrying the decision. The gaps are weighted by length, averaged per word and normalized.</p>
+        <p>{done
+          ? <>Done. <em>garbage</em> alone scores 0.60, close to the post&apos;s 0.79, so it gets the shortest bar; its neighbours share some credit through the pairs and triples around it. The shortest half become the rationale.</>
+          : <>Press <b>Start the probe</b> and watch the bars. When it finishes, the <em>shortest</em> bars become the rationale: the lower half here, the lowest five in longer posts.</>}</p>
+        <p className="ex-note">A toy scorer stands in for the trained model; the arithmetic is the repository&apos;s.</p>
       </div>
     </div>
   )
@@ -170,115 +288,106 @@ export function ProbeExplorable() {
 
 const PASS = 0.8, TOL = 0.05
 const BASE = [0.92, 0.88, 0.85, 0.95, 0.81, 0.7, 0.9, 0.86, 0.83, 0.65]
-const CAND0 = [0.97, 0.93, 0.9, 0.98, 0.72, 0.84, 0.95, 0.62, 0.88, 0.82]
-type Cls = "regressed" | "improved" | "unchanged" | "not comparable"
+const CAND = [0.95, 0.91, 0.88, 0.97, 0.72, 0.84, 0.93, 0.62, 0.86, 0.82]
+type Cls = "regressed" | "improved" | "unchanged"
 
-// The repository's pairing rule for rubric-judged cases, where a fail-to-fail drop can still count.
-function classify(b: number, c: number | null): Cls {
-  if (c === null) return "not comparable"
+// The repository's pairing rule for rubric-judged cases.
+function classify(b: number, c: number): Cls {
   const bp = b >= PASS, cp = c >= PASS
   if (bp && !cp) return "regressed"
   if (!bp && cp) return "improved"
-  if (b - c >= TOL) return "regressed"
-  if (c - b >= TOL) return "improved"
+  // The repository compares Decimals; round so 0.97 − 0.92 counts as exactly 0.05.
+  const d = Math.round((c - b) * 10000) / 10000
+  if (-d >= TOL) return "regressed"
+  if (d >= TOL) return "improved"
   return "unchanged"
 }
 
 export function PairingExplorable() {
-  const [cand, setCand] = useState<number[]>(CAND0)
-  const [sel, setSel] = useState(4)
-  const [critical, setCritical] = useState<Set<number>>(() => new Set())
-  const [maxReg, setMaxReg] = useState(0)
-  const [minPass, setMinPass] = useState(0.8)
-  const [drop, setDrop] = useState(0)
-  const [missing, setMissing] = useState(false)
-  const [crash, setCrash] = useState(false)
-  const svg = useRef<SVGSVGElement>(null)
-  const dragging = useRef<number | null>(null)
-
-  const candAt = (i: number) => (missing && i === 9 ? null : cand[i])
-  const cls = BASE.map((b, i) => classify(b, candAt(i)))
-  const comparable = cls.filter((c) => c !== "not comparable").length
+  const [scene, setScene] = useState(0)
+  const [allowed, setAllowed] = useState(0)
+  const [critical, setCritical] = useState(false)
+  const cls = BASE.map((b, i) => classify(b, CAND[i]))
   const avg = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length
-  const baseAvg = avg(BASE), candVals = cand.filter((_, i) => candAt(i) !== null), candAvg = avg(candVals)
-  const passRate = candVals.filter((v) => v >= PASS).length / candVals.length
-  const pairedDelta = avg(BASE.map((b, i) => (candAt(i) === null ? null : (candAt(i) as number) - b)).filter((v): v is number => v !== null))
   const regs = cls.filter((c) => c === "regressed").length
-  const critRegs = Array.from(critical).filter((i) => cls[i] === "regressed").length
+  const reasons: string[] = []
+  if (critical && cls[4] === "regressed") reasons.push("Candidate regressed 1 critical test case(s).")
+  if (regs > allowed) reasons.push(`Candidate introduced ${regs} paired regressions; maximum allowed is ${allowed}.`)
+  const decision = reasons.length ? "BLOCK" : "PASS"
 
-  // Same order and wording as decide_release.
-  const reasons: [string, "block" | "gap"][] = []
-  if (comparable < BASE.length) reasons.push([`Comparison coverage ${(comparable / BASE.length).toFixed(2)} is below 1.00`, "gap"])
-  if (crash) reasons.push(["A runtime-success check failed", "block"])
-  if (critRegs) reasons.push([`${critRegs} critical case${critRegs > 1 ? "s" : ""} regressed`, "block"])
-  if (passRate < minPass) reasons.push([`Pass rate ${passRate.toFixed(2)} is below ${minPass.toFixed(2)}`, "block"])
-  if (regs > maxReg) reasons.push([`${regs} paired regression${regs === 1 ? "" : "s"}; at most ${maxReg} allowed`, "block"])
-  if (pairedDelta < -drop) reasons.push([`Paired score fell ${Math.abs(pairedDelta).toFixed(3)}, more than ${drop.toFixed(2)}`, "block"])
-  const blocked = reasons.some(([, k]) => k === "block")
-  const verdict = !reasons.length ? "PASS" : blocked ? "BLOCK" : "REVIEW"
+  const rows = (paired: boolean) => (
+    <div className={`ex-rows ${paired ? "is-paired" : ""}`}>
+      <p className="ex-rows-head"><span>case</span><span>baseline</span><span /><span>candidate</span><span /></p>
+      {BASE.map((b, i) => (
+        <p key={i} className={`ex-row is-${paired ? cls[i] : "plain"} ${critical && i === 4 && paired ? "is-critical" : ""}`} style={{ animationDelay: `${i * 70}ms` }}
+          title={paired ? (cls[i] === "regressed" ? "Passed before, fails now" : cls[i] === "improved" ? "Failed before, passes now (or rose by 0.05 or more)" : "No meaningful change") : undefined}>
+          <span>{i + 1}</span>
+          <span className={b >= PASS ? "is-pass" : "is-fail"}>{b.toFixed(2)}</span>
+          <i className="ex-link" />
+          <span className={CAND[i] >= PASS ? "is-pass" : "is-fail"}>{CAND[i].toFixed(2)}</span>
+          <em>{paired ? cls[i] : ""}</em>
+        </p>
+      ))}
+    </div>
+  )
 
-  // Plot: baseline score across, candidate score up, both from 0.55 to 1.
-  const W = 300, lo = 0.55, X = (v: number) => 24 + ((v - lo) / (1 - lo)) * W, Y = (v: number) => 12 + (1 - (v - lo) / (1 - lo)) * W
-  const onMove = (e: React.PointerEvent) => {
-    if (dragging.current === null || !svg.current) return
-    const r = svg.current.getBoundingClientRect()
-    const y = ((e.clientY - r.top) / r.height) * (W + 40)
-    const v = Math.max(lo, Math.min(1, 1 - ((y - 12) / W) * (1 - lo)))
-    setCand((c) => c.map((x, i) => (i === dragging.current ? Math.round(v * 100) / 100 : x)))
-  }
+  const titles = ["The averages", "Pair them", "Let policy decide"]
+  const captions = [
+    {
+      title: <>On average, the new version <em>looks better</em>.</>,
+      body: <>Ten test questions, two versions of the app. Scores of 0.80 or more pass. The average went from {avg(BASE).toFixed(3)} to {avg(CAND).toFixed(3)}, and eight cases pass either way.</>,
+      tryit: <>Would you ship it? Press <b>Next</b>.</>,
+    },
+    {
+      title: <>Pair each case with <em>itself</em>.</>,
+      body: "Compare every question with the same question in the old version. Cases 5 and 8 used to pass and now fail. Cases 6 and 10 were fixed. Two broke, two healed, and the average rose anyway, which is exactly what an average hides.",
+      tryit: "Point at a row to read the rule that labelled it.",
+    },
+    {
+      title: <>The verdict is <em>arithmetic</em>, not a vote.</>,
+      body: "Your release policy says how many regressions you can live with. CI calls AgentGuard's release gate and gets back an exit code: 0 ships, 1 stops the pipeline.",
+      tryit: "Raise the allowance to 2, then mark case 5 as critical.",
+    },
+  ]
 
   return (
-    <div className="ex">
-      <div className="ex-stage ex-pair">
-        <svg ref={svg} viewBox={`0 0 ${W + 40} ${W + 40}`} onPointerMove={onMove} onPointerUp={() => { dragging.current = null }} onPointerLeave={() => { dragging.current = null }} role="img" aria-label="Baseline score against candidate score for ten test cases">
-          <polygon className="ex-band" points={`${X(lo)},${Y(lo + TOL)} ${X(1 - TOL)},${Y(1)} ${X(1)},${Y(1)} ${X(1)},${Y(1 - TOL)} ${X(lo + TOL)},${Y(lo)} ${X(lo)},${Y(lo)}`} />
-          <rect className="ex-zone is-bad" x={X(PASS)} y={Y(PASS)} width={X(1) - X(PASS)} height={Y(lo) - Y(PASS)} />
-          <rect className="ex-zone is-good" x={X(lo)} y={Y(1)} width={X(PASS) - X(lo)} height={Y(PASS) - Y(1)} />
-          <line className="ex-diag" x1={X(lo)} y1={Y(lo)} x2={X(1)} y2={Y(1)} />
-          <line className="ex-thresh" x1={X(PASS)} y1={Y(lo)} x2={X(PASS)} y2={Y(1)} />
-          <line className="ex-thresh" x1={X(lo)} y1={Y(PASS)} x2={X(1)} y2={Y(PASS)} />
-          <text className="ex-axis" x={X(1)} y={W + 34} textAnchor="end">baseline score →</text>
-          <text className="ex-axis" x={10} y={Y(1) - 2} transform={`rotate(-90 10 ${Y(1) - 2})`} textAnchor="end">candidate →</text>
-          <text className="ex-zlabel" x={X(PASS) + 6} y={Y(lo) - 8}>passed → failed</text>
-          <text className="ex-zlabel" x={X(lo) + 6} y={Y(1) + 14}>failed → passed</text>
-          {BASE.map((b, i) => {
-            const c = candAt(i)
-            if (c === null) return <text key={i} className="ex-missing" x={X(b)} y={Y(lo) - 4} textAnchor="middle">?</text>
-            return (
-              <g key={i} className={`ex-pt is-${cls[i].replace(" ", "-")} ${sel === i ? "is-sel" : ""}`}
-                onPointerDown={(e) => { (e.target as Element).setPointerCapture?.(e.pointerId); dragging.current = i; setSel(i) }}>
-                <line x1={X(b)} y1={Y(b)} x2={X(b)} y2={Y(c)} />
-                <circle cx={X(b)} cy={Y(c)} r={critical.has(i) ? 9 : 7} />
-                {critical.has(i) && <circle className="ex-crit" cx={X(b)} cy={Y(c)} r={13} />}
-              </g>
-            )
-          })}
-        </svg>
-        <div className="ex-avg">
-          <p>Average score <b>{baseAvg.toFixed(3)} → {candAvg.toFixed(3)}</b> <span className={candAvg >= baseAvg ? "is-up" : "is-down"}>{candAvg >= baseAvg ? "looks better" : "looks worse"}</span></p>
-          <p>Pass rate <b>{passRate.toFixed(2)}</b> · paired regressions <b className={regs ? "is-bad" : ""}>{regs}</b></p>
+    <Guided titles={titles} scene={scene} setScene={setScene} caption={captions[scene]}>
+      {scene === 0 && (
+        <div className="ex-avgview">
+          <div className="ex-avgcards">
+            <p><small>baseline average</small><b>{avg(BASE).toFixed(3)}</b></p>
+            <p className="is-up"><small>candidate average</small><b>{avg(CAND).toFixed(3)} ▲</b></p>
+            <p><small>passing</small><b>8 → 8</b></p>
+          </div>
+          {rows(false)}
         </div>
-      </div>
-      <div className="ex-side">
-        <p className="ex-kicker">The one idea</p>
-        <h3>Pair each case with <em>itself</em>.</h3>
-        <p>The average went up, and the pass rate held. Two cases still broke. AgentGuard compares every case against the same case in the baseline: passed to failed, or a drop of 0.05 or more, is a regression. Drag a dot to change a candidate score.</p>
-        <div className="ex-policy">
-          <p className="ex-selected">Case {sel + 1}: {BASE[sel].toFixed(2)} → {candAt(sel)?.toFixed(2) ?? "no run"} · <b className={`is-${cls[sel].replace(" ", "-")}`}>{cls[sel]}</b>
-            <label><input type="checkbox" checked={critical.has(sel)} onChange={() => setCritical((s) => { const n = new Set(s); if (!n.delete(sel)) n.add(sel); return n })} /> critical</label></p>
-          <label>Most regressions allowed <output>{maxReg}</output><input type="range" min={0} max={3} value={maxReg} onChange={(e) => setMaxReg(Number(e.target.value))} /></label>
-          <label>Minimum pass rate <output>{minPass.toFixed(2)}</output><input type="range" min={0.5} max={1} step={0.05} value={minPass} onChange={(e) => setMinPass(Number(e.target.value))} /></label>
-          <label>Allowed score drop <output>{drop.toFixed(2)}</output><input type="range" min={0} max={0.1} step={0.01} value={drop} onChange={(e) => setDrop(Number(e.target.value))} /></label>
-          <label className="ex-check"><input type="checkbox" checked={missing} onChange={(e) => setMissing(e.target.checked)} /> Case 10 never ran on the candidate</label>
-          <label className="ex-check"><input type="checkbox" checked={crash} onChange={(e) => setCrash(e.target.checked)} /> A candidate run crashed</label>
+      )}
+      {scene === 1 && rows(true)}
+      {scene === 2 && (
+        <div className="ex-gate">
+          <div className="ex-gate-controls">
+            <label>Regressions allowed
+              <span className="ex-stepper">
+                <button type="button" onClick={() => setAllowed((v) => Math.max(0, v - 1))} aria-label="Fewer">−</button>
+                <b>{allowed}</b>
+                <button type="button" onClick={() => setAllowed((v) => Math.min(3, v + 1))} aria-label="More">+</button>
+              </span>
+            </label>
+            <label className="ex-check"><input type="checkbox" checked={critical} onChange={(e) => setCritical(e.target.checked)} /> Case 5 is critical</label>
+            <p className="ex-found">Found: <b>{regs}</b> paired regressions{critical ? ", one of them critical" : ""}</p>
+          </div>
+          <pre className={`ex-json is-${decision.toLowerCase()}`} key={decision + reasons.length}>{`GET /api/v1/ci/release-gate
+{
+  "passed": ${decision === "PASS"},
+  "exit_code": ${decision === "PASS" ? 0 : 1},
+  "decision": {
+    "decision": "${decision}",
+    "reasons": [${reasons.map((r) => `\n      "${r}"`).join(",")}${reasons.length ? "\n    " : ""}]
+  }
+}`}</pre>
         </div>
-        <div className={`ex-verdict is-${verdict.toLowerCase()}`} role="status">
-          <strong key={verdict}>{verdict}</strong>
-          <ul>{reasons.length ? reasons.map(([r]) => <li key={r}>{r}</li>) : <li>Every rule holds and every case is paired.</li>}</ul>
-        </div>
-        <button type="button" className="ex-reset" onClick={() => { setCand(CAND0); setCritical(new Set()); setMaxReg(0); setMinPass(0.8); setDrop(0); setMissing(false); setCrash(false) }}>Reset</button>
-      </div>
-    </div>
+      )}
+    </Guided>
   )
 }
 

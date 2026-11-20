@@ -280,3 +280,163 @@ export const flows: Record<string, Flow> = {
     ],
   },
 }
+
+// What travels between the blocks at each step: a label for the moving token, and the actual data or
+// code at that moment, taken from (or shaped exactly like) the repository's own.
+export type Packet = { token: string; code: string }
+
+export const packets: Record<string, Packet[]> = {
+  agentguard: [
+    { token: "spans", code: `with ag.trace("answer-question", input={"question": q}) as trace:
+    with trace.span("plan", type="LLM"): ...
+    with trace.span("retrieve", type="RETRIEVER"):
+        with trace.span("summarize-documents", type="TOOL"): ...
+    with trace.span("generate", type="LLM"): ...` },
+    { token: "trace", code: `POST /api/v1/traces
+x-agentguard-api-key: ag_…
+{
+  "project_slug": "research-agent", "version": "v1",
+  "name": "answer-question", "status": "OK",
+  "spans": [
+    { "external_span_id": "s2", "name": "retrieve", "type": "RETRIEVER" },
+    { "external_span_id": "s3", "parent_external_span_id": "s2",
+      "name": "summarize-documents", "type": "TOOL" }, …
+  ]
+}` },
+    { token: "check", code: `✓ 4 spans, limit 500
+✓ external_span_id values unique
+✓ every parent is in this payload
+✓ no cycles
+✓ every span ends after it starts
+✓ project/version belongs to your workspace` },
+    { token: "rows", code: `"input": { "question": "Email [REDACTED] the refund policy" }
+
+BEGIN;
+  INSERT INTO traces (…);
+  INSERT INTO spans (…, parent_span_id) VALUES (…, NULL);    -- retrieve
+  INSERT INTO spans (…, parent_span_id) VALUES (…, :retrieve); -- tool
+COMMIT;` },
+    { token: "case", code: `dataset_case {
+  "name": "refund window",
+  "input": { "question": "…" },
+  "expected_substring": "30 days",
+  "metadata": { "critical": true }
+}
+trace.input.dataset_case_id  →  this case` },
+    { token: "job", code: `evaluation_job {
+  evaluator: "builtin.groundedness",
+  status: QUEUED, max_attempts: 2   # default
+}
++ one evaluation_job_case per applicable case
+
+redis.enqueue_job("process_evaluation_job_arq", job_id)` },
+    { token: "claim", code: `SELECT * FROM evaluation_jobs
+ WHERE status = 'QUEUED'
+ ORDER BY created_at
+ LIMIT 1
+ FOR UPDATE SKIP LOCKED;   -- a second worker skips this row
+
+stuck RUNNING > 300 s  →  back to QUEUED` },
+    { token: "score", code: `judge (temperature 0, JSON only) →
+{ "score": 0.72, "passed": false,
+  "explanation": "cites a document that was not retrieved" }
+
+rule: passed must equal (score ≥ 0.8)` },
+    { token: "pairs", code: `case 1  groundedness  0.92 → 0.97   IMPROVED   +0.05
+case 5  groundedness  0.81 → 0.72   REGRESSED  passed → failed
+case 6  groundedness  0.70 → 0.84   IMPROVED   failed → passed
+case 8  groundedness  0.86 → 0.62   REGRESSED  passed → failed
+failure stage: "retrieval"  (correlated evidence only; no causal claim)` },
+    { token: "verdict", code: `GET /api/v1/ci/release-gate?…&maximum_regressions=0
+{
+  "passed": false,
+  "exit_code": 1,
+  "decision": {
+    "decision": "BLOCK",
+    "reasons": ["Candidate introduced 2 paired regressions; maximum allowed is 0."]
+  }
+}` },
+  ],
+  "x-mutest": [
+    { token: "post", code: `text:       "…"
+label:      1            # hateful or offensive
+rationale:  [0, 0, 1, 1, 0, 0, 1]   # one flag per word, three annotators` },
+    { token: "model", code: `XLMRobertaForSequenceClassification
+  .from_pretrained("xlm-roberta-base", num_labels=2)   # 20 epochs
+
+LimeTextExplainer(class_names=["non-hate", "hate"])
+  .explain_instance(text, predictor, num_features=200, num_samples=500)` },
+    { token: "attn", code: `attn = outputs.attentions[-1][:, :, 0, :]   # last layer, [CLS] row
+attn = attn.mean(dim=1)                      # average the heads
+loss = 0.5 * classification + 0.5 * BCEWithLogits(attn, rationale)` },
+    { token: "n-gram", code: `for n, w in {1: 0.5, 2: 0.3, 3: 0.2}.items():
+    for gram in ngrams(text, n):
+        diff = (p(text) - p(gram)).abs().mean()
+        for tok in gram:
+            score[tok] += w * diff
+score = normalize(score / count)` },
+    { token: "words", code: `order = sorted(range(len(scores)), key=lambda i: scores[i])
+bottom = order[:5] if len(scores) > 10 else order[:len(scores) // 2]
+pred_rationales = [1 if i in bottom else 0 for i in range(len(scores))]` },
+    { token: "LLM", code: `model: gpt-4o | llama3.1-405b | mistral-large-latest
+temperature: 0
+system: "…return a list of the hateful or offensive words and phrases
+         without providing any explanation…"` },
+    { token: "attn", code: `ground truth  ←  pred_rationales
+loss = 0.7 * attention_loss + 0.3 * classification_loss
+AdamW(lr=2e-5, weight_decay=0.01), max_len = 128` },
+    { token: "scores", code: `comprehensiveness:  rationale hidden    "… <mask> <mask> …"
+sufficiency:        only rationale kept "<mask> … word word … <mask>"
+Token-F1:           every word, flattened
+IOU-F1:             spans count when IoU > 0.5` },
+  ],
+  "tensor-fusion": [
+    { token: "clip", code: `audio, video, text, label = batch
+# [B, 50, 35]  [B, 50, 74]  [B, 50, 300]` },
+    { token: "balance", code: `label = 1 if sentiment >= 0 else 0   # exactly 0 is skipped
+train 550 + 550 = 1100
+valid  75 +  75 =  150
+test  250 + 250 =  500` },
+    { token: "vectors", code: `SubnetModel:  x.mean(dim=1) → Linear 32 → 32 → 32   (ReLU)
+TextModel:    LSTM(300 → 128) → Linear 128 → 128    (ReLU)` },
+    { token: "+1", code: `ones = torch.ones(B, 1)
+a = torch.cat((ones, a), dim=1)   # 33
+v = torch.cat((ones, v), dim=1)   # 33
+t = torch.cat((ones, t), dim=1)   # 129` },
+    { token: "tensor", code: `f = torch.bmm(a.unsqueeze(2), v.unsqueeze(1))   # [B, 33, 33]
+f = f.view(-1, 33 * 33, 1)                      # [B, 1089, 1]
+f = torch.bmm(f, t.unsqueeze(1)).view(B, -1)    # [B, 140481]` },
+    { token: "128", code: `fc1: Linear(140481, 128) → ReLU
+fc2: Linear(128, 128)    → ReLU` },
+    { token: "ŷ", code: `binary:      sigmoid · BCELoss · Adam(5e-4)   →  acc 0.704, F1 0.709
+regression:  sigmoid scaled to [−3, 3] · MSE   →  MAE 1.10, r 0.53
+five-class:  Linear(128, 5) · cross_entropy    →  acc 0.319` },
+    { token: "!", code: `# inside the "Validation" block of the training loop
+for batch in test_dataloader:     # should be the validation loader
+    ...` },
+  ],
+  "course-catalog": [
+    { token: "seed", code: `await Course.deleteMany({})          // on every boot
+await Course.insertMany(courses)     // CS101 … CS105` },
+    { token: "login", code: `GET /auth/google
+passport.authenticate('google', { scope: ['profile', 'email'] })` },
+    { token: "role", code: `const isStudent = /^\\d{2}[a-zA-Z]{3}\\d{3}@iiitdwd\\.ac\\.in$/.test(email)
+branch: BCS → CSE · BDS → DSAI · BEC → ECE
+semester from the joining year: 1, 3, 5 or 7` },
+    { token: "session", code: `serializeUser   → { id, role: 'student' | 'professor' }
+deserializeUser → (role === 'student' ? Student : Professor).findById(id)` },
+    { token: "course", code: `GET /student/course/:id
+Course.findById(id).populate('professor')   → JSON` },
+    { token: "cart", code: `POST /student/addToCart  { courseId }
+if (!req.session.cart.includes(courseId)) req.session.cart.push(courseId)` },
+    { token: "writes", code: `for each courseId in cart:
+  user.enrolledCourses.push(courseId)
+  course.enrolledStudents.push(userId)
+  await course.save()
+await user.save()
+delete req.session.cart` },
+    { token: "gap", code: `// no transaction around the saves
+// no "already enrolled" check in /student/confirm
+// creditLimit: 25 is defined on Student and never read` },
+  ],
+}

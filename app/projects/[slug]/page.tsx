@@ -9,8 +9,8 @@ import { CrashExplorable, FusionExplorable, PairingExplorable, ProbeExplorable }
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
 import { ReadingProgress } from "@/components/xp/reading"
-import { ArchFlow } from "@/components/xp/arch-flow"
-import { flows } from "@/lib/flows"
+import { SystemFlow } from "@/components/xp/system-flow"
+import { flows, packets } from "@/lib/flows"
 import { RepoSection } from "@/components/xp/repo-section"
 import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
@@ -24,6 +24,13 @@ const chapterCopy: Record<string, { opening: string; system: string; decisions: 
   "x-mutest": { opening: "Why the label is only half the answer", system: "Training with reasons, not only labels", decisions: "How explanation quality was measured", debugging: "The annotation process needed another pass", results: "What the paper reports", limits: "What the benchmark cannot settle" },
   "tensor-fusion": { opening: "The sentence is not the whole signal", system: "Three representations, one prediction", decisions: "What I kept separate", debugging: "Alignment was the quiet failure mode", results: "The checked-in run", limits: "Where the experiment stops" },
   "course-catalog": { opening: "The same course means two different jobs", system: "One data model, two paths through it", decisions: "Small choices that shaped the flow", debugging: "Enrollment touched both sides", results: "What the repository implements", limits: "What would need hardening" },
+}
+
+const runTitle: Record<string, string> = {
+  agentguard: "From one traced run to a release verdict.",
+  "x-mutest": "From annotated posts to explanations you can measure.",
+  "tensor-fusion": "From three streams to one sentiment score.",
+  "course-catalog": "From a Google sign-in to a confirmed enrollment.",
 }
 
 const explorableTitle: Record<string, string> = {
@@ -142,17 +149,22 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       </section>
 
       {flows[project.slug] && (
-        <section className="xp-section xp-try xp-walk" aria-labelledby="walk-title">
+        <section className="xp-section xp-try xp-walk" aria-labelledby="run-title">
+          <p className="xp-head-label"><span>↳</span>How it runs</p>
+          <h2 id="run-title">{runTitle[project.slug]}</h2>
+          <p className="xp-try-intro">Follow the data through the real components. The token is what&apos;s moving; the inspector shows exactly what it looks like at that moment, taken from the repository.</p>
+          <SystemFlow flow={flows[project.slug]} packets={packets[project.slug]} />
+        </section>
+      )}
+
+      {flows[project.slug] && (
+        <section className="xp-section xp-try xp-walk" aria-labelledby="idea-title">
           <p className="xp-head-label"><span>↳</span>The idea that makes it work</p>
-          <h2 id="walk-title">{explorableTitle[project.slug]}</h2>
+          <h2 id="idea-title">{explorableTitle[project.slug]}</h2>
           {project.slug === "tensor-fusion" && <FusionExplorable />}
           {project.slug === "x-mutest" && <ProbeExplorable />}
           {project.slug === "agentguard" && <PairingExplorable />}
           {project.slug === "course-catalog" && <CrashExplorable />}
-          <details className="xp-whole">
-            <summary>See the whole system, step by step</summary>
-            <ArchFlow flow={flows[project.slug]} />
-          </details>
         </section>
       )}
 

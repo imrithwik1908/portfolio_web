@@ -54,7 +54,8 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
       t += 1
       let flight = -1
       if (scrub) {
-        const s = Math.min(1, Math.max(0, (scrub.current - 0.22) / 0.56))
+        // The page decides the timing; 0 is Dharwad, 1 is Tempe.
+        const s = Math.min(1, Math.max(0, scrub.current))
         flight = s * s * (3 - 2 * s)
         const [lon, lat] = route(flight) as [number, number]
         const tl = -lon, tp = -Math.max(-35, Math.min(35, lat)) - 8
