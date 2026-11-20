@@ -168,14 +168,14 @@ export const projects: Project[] = [
     imageFit: "contain",
     status: "Completed study",
     year: "2024",
-    stack: ["PyTorch", "TensorFlow", "CMU-MOSEI", "scikit-learn"],
+    stack: ["PyTorch", "MultiBench", "CMU-MOSI", "scikit-learn"],
     capabilities: ["data", "intelligence"],
     github: "https://github.com/imrithwik1908/Tensor-Fusion-Network",
     outcome: "70.4% binary test accuracy",
     outcomeLabel: "Verified notebook output",
     problem: [
       "Sentiment is not carried by words alone. Tone and expression can reinforce the transcript, contradict it, or add noise. The useful question was not simply whether more modalities helped, but how fusion choices changed the result.",
-      "The experiments use aligned language, acoustic, and visual feature sequences from CMU-MOSEI and evaluate several prediction setups rather than presenting one final model as universal.",
+      "The experiments use aligned language, acoustic, and visual feature sequences from CMU-MOSI and evaluate several prediction setups rather than presenting one final model as universal.",
     ],
     system: [
       "Each modality is encoded independently before the representations are combined. The notebooks cover binary sentiment, five-class classification, and continuous regression, with separate training, validation, and held-out test flows.",
@@ -204,7 +204,7 @@ export const projects: Project[] = [
     ],
     limitations: [
       "The work remains in notebooks and is not packaged as a reproducible training application.",
-      "The repository does not include the CMU-MOSEI feature data or an automated environment setup.",
+      "The repository does not include the CMU-MOSI feature data or an automated environment setup.",
       "The five-class result is substantially weaker than the binary setup and needs better tuning and error analysis.",
     ],
     next:

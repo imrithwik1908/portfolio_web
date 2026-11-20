@@ -78,7 +78,7 @@ export const repoDetail: Record<string, RepoDetail> = {
     features: [
       { title: "Three target shapes", body: "The same fused representation is trained for binary sentiment, five-class sentiment and continuous regression, each in its own notebook." },
       { title: "Sequence encoders per modality", body: "Language, acoustic and visual feature sequences are encoded with LSTM layers before fusion." },
-      { title: "An honest record", body: "The repository is an experimental notebook record, not a packaged application, and it does not include the CMU-MOSEI features." },
+      { title: "An honest record", body: "The repository is an experimental notebook record, not a packaged application, and it does not include the CMU-MOSI features." },
     ],
     layout: [
       { path: "Combination_binary.ipynb", role: "Binary sentiment: positive or negative" },

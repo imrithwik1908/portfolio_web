@@ -129,7 +129,16 @@ export function Globe() {
     draw()
 
     const onFly = (e: Event) => {
-      const to = (e as CustomEvent<"dharwad" | "tempe">).detail === "tempe" ? TEMPE : DHARWAD
+      const detail = (e as CustomEvent<"dharwad" | "tempe" | "route">).detail
+      if (detail === "route") {
+        // Turn to the middle of the flight path and show the whole arc.
+        const mid = route(0.5) as [number, number]
+        target.current = [-mid[0], -Math.max(-40, Math.min(40, mid[1]))]
+        focus.current = null
+        setLabel("The flight · 14,530 km")
+        return
+      }
+      const to = detail === "tempe" ? TEMPE : DHARWAD
       target.current = [-to[0], -to[1]]
       focus.current = to === TEMPE ? "tempe" : "dharwad"
       setLabel(to === TEMPE ? "Tempe, Arizona" : "Dharwad, India")

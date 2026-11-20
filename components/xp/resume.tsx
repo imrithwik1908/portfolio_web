@@ -112,7 +112,7 @@ function ResumeSheet() {
       </article>
       <article>
         <div className="xp-sheet-row"><strong>Tensor Fusion</strong><span>2024</span></div>
-        <ul><li>Multimodal sentiment analysis on CMU-MOSEI fusing text, audio and video; 70.4% binary accuracy, F1 0.709.</li></ul>
+        <ul><li>Multimodal sentiment analysis on CMU-MOSI fusing text, audio and video; 70.4% binary accuracy, F1 0.709.</li></ul>
       </article>
       <article>
         <div className="xp-sheet-row"><strong>Course Catalog</strong><span>2024</span></div>

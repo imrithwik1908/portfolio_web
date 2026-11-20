@@ -9,6 +9,8 @@ import { PolicyPlayground, EnrollmentDemo } from "@/components/xp/playgrounds"
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
 import { ReadingProgress } from "@/components/xp/reading"
+import { ArchFlow } from "@/components/xp/arch-flow"
+import { flows } from "@/lib/flows"
 import { RepoSection } from "@/components/xp/repo-section"
 import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
@@ -131,6 +133,15 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <div><p>How it works</p><span>{project.system[0]}</span></div>
         <div><p>What I&apos;d do next</p><span>{project.next}</span></div>
       </section>
+
+      {flows[project.slug] && (
+        <section className="xp-section xp-try xp-walk" aria-labelledby="walk-title">
+          <p className="xp-head-label"><span>↳</span>Walk through it</p>
+          <h2 id="walk-title">The whole system, one step at a time.</h2>
+          <p className="xp-try-intro">A model of how {project.title} actually runs, built from its repository. It narrates itself slowly; use the arrows to go at your own pace, drag to turn it, or click any block.</p>
+          <ArchFlow flow={flows[project.slug]} />
+        </section>
+      )}
 
       {project.slug === "agentguard" && (
         <section className="xp-section xp-try" aria-labelledby="try-title">
