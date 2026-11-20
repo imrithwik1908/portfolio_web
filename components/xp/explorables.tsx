@@ -110,7 +110,7 @@ export function FusionExplorable() {
   const captions = [
     {
       title: <>Every clip becomes <em>three short lists of numbers</em>.</>,
-      body: "Before anything is fused, each modality runs through its own small network: the face, the voice and the words each come out as a vector. Here they have two numbers each, so you can see everything.",
+      body: "Before anything is combined, each sense runs through its own small network: the face, the voice and the words each come out as a short list of numbers, a vector. Here each has two numbers, so you can see everything.",
       tryit: "Grab the top of any bar and drag it. These are the numbers the next scenes multiply.",
     },
     {
@@ -129,8 +129,8 @@ export function FusionExplorable() {
     },
     {
       title: <>The real cube holds <em>140,481</em> numbers per clip.</>,
-      body: "In the notebook the vectors are 32, 32 and 128 long, plus their 1s. Two dense layers of 128 squeeze that cube into a single prediction of the clip's sentiment.",
-      note: "On the balanced binary test set the notebook records 70.4% accuracy and an F1 of 0.709.",
+      body: "In the notebook the vectors are 32, 32 and 128 long, plus their 1s. Two layers squeeze that cube down to 128 numbers, and a last one predicts the clip's sentiment.",
+      note: "Asked positive or negative on a balanced test set, the notebook gets 70.4% right (guessing gets 50%), with an F1 of 0.709.",
     },
   ]
 
@@ -311,8 +311,8 @@ export function PairingExplorable() {
   const avg = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length
   const regs = cls.filter((c) => c === "regressed").length
   const reasons: string[] = []
-  if (critical && cls[4] === "regressed") reasons.push("Candidate regressed 1 critical test case(s).")
-  if (regs > allowed) reasons.push(`Candidate introduced ${regs} paired regressions; maximum allowed is ${allowed}.`)
+  if (critical && cls[4] === "regressed") reasons.push("Case 5 is critical, and it broke.")
+  if (regs > allowed) reasons.push(`${regs} cases broke; your policy allows ${allowed}.`)
   const decision = reasons.length ? "BLOCK" : "PASS"
 
   const rows = (paired: boolean) => (
@@ -345,7 +345,7 @@ export function PairingExplorable() {
     },
     {
       title: <>The verdict is <em>arithmetic</em>, not a vote.</>,
-      body: "Your release policy says how many regressions you can live with. CI calls AgentGuard's release gate and gets back an exit code: 0 ships, 1 stops the pipeline.",
+      body: "Your release policy says how many regressions you can live with. Before shipping, the deployment pipeline asks AgentGuard's release gate and gets a clear answer: carry on, or stop.",
       tryit: "Raise the allowance to 2, then mark case 5 as critical.",
     },
   ]
@@ -376,15 +376,12 @@ export function PairingExplorable() {
             <label className="ex-check"><input type="checkbox" checked={critical} onChange={(e) => setCritical(e.target.checked)} /> Case 5 is critical</label>
             <p className="ex-found">Found: <b>{regs}</b> paired regressions{critical ? ", one of them critical" : ""}</p>
           </div>
-          <pre className={`ex-json is-${decision.toLowerCase()}`} key={decision + reasons.length}>{`GET /api/v1/ci/release-gate
-{
-  "passed": ${decision === "PASS"},
-  "exit_code": ${decision === "PASS" ? 0 : 1},
-  "decision": {
-    "decision": "${decision}",
-    "reasons": [${reasons.map((r) => `\n      "${r}"`).join(",")}${reasons.length ? "\n    " : ""}]
-  }
-}`}</pre>
+          <div className={`ex-verdict is-${decision.toLowerCase()}`} key={decision + reasons.length} role="status">
+            <p className="ex-verdict-label">Release gate says</p>
+            <b>{decision}</b>
+            <p className="ex-verdict-why">{reasons.length ? reasons.map((r) => <span key={r}>{r}</span>) : <span>No rule is broken: the two cases that broke are within what you allowed.</span>}</p>
+            <p className="ex-verdict-pipe">{decision === "PASS" ? "The pipeline continues and the release ships." : "The pipeline stops; the release waits for a fix."}</p>
+          </div>
         </div>
       )}
     </Guided>
@@ -394,7 +391,7 @@ export function PairingExplorable() {
 /* ───────────────────────── Course Catalog: where a crash leaves you ───────────────────────── */
 
 const CART = [{ code: "CS101", credits: 3 }, { code: "CS102", credits: 4 }, { code: "CS104", credits: 5 }]
-const OPS = [...CART.map((c) => `course ${c.code}.save()`), "student.save()", "delete session.cart"]
+const OPS = [...CART.map((c) => `Save ${c.code} with the student added`), "Save the student with the courses added", "Empty the cart"]
 
 export function CrashExplorable() {
   const [at, setAt] = useState(OPS.length) // the crash happens before this operation; OPS.length means no crash
@@ -423,32 +420,38 @@ export function CrashExplorable() {
   return (
     <div className="ex">
       <div className="ex-stage ex-crash">
-        <p className="ex-kicker">POST /student/confirm, one operation at a time</p>
+        <p className="ex-kicker">Pressing Confirm, one write at a time. Click a dot to crash there.</p>
         <ol className="ex-ops">
           {OPS.map((op, i) => (
             <li key={op} className={i < at ? "is-done" : "is-lost"}>
-              <button type="button" onClick={() => { setAt(i); setRetries(0) }} aria-label={`Crash before ${op}`}>{i === at && <i className="ex-bolt">crash</i>}</button>
-              <code>{op}</code>{i < CART.length && <small>runs alongside the other courses</small>}
+              <button type="button" onClick={() => { setAt(i); setRetries(0) }} aria-label={`Crash before ${op}`} className={i === at ? "is-crash" : undefined} />
+              <span className="ex-op">{op}{i === at && <i className="ex-bolt">crash here</i>}</span>{i < CART.length && <small>runs alongside the other courses</small>}
             </li>
           ))}
-          <li className={!crashed ? "is-done" : "is-lost"}><button type="button" onClick={() => { setAt(OPS.length); setRetries(0) }} aria-label="No crash">{!crashed && <i className="ex-bolt is-ok">done</i>}</button><code>redirect</code></li>
+          <li className={!crashed ? "is-done" : "is-lost"}><button type="button" onClick={() => { setAt(OPS.length); setRetries(0) }} aria-label="No crash" /><span className="ex-op">Done, back to the home page{!crashed && <i className="ex-bolt is-ok">no crash</i>}</span></li>
         </ol>
         <div className="ex-docs">
-          <pre className={state.student === 0 && state.courses.some(Boolean) ? "is-bad" : state.student > CART.length ? "is-bad" : ""}>{`student 42 {\n  enrolledCourses: [${Array.from({ length: state.student }, (_, i) => CART[i % CART.length].code).join(", ")}]\n}`}</pre>
+          <div className={`ex-doc ${state.student === 0 && state.courses.some(Boolean) ? "is-bad" : state.student > CART.length ? "is-bad" : ""}`}>
+            <p>The student&apos;s record</p>
+            <span>{state.student ? Array.from({ length: state.student }, (_, i) => <i key={i}>{CART[i % CART.length].code}</i>) : <em>no courses</em>}</span>
+          </div>
           {CART.map((c, i) => (
-            <pre key={c.code} className={state.courses[i] > 1 || (state.courses[i] > 0) !== (state.student > 0) ? "is-bad" : ""}>{`${c.code} {\n  enrolledStudents: [${Array.from({ length: state.courses[i] }, () => "42").join(", ")}]\n}`}</pre>
+            <div key={c.code} className={`ex-doc ${state.courses[i] > 1 || (state.courses[i] > 0) !== (state.student > 0) ? "is-bad" : ""}`}>
+              <p>{c.code}&apos;s record</p>
+              <span>{state.courses[i] ? Array.from({ length: state.courses[i] }, (_, k) => <i key={k}>student 42</i>) : <em>no students</em>}</span>
+            </div>
           ))}
-          <p className="ex-cart">session cart: {state.cart ? `[${CART.map((c) => c.code).join(", ")}]` : "empty"}</p>
+          <p className="ex-cart">Cart: {state.cart ? CART.map((c) => c.code).join(", ") : "empty"}</p>
         </div>
       </div>
       <div className="ex-side">
         <p className="ex-kicker">The one idea</p>
-        <h3>Two collections, no <em>transaction</em>.</h3>
-        <p>Confirm saves each course first and the student last, as separate writes. Click a step to crash just before it and watch the documents disagree.</p>
-        <p>Then try confirming again. The cart is still in the session, and this route, unlike the single-course enroll route, never checks whether the student is already listed.</p>
+        <h3>Two records, saved <em>separately</em>.</h3>
+        <p>An enrollment lives in two places: the course lists the student, and the student lists the course. Confirm saves the courses first and the student last, as separate writes. Crash in between and watch the two records disagree.</p>
+        <p>Then confirm again. The cart is still there, and unlike the single-course enroll button, this route never checks whether the student is already listed.</p>
         <button type="button" className="ex-toggle" onClick={() => setRetries((r) => r + 1)} disabled={!state.cart}>{state.cart ? "Confirm again" : "Cart is empty"}</button>
         <p className={`ex-status ${mismatch ? "is-bad" : "is-good"}`} role="status">{mismatch ? (state.courses.some((n) => n > 1) ? "Duplicates: a course now lists the same student twice." : "The two sides disagree.") : crashed ? "Nothing was written yet." : "Both sides agree."}</p>
-        <p className="ex-note">The fix is one transaction around all four writes, plus an already-enrolled check like the one in /student/enroll.</p>
+        <p className="ex-note">The fix: wrap all the writes in one transaction, so they succeed or fail together, and check for an existing enrollment first, as the single-course route already does.</p>
       </div>
     </div>
   )

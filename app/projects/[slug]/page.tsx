@@ -11,6 +11,7 @@ import { ProjectReader } from "@/components/xp/project-reader"
 import { ReadingProgress } from "@/components/xp/reading"
 import { SystemFlow } from "@/components/xp/system-flow"
 import { flows, packets } from "@/lib/flows"
+import { plain } from "@/lib/plain"
 import { RepoSection } from "@/components/xp/repo-section"
 import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
@@ -52,10 +53,11 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const project = getProject(params.slug)
   if (!project) notFound()
   const meta = projectMeta[project.slug]
+  const simple = plain[project.slug]
   const labels = chapterCopy[project.slug]
   const index = projects.findIndex((p) => p.slug === project.slug)
   // Reading time from the words actually on the page, at a technical-reading pace of 200 words a minute.
-  const words = [project.summary, project.question, ...project.problem, ...project.system, ...project.decisions.flatMap((d) => [d.title, d.body]), project.debugging, ...project.results, ...project.limitations, project.next]
+  const words = [project.summary, project.question, simple.what, simple.how, simple.why, ...project.problem, ...project.system, ...project.decisions.flatMap((d) => [d.title, d.body]), project.debugging, ...project.results, ...project.limitations, project.next]
     .join(" ").split(/\s+/).filter(Boolean).length
   const minutes = Math.max(1, Math.round(words / 200))
   const next = projects[(index + 1) % projects.length]
@@ -142,17 +144,25 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       </dl>
 
       <ProjectReader brief={brief}>
-      <section className="xp-inshort" aria-label="In short">
-        <div><p>The problem</p><span>{project.problem[0]}</span></div>
-        <div><p>How it works</p><span>{project.system[0]}</span></div>
-        <div><p>What I&apos;d do next</p><span>{project.next}</span></div>
+      <section className="xp-plain" aria-labelledby="plain-title">
+        <p className="xp-head-label"><span>↳</span>In plain words</p>
+        <h2 id="plain-title" className="sr-only">In plain words</h2>
+        <div className="xp-plain-grid">
+          <div><p>What it is</p><span>{simple.what}</span></div>
+          <div><p>How it&apos;s built</p><span>{simple.how}</span></div>
+          <div><p>Why it matters</p><span>{simple.why}</span></div>
+        </div>
+        <details className="xp-terms">
+          <summary>Words you&apos;ll see on this page <span>{simple.terms.length}</span></summary>
+          <dl>{simple.terms.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}</dl>
+        </details>
       </section>
 
       {flows[project.slug] && (
         <section className="xp-section xp-try xp-walk" aria-labelledby="run-title">
           <p className="xp-head-label"><span>↳</span>How it runs</p>
           <h2 id="run-title">{runTitle[project.slug]}</h2>
-          <p className="xp-try-intro">Follow the data through the real components. The token is what&apos;s moving; the inspector shows exactly what it looks like at that moment, taken from the repository.</p>
+          <p className="xp-try-intro">Follow one piece of work through the real system. The glowing dot is what&apos;s moving; the card beside the story says what it is. Click any box to jump to its step.</p>
           <SystemFlow flow={flows[project.slug]} packets={packets[project.slug]} />
         </section>
       )}

@@ -22,11 +22,11 @@ export const repoDetail: Record<string, RepoDetail> = {
       { value: "8", label: "API test modules, including PostgreSQL integration tests" },
     ],
     features: [
-      { title: "Fail-open Python SDK", body: "Decorators and context managers capture runs, retrievals and LLM calls. If AgentGuard is down, the SDK logs a structured warning instead of crashing the app it instruments." },
-      { title: "OpenAI-compatible auto-instrumentation", body: "Wrapping the client records model, provider, latency, token usage and errors. Provider secrets are never copied into telemetry." },
-      { title: "Deterministic and LLM-judge evaluators", body: "Exact answer, required content, structured output, keyword coverage, expected and forbidden tools, required source, runtime and latency, plus rubric-based judges whose provenance is stored as evidence, not ground truth." },
-      { title: "Release policy with reasons", body: "PASS, BLOCK or REVIEW from paired regressions, critical cases, pass rate, score drop, coverage, runtime failures and required evidence. Missing evidence produces REVIEW, never an invented pass." },
-      { title: "Runs without a paid model", body: "Deterministic-only mode is the default; an optional local Ollama judge uses its OpenAI-compatible endpoint with no API key." },
+      { title: "A recorder that never breaks your app", body: "A few lines of Python wrap each step: runs, document lookups and model calls. If AgentGuard is down, the SDK logs a warning instead of crashing the app it is watching." },
+      { title: "Automatic recording for OpenAI-style APIs", body: "Wrap the model client once and every call is recorded with model, provider, time taken, token usage and errors. API keys are never copied into the records." },
+      { title: "Rule checks and AI graders", body: "Rules for exact answers, required content, output format, keywords, expected and forbidden tools, sources, crashes and speed, plus AI graders with fixed rubrics whose every grade is stored as evidence, not treated as truth." },
+      { title: "A release decision with reasons", body: "PASS, BLOCK or REVIEW from regressions, critical cases, pass rate, score drops, coverage, crashes and required evidence. Missing evidence produces REVIEW, never a pass by default." },
+      { title: "Runs without a paid AI API", body: "Rule-based checks are the default. An optional AI grader can run locally through Ollama, with no API key." },
       { title: "Deployed", body: "Next.js frontend on Vercel; FastAPI, PostgreSQL and Redis defined for Render. The free API can take up to a minute to wake." },
     ],
     layout: [
@@ -48,9 +48,9 @@ export const repoDetail: Record<string, RepoDetail> = {
       { value: "1st", label: "token-level rationale benchmark for Telugu hate speech, per the paper" },
     ],
     features: [
-      { title: "Two-stage explainability", body: "Stage one guides model attention with human rationales; stage two refines it with n-gram explainability scores computed from prediction changes across unigrams, bigrams and trigrams." },
-      { title: "LLM-consulted explanations", body: "Model-derived rationales are combined with explanations from LLaMA 3.1. The repository also contains notebooks for GPT-4o and Mistral rationales." },
-      { title: "Explanation metrics", body: "Plausibility through Token-F1 and IOU-F1, faithfulness through comprehensiveness and sufficiency, each in its own notebook." },
+      { title: "Two rounds of training", body: "Round one points the model's attention at the words people marked; round two refines it with the phrase probe, which tests every single word, pair and triple on its own." },
+      { title: "A second opinion from LLMs", body: "The model's own explanation is merged with Llama 3.1's list of hateful words. The repository also has notebooks asking GPT-4o and Mistral." },
+      { title: "Explanations, graded", body: "Plausible (does it match people? Token-F1, IOU-F1) and faithful (does the model rely on it? comprehensiveness, sufficiency), each in its own notebook." },
       { title: "Built on shared tasks", body: "Extends HASOC 2020, HASOC 2021 and HOLD-Telugu 2024 data. The dataset is released for research only, through a controlled-access request form." },
     ],
     layout: [
@@ -77,7 +77,7 @@ export const repoDetail: Record<string, RepoDetail> = {
     ],
     features: [
       { title: "Three target shapes", body: "The same fused representation is trained for binary sentiment, five-class sentiment and continuous regression, each in its own notebook." },
-      { title: "Sequence encoders per modality", body: "Language, acoustic and visual feature sequences are encoded with LSTM layers before fusion." },
+      { title: "One small network per sense", body: "The words are read in order by an LSTM; face and voice features are averaged over time and passed through three small dense layers. Then the outer product fuses them." },
       { title: "An honest record", body: "The repository is an experimental notebook record, not a packaged application, and it does not include the CMU-MOSI features." },
     ],
     layout: [

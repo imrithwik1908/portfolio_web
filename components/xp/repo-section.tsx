@@ -45,12 +45,6 @@ export function RepoSection({ detail, github }: { detail: RepoDetail; github: st
         )}
       </div>
 
-      {detail.run && (
-        <div className="xp-run">
-          <h3 className="xp-repo-sub">{detail.run.label}</h3>
-          <pre><code>{detail.run.code}</code></pre>
-        </div>
-      )}
       {detail.note && <p className="xp-repo-note">{detail.note}</p>}
     </section>
   )

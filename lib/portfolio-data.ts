@@ -36,7 +36,7 @@ export const projects: Project[] = [
     eyebrow: "LLM reliability platform",
     question: "What changed, and is it safe to release?",
     summary:
-      "A regression-testing and observability platform for LLM applications. It records traces, reruns representative cases, compares a candidate with a baseline, and turns stored evidence into a conservative release recommendation.",
+      "A release check for AI features. It records what an AI app does, runs the same test questions on the old and new versions, compares them case by case, and returns PASS, BLOCK or REVIEW with reasons. Built end to end: Python SDK, API, database, background workers and dashboard.",
     image: "/agentguard.png",
     imageFit: "cover",
     status: "Working build",
@@ -48,49 +48,49 @@ export const projects: Project[] = [
     outcome: "Instrument → evaluate → compare → release",
     outcomeLabel: "Implemented workflow",
     problem: [
-      "Changing a prompt, model, retriever, tool, or workflow can improve an average score while breaking cases that used to work. A single evaluation number does not explain which behavior changed or whether the evidence is complete enough to release.",
-      "AgentGuard keeps the unit of comparison concrete: one test case, one evaluator, one application version, and the trace that produced the result.",
+      "Teams change AI features constantly: a new prompt, a newer model, different documents to search. Each change can raise the average test score while quietly breaking questions that used to work. One number can't say which answers changed, or whether there is enough evidence to ship.",
+      "AgentGuard keeps the comparison concrete: one test question, one check, one version of the app, and the recorded steps that produced the answer.",
     ],
     system: [
-      "A Python SDK captures runs and nested steps from an LLM, RAG, or agent application. FastAPI validates and stores each complete trace atomically in PostgreSQL, while JSONB fields preserve heterogeneous inputs, outputs, and metadata.",
-      "Evaluation work runs outside the request path through Redis and ARQ. Deterministic evaluators and optional LLM judges produce versioned evidence. The release engine reads that evidence and returns PASS, BLOCK, or REVIEW with reasons; an LLM never makes the final release decision.",
+      "A Python SDK records each run and its nested steps (planning, document lookup, tool calls, the model's answer) from any AI application. A FastAPI service validates the whole trace and saves it to PostgreSQL in one transaction, with flexible JSON columns for inputs and outputs that differ from app to app.",
+      "Grading happens in the background: jobs go onto a Redis queue and ARQ workers run rule-based checks and, optionally, an AI grader. Every grade is stored with what produced it. The release engine reads that evidence and returns PASS, BLOCK or REVIEW with reasons; an AI model never makes the final call.",
     ],
     decisions: [
       {
         title: "Relational ownership, flexible telemetry",
-        body: "PostgreSQL enforces workspace, project, version, suite, and job relationships. JSONB holds model-specific payloads without turning every provider variation into a migration.",
+        body: "PostgreSQL enforces who owns what: workspaces, projects, versions, test suites and jobs. Flexible JSON columns hold each model's own inputs and outputs, so a new provider doesn't mean a database migration.",
       },
       {
         title: "Whole-trace ingestion",
-        body: "Runs and spans arrive as one validated transaction. Streaming would feel faster, but atomic ingestion keeps the v1 consistency model and failure behavior easier to defend.",
+        body: "A run and all its steps arrive and are saved together. Streaming steps one by one would feel faster, but saving all-or-nothing means there is never half a trace to reason about.",
       },
       {
         title: "Evidence before verdict",
-        body: "Judge outputs are stored with evaluator, rubric, provider, model, threshold, explanation, and timestamp. Missing required evidence produces REVIEW instead of an invented pass.",
+        body: "Every AI-graded result is stored with its rubric, model, threshold, explanation and time. If required evidence is missing, the answer is REVIEW, never a pass by default.",
       },
     ],
     debugging:
-      "Comparison semantics were deceptively easy to get wrong. Historical evaluations could leak into a current comparison and make two versions look better supported than they were. The fix was to scope pairing to the latest terminal job execution for the same suite, version, evaluator, and case, then test those boundaries directly.",
+      "Comparisons were easy to get subtly wrong. Old grading results could leak into a new comparison and make two versions look better supported than they were. The fix was to compare only the latest finished grading run for the same suite, version, check and case, and to write tests for exactly those boundaries.",
     results: [
-      "A working web application, async API, worker, PostgreSQL schema, and installable SDK live in one repository.",
-      "The integration suite covers atomic ingestion, workspace isolation, job progress, evaluator provenance, paired comparisons, and release-policy behavior.",
-      "A 30-case support-policy RAG example can generate baseline and candidate evidence without requiring a paid model API.",
+      "A working dashboard, API, background worker, database schema and installable SDK, in one repository and deployed.",
+      "Integration tests against a real PostgreSQL cover all-or-nothing saving, workspace isolation, job progress, grading provenance, paired comparisons and the release rules.",
+      "A 30-question customer-support example produces old and new versions to compare without needing a paid AI API.",
     ],
     limitations: [
-      "One production-quality automatic provider integration: OpenAI-compatible chat completions.",
-      "No persistent SDK-side retry queue or streaming span ingestion.",
-      "Failure grouping is deterministic, not embedding-based semantic clustering.",
+      "Automatic recording covers one kind of model API so far: OpenAI-compatible chat.",
+      "If the network drops, the SDK doesn't keep unsent traces to retry later, and steps can't be streamed in as they happen.",
+      "Failures are grouped by fixed rules, not by meaning.",
       "The public demo uses free hosting and may need time to wake after inactivity.",
     ],
     next:
-      "I would add a durable client queue before broadening integrations. Losing telemetry during a network interruption is a more important gap than supporting another framework wrapper.",
+      "I would make the SDK keep unsent traces and retry them before adding more integrations. Losing evidence during a network blip matters more than supporting one more framework.",
     architecture: [
-      { label: "Application", detail: "LLM, RAG, or agent code" },
-      { label: "Python SDK", detail: "Runs, spans, fail-open delivery" },
-      { label: "FastAPI", detail: "Validation, auth, atomic ingestion" },
-      { label: "PostgreSQL", detail: "Traces, suites, jobs, evidence" },
-      { label: "Worker", detail: "Redis / ARQ evaluation jobs" },
-      { label: "Decision UI", detail: "Compare, diagnose, release" },
+      { label: "Your AI app", detail: "Assistant, search or agent" },
+      { label: "Python SDK", detail: "Records every step" },
+      { label: "FastAPI", detail: "Checks and saves traces" },
+      { label: "PostgreSQL", detail: "Traces, tests, grades" },
+      { label: "Workers", detail: "Grade answers (Redis queue)" },
+      { label: "Dashboard", detail: "Compare and decide" },
     ],
   },
   {
@@ -100,7 +100,7 @@ export const projects: Project[] = [
     eyebrow: "Explainable multilingual NLP research",
     question: "A correct label is not the same as a useful explanation.",
     summary:
-      "An AAAI 2026 paper and benchmark for explainable hate-speech detection in English, Hindi, and Telugu. The work pairs classification labels with token-level human rationales, then evaluates whether a model's explanation is both plausible and faithful.",
+      "An AAAI 2026 paper I co-authored on hate-speech detection that shows its work, in English, Hindi and Telugu: a benchmark of about 16,800 posts with the offending words marked by native speakers, and a training method that makes models point to the right words.",
     image: "/xmutest-architecture.png",
     imageFit: "contain",
     status: "Published research",
@@ -112,48 +112,48 @@ export const projects: Project[] = [
     outcome: "16,830 samples with token-level rationales",
     outcomeLabel: "Published benchmark",
     problem: [
-      "Hate-speech classifiers can produce the right label for the wrong reason. That is especially difficult to inspect in lower-resource languages, where rationale-annotated benchmarks are scarce.",
-      "X-MuTeST adds human-marked rationales to English, Hindi, and Telugu data, then asks two separate questions: does the explanation overlap with what people marked, and does the model actually depend on those highlighted tokens?",
+      "A hate-speech classifier can give the right label for the wrong reason, for example by reacting to a group's name rather than to the insult. That is hard to check in lower-resource languages, where almost no data marks which words make a post hateful.",
+      "X-MuTeST adds those word-level marks to English, Hindi and Telugu posts, then asks two separate questions of any explanation: does it match the words people marked, and does the model actually depend on them?",
     ],
     system: [
-      "The training process has two stages. Human rationales guide model attention first. A second stage uses token-importance targets produced by an n-gram perturbation method, which measures how predictions change across unigrams, bigrams, and trigrams.",
-      "The final rationale is the union of the model-derived tokens and LLaMA 3.1 suggestions. MuRIL is used for Telugu and English, while XLM-R is used for Hindi based on validation performance.",
+      "Training runs in two rounds. First, the model learns to focus its attention on the words people marked. Then a probe feeds it every single word, pair and triple from a post, finds the words whose fragments land closest to the whole post's verdict, and the model is trained again on those.",
+      "The final explanation merges the model's own words with Llama 3.1's suggestions. MuRIL is used for Telugu and English and XLM-R for Hindi, chosen per language by validation results.",
     ],
     decisions: [
       {
         title: "Evaluate the explanation separately",
-        body: "Token-F1 and IOU-F1 measure overlap with human rationales. Comprehensiveness and sufficiency test whether removing or keeping those tokens changes the prediction as expected.",
+        body: "Plausibility (Token-F1, IOU-F1) measures overlap with the words people marked. Faithfulness (comprehensiveness, sufficiency) hides or keeps only those words and checks the prediction moves the way it should.",
       },
       {
         title: "Use human and model signals",
-        body: "Stage one aligns attention with human rationales. Stage two lets the model-derived n-gram signal refine that target instead of assuming either source is complete on its own.",
+        body: "Round one follows the human marks; round two lets the model's own probe refine them. Neither source is assumed complete on its own.",
       },
       {
         title: "Keep the language choice empirical",
-        body: "The encoder was selected per language from validation results rather than forcing one multilingual model across every dataset.",
+        body: "The model was chosen per language from validation results, rather than forcing one multilingual model on every dataset.",
       },
     ],
     debugging:
-      "The annotation process needed more than one pass. Three native-language annotators marked rationales, reviewed disagreements in guidance sessions, and re-annotated the data. The reported overall agreement reached 81.0 for Telugu, 83.15 for Hindi, and 85.10 for English.",
+      "Annotation needed more than one pass. Three native speakers marked the words, went through their disagreements in guidance sessions, and annotated again. Overall agreement reached 81.0 for Telugu, 83.15 for Hindi and 85.10 for English (Fleiss' kappa, scaled to 100).",
     results: [
       "The benchmark contains 4,492 Telugu, 6,004 Hindi, and 6,334 English samples with token-level rationales.",
-      "The reported X-MuTeST setup reached 0.8881 accuracy on Telugu, 0.8745 on Hindi, and 0.8604 on English.",
-      "The paper reports explanation quality with plausibility and faithfulness metrics, then tests generalization on HateXplain and HateBRXplain.",
+      "The X-MuTeST setup reached 88.8% accuracy on Telugu, 87.5% on Hindi and 86.0% on English.",
+      "The paper reports explanation quality for plausibility and faithfulness, and tests whether the method carries over to two other benchmarks, HateXplain and HateBRXplain.",
     ],
     limitations: [
       "The benchmark covers three languages and binary hate / not-hate labels; it does not represent every dialect, culture, or moderation policy.",
       "A rationale that looks plausible to a person is not automatically a faithful account of the model's internal decision.",
-      "The final union inherits the cost and variability of consulting an LLM.",
+      "Merging in an LLM's suggestions adds its cost, and its variability, to every explanation.",
     ],
     next:
       "I would want a follow-up to separate annotator disagreement from annotation noise more explicitly and test whether the rationale supervision transfers across language varieties, not only across benchmark datasets.",
     architecture: [
-      { label: "Human rationales", detail: "Three annotators per language" },
-      { label: "Stage 1", detail: "Align attention with people" },
-      { label: "N-gram signal", detail: "Measure prediction changes" },
-      { label: "Stage 2", detail: "Refine attention targets" },
-      { label: "LLM consultation", detail: "Add contextual tokens" },
-      { label: "Evaluation", detail: "Plausibility and faithfulness" },
+      { label: "Marked posts", detail: "Three native speakers each" },
+      { label: "Round 1", detail: "Focus on the marked words" },
+      { label: "Phrase probe", detail: "Which words carry the verdict" },
+      { label: "LLM opinion", detail: "Llama 3.1's word list" },
+      { label: "Round 2", detail: "Train on the merged words" },
+      { label: "Evaluation", detail: "Plausible and faithful?" },
     ],
   },
   {
@@ -163,7 +163,7 @@ export const projects: Project[] = [
     eyebrow: "Multimodal ML study",
     question: "Can three noisy modalities beat one?",
     summary:
-      "A notebook-based study of sentiment analysis from language, acoustic, and visual representations. The work compares fusion setups across binary classification, five-class classification, and regression.",
+      "Can an AI read sentiment better from face, voice and words together than from words alone? A PyTorch implementation of the Tensor Fusion Network on CMU-MOSI video clips, run three ways: positive or negative, five classes, and a score from −3 to +3.",
     image: "/tensor_fusion.jpg",
     imageFit: "contain",
     status: "Completed study",
@@ -174,48 +174,49 @@ export const projects: Project[] = [
     outcome: "70.4% binary test accuracy",
     outcomeLabel: "Verified notebook output",
     problem: [
-      "Sentiment is not carried by words alone. Tone and expression can reinforce the transcript, contradict it, or add noise. The useful question was not simply whether more modalities helped, but how fusion choices changed the result.",
-      "The experiments use aligned language, acoustic, and visual feature sequences from CMU-MOSI and evaluate several prediction setups rather than presenting one final model as universal.",
+      "Sentiment isn't carried by words alone. Tone and expression can reinforce what is said, contradict it, or just add noise. The interesting part is how to combine the three so that each one's signal survives.",
+      "The experiments use time-aligned face, voice and word features from CMU-MOSI, and ask the same question three ways rather than presenting one model as the answer.",
     ],
     system: [
-      "Each modality is encoded independently before the representations are combined. The notebooks cover binary sentiment, five-class classification, and continuous regression, with separate training, validation, and held-out test flows.",
-      "The repository is an experimental record, not a packaged application. That distinction matters: the useful artifact is the comparison work and the saved evaluation output, not a claim of production readiness.",
+      "Each sense gets its own small network first: face and voice are averaged over time and compressed to 32 numbers each, and the words go through an LSTM to 128. Each summary gets a 1 appended, and an outer product multiplies them into 140,481 numbers that hold every combination. Two layers compress that, and a final layer gives the answer.",
+      "The repository is an experiment record, not a packaged application: three notebooks, one per task, with their outputs saved.",
     ],
     decisions: [
       {
         title: "Keep modality paths separate first",
-        body: "Independent encoders make it possible to reason about what each representation contributes before fusion changes the feature space.",
+        body: "A separate network per sense makes it possible to reason about what each one contributes before they are mixed.",
       },
       {
-        title: "Evaluate more than one target shape",
-        body: "Binary accuracy can hide the difficulty of fine-grained sentiment. Running classification and regression exposed different weaknesses in the same representation pipeline.",
+        title: "Ask the question more than one way",
+        body: "Positive-or-negative accuracy can hide how hard fine-grained sentiment is. Running five classes and a continuous score through the same pipeline exposed weaknesses the yes-or-no version hid.",
       },
       {
-        title: "Report the artifact honestly",
-        body: "The notebooks record a 70.4% binary test accuracy and 0.7087 F1 for one run. Higher numbers mentioned in old notes are not used here because the public output does not verify them cleanly.",
+        title: "Multiply, don't just stack",
+        body: "Gluing the three summaries end to end only lets the next layer add their signals. The outer product represents how they interact, and the appended 1 keeps each sense's solo signal alive too.",
       },
     ],
     debugging:
-      "Sequence alignment and label handling were the fragile parts. A model can train normally while samples, modalities, or target shapes are slightly out of step. The notebooks include explicit reshaping, target conversion, and held-out checks to catch those quiet errors.",
+      "Shapes and labels were the fragile parts: a model trains happily while samples, senses or targets are slightly out of step, so the notebooks reshape and convert explicitly. Re-reading the code for this page, I also found that the training loop checks its progress on the test set rather than the validation set. The test set influenced which model was kept, so the numbers below are likely a little optimistic.",
     results: [
-      "The checked-in binary notebook records 70.4% test accuracy and a 0.7087 F1 score.",
-      "The same feature pipeline was exercised as binary classification, five-class classification, and regression.",
-      "The experiments made the tradeoff between richer fusion and harder debugging visible rather than treating multimodality as an automatic improvement.",
+      "Positive or negative: 70.4% accuracy and 0.709 F1 on a balanced test set, where guessing gets 50%.",
+      "Score from −3 to +3: off by 1.10 on average, with a 0.53 correlation to the true score.",
+      "Five classes: 31.9% accuracy, a much harder version of the same question.",
     ],
     limitations: [
       "The work remains in notebooks and is not packaged as a reproducible training application.",
       "The repository does not include the CMU-MOSI feature data or an automated environment setup.",
-      "The five-class result is substantially weaker than the binary setup and needs better tuning and error analysis.",
+      "Model selection looked at the test set; the reported numbers would need a clean rerun to be fully trusted.",
+      "The five-class result is much weaker than the yes-or-no one and needs tuning and error analysis.",
     ],
     next:
-      "I would rebuild the experiments around a single reproducible configuration, add per-modality ablations, and log alignment checks before trying a more complicated fusion layer.",
+      "I would fix model selection to use validation only, rebuild the three notebooks around one reproducible configuration, and remove one sense at a time to measure what each actually adds.",
     architecture: [
-      { label: "Language", detail: "Transcript representation" },
-      { label: "Acoustic", detail: "Voice and prosody features" },
-      { label: "Visual", detail: "Frame-level expression features" },
-      { label: "Encoders", detail: "Independent sequence paths" },
-      { label: "Fusion", detail: "Combined representation" },
-      { label: "Heads", detail: "Classify or regress sentiment" },
+      { label: "Words", detail: "What is said" },
+      { label: "Voice", detail: "How it sounds" },
+      { label: "Face", detail: "How it looks" },
+      { label: "Small networks", detail: "One summary per sense" },
+      { label: "Tensor fusion", detail: "Every combination" },
+      { label: "Answer", detail: "Three ways to ask" },
     ],
   },
   {
@@ -225,7 +226,7 @@ export const projects: Project[] = [
     eyebrow: "Role-based web application",
     question: "One course system, two very different users.",
     summary:
-      "A server-rendered course application with separate student and professor flows. Google authentication selects the role; MongoDB holds people, courses, and enrollment relationships.",
+      "A course-registration web app with separate student and professor experiences. Google sign-in works out the role from the email address; students browse, fill a cart and enroll, and professors see what they teach. Node.js, Express and MongoDB.",
     image: "/course_catalog.jpg",
     imageFit: "cover",
     status: "Completed project",
@@ -240,8 +241,8 @@ export const projects: Project[] = [
       "The project was about keeping those flows distinct without duplicating the underlying course and identity data.",
     ],
     system: [
-      "Express handles Google OAuth, session state, role-based redirects, and server-rendered EJS views. Mongoose models students, professors, courses, and their references.",
-      "Enrollment updates both sides of the relationship: the student stores enrolled courses and each course stores enrolled students. A session-backed cart keeps selection separate from confirmation.",
+      "Express handles Google sign-in, remembers who you are in a session, sends students and professors to their own pages, and builds those pages on the server with EJS. Mongoose defines students, professors and courses and the links between them.",
+      "An enrollment is written on both sides: the student lists their courses and each course lists its students. A cart kept in the session separates choosing courses from confirming them.",
     ],
     decisions: [
       {
@@ -258,7 +259,7 @@ export const projects: Project[] = [
       },
     ],
     debugging:
-      "Enrollment touches both the student and course documents. The first implementation made it easy to create duplicates or update only one side. Explicit duplicate checks and grouped save operations made the state transition easier to follow, though a database transaction would be the stronger production solution.",
+      "Enrollment touches both the student and the course. The single-course route checks for duplicates before enrolling; the cart's confirm route doesn't, and its saves aren't wrapped in a transaction. A crash halfway, or confirming twice, can leave the two sides disagreeing. The playground above shows exactly how.",
     results: [
       "Google authentication and role-aware routing are implemented.",
       "Students can browse, collect, and confirm course enrollment; professors see courses tied to their account.",
@@ -272,11 +273,11 @@ export const projects: Project[] = [
     next:
       "I would move secrets and sessions into production-safe infrastructure, enforce authorization in reusable middleware, and make enrollment a transactional operation.",
     architecture: [
-      { label: "Google OAuth", detail: "Identity and callback" },
-      { label: "Role routing", detail: "Student or professor flow" },
-      { label: "Express", detail: "Sessions and application logic" },
-      { label: "EJS", detail: "Server-rendered interfaces" },
-      { label: "Mongoose", detail: "Schemas and references" },
+      { label: "Google sign-in", detail: "Who you are" },
+      { label: "Email check", detail: "Student or professor" },
+      { label: "Express", detail: "Pages, session, cart" },
+      { label: "EJS", detail: "Pages built on the server" },
+      { label: "Mongoose", detail: "Records and their links" },
       { label: "MongoDB", detail: "People, courses, enrollments" },
     ],
   },

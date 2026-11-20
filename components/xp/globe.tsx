@@ -73,16 +73,16 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
         rot.current[0] += vel.current
         vel.current += (0.08 - vel.current) * 0.02
       }
-      const R = size / 2 - 6
+      const R = size / 2 * 0.86
       const lamp = currentPalette().lampRgb
       const proj = geoOrthographic().scale(R).translate([size / 2, size / 2]).rotate([rot.current[0], rot.current[1], 0]).clipAngle(90)
       const path = geoPath(proj, ctx)
       ctx.clearRect(0, 0, size, size)
 
       // Atmosphere
-      const halo = ctx.createRadialGradient(size / 2, size / 2, R * 0.9, size / 2, size / 2, R * 1.08)
+      const halo = ctx.createRadialGradient(size / 2, size / 2, R * 0.92, size / 2, size / 2, size / 2)
       halo.addColorStop(0, `rgba(${lamp},0.18)`); halo.addColorStop(1, `rgba(${lamp},0)`)
-      ctx.fillStyle = halo; ctx.fillRect(0, 0, size, size)
+      ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2); ctx.fill()
 
       // Ocean, lit from the upper left
       const ocean = ctx.createRadialGradient(size * 0.36, size * 0.32, R * 0.1, size / 2, size / 2, R)

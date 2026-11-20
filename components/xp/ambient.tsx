@@ -398,7 +398,7 @@ function Stars() {
 // Authors can set data-cursor="Label" on anything. Mouse and trackpad only.
 const CURSOR_RULES: [string, string][] = [
   ["[data-cursor]", ""],
-  [".xp-globe canvas", "Drag"],
+  [".xp-globe canvas:not(.is-scrub)", "Drag"],
   [".xp-copy, .xp-nav-copy", "Copy"],
   [".xp-strip a, .pc, a[href^='/projects/']", "Open"],
   [".xp-portrait, .xp-about-photo, .xp-fig-zoom, figure img", "View"],
