@@ -27,6 +27,7 @@ export function Globe() {
   const rot = useRef<[number, number]>([-20, -18])
   const vel = useRef(0.08)
   const target = useRef<[number, number] | null>(null)
+  const focus = useRef<"dharwad" | "tempe" | null>(null)
   const [label, setLabel] = useState("Drag me")
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export function Globe() {
 
       // Route with a light travelling along it
       const arc = { type: "LineString" as const, coordinates: Array.from({ length: 65 }, (_, i) => route(i / 64)) }
-      ctx.beginPath(); path(arc); ctx.strokeStyle = `rgba(${lamp},0.55)`; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([])
+      ctx.beginPath(); path(arc); ctx.strokeStyle = `rgba(${lamp},0.8)`; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.4; ctx.stroke(); ctx.setLineDash([])
       const p = route(((t / 360) % 1))
       const center: [number, number] = [-rot.current[0], -rot.current[1]]
       const dot = (c: [number, number], r: number, color: string) => {
@@ -97,8 +98,25 @@ export function Globe() {
         ctx.fillStyle = "#fff4e2"; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
       }
       dot(p, 1.6, `rgba(${lamp},0.9)`)
-      dot(DHARWAD, 2.4, `rgba(${lamp},0.8)`)
-      dot(TEMPE, 2.4, `rgba(${lamp},0.8)`)
+      const place = (c: [number, number], name: string, on: boolean) => {
+        if (geoDistance(c, center) > Math.PI / 2 - 0.05) return
+        dot(c, on ? 3 : 2.2, `rgba(${lamp},${on ? 1 : 0.7})`)
+        const [x, y] = proj(c)!
+        if (on) {
+          const pulse = (t % 90) / 90
+          ctx.strokeStyle = `rgba(${lamp},${0.6 * (1 - pulse)})`; ctx.lineWidth = 1
+          ctx.beginPath(); ctx.arc(x, y, 4 + pulse * 14, 0, Math.PI * 2); ctx.stroke()
+        }
+        ctx.font = "500 10px ui-monospace, monospace"
+        ctx.textAlign = x > size / 2 ? "right" : "left"
+        const tx = x + (x > size / 2 ? -9 : 9)
+        ctx.strokeStyle = "rgba(5,5,7,0.9)"; ctx.lineWidth = 3; ctx.lineJoin = "round"
+        ctx.strokeText(name, tx, y - 7)
+        ctx.fillStyle = on ? "rgba(232,236,244,0.95)" : "rgba(232,236,244,0.55)"
+        ctx.fillText(name, tx, y - 7)
+      }
+      place(DHARWAD, "DHARWAD", focus.current === "dharwad")
+      place(TEMPE, "TEMPE", focus.current === "tempe")
 
       // Rim shading for depth
       const rim = ctx.createRadialGradient(size / 2, size / 2, R * 0.6, size / 2, size / 2, R)
@@ -106,6 +124,14 @@ export function Globe() {
       ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = rim; ctx.fill()
     }
     draw()
+
+    const onFly = (e: Event) => {
+      const to = (e as CustomEvent<"dharwad" | "tempe">).detail === "tempe" ? TEMPE : DHARWAD
+      target.current = [-to[0], -to[1]]
+      focus.current = to === TEMPE ? "tempe" : "dharwad"
+      setLabel(to === TEMPE ? "Tempe, Arizona" : "Dharwad, India")
+    }
+    window.addEventListener("xp-globe-fly", onFly)
 
     let drag: { x: number; y: number; r: [number, number]; lx: number; lt: number } | null = null
     const down = (e: PointerEvent) => { el.setPointerCapture(e.pointerId); target.current = null; drag = { x: e.clientX, y: e.clientY, r: [...rot.current], lx: e.clientX, lt: performance.now() } }
@@ -122,7 +148,7 @@ export function Globe() {
     el.addEventListener("pointerdown", down); el.addEventListener("pointermove", move)
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up)
     return () => {
-      cancelAnimationFrame(frame); ro.disconnect(); io.disconnect()
+      cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); window.removeEventListener("xp-globe-fly", onFly)
       el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move)
       el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up)
     }
@@ -133,6 +159,7 @@ export function Globe() {
     const center: [number, number] = [-rot.current[0], -rot.current[1]]
     const to = geoDistance(DHARWAD, center) < geoDistance(TEMPE, center) ? TEMPE : DHARWAD
     target.current = [-to[0], -to[1]]
+    focus.current = to === TEMPE ? "tempe" : "dharwad"
     setLabel(to === TEMPE ? "Tempe, now" : "Dharwad, where it started")
   }
 

@@ -17,39 +17,41 @@ export function Education() {
     setMonths(Math.max(0, (GRADUATION.getFullYear() - now.getFullYear()) * 12 + GRADUATION.getMonth() - now.getMonth()))
     setDone(Math.min(1, Math.max(0, (now.getTime() - STARTED.getTime()) / (GRADUATION.getTime() - STARTED.getTime()))))
   }, [])
-  const chips = (list: string[]) => <dd className="xp-degree-chips">{list.map((c) => <span key={c}>{c}</span>)}</dd>
+  const chips = (list: string[]) => <div className="xp-degree-chips">{list.map((c) => <span key={c}>{c}</span>)}</div>
+  // Pointing at a card turns the globe to that campus.
+  const fly = (to: "dharwad" | "tempe") => () => window.dispatchEvent(new CustomEvent("xp-globe-fly", { detail: to }))
 
   return (
     <div className="xp-degrees">
-      <article className="xp-degree">
-        <p className="xp-degree-when">2021 — May 2025 · Dharwad, India</p>
+      <article className="xp-degree" onMouseEnter={fly("dharwad")} onFocus={fly("dharwad")} tabIndex={-1}>
+        <p className="xp-degree-when">2021 — May 2025 <span>· Dharwad, India</span></p>
         <h3>IIIT Dharwad</h3>
         <p className="xp-degree-name">B.Tech Computer Science</p>
-        <div className="xp-degree-progress is-done" role="img" aria-label="Completed"><span style={{ "--done": 1 } as React.CSSProperties} /><small>Completed</small></div>
-        <dl>
-          <div><dt>GPA</dt><dd>8.94 / 10</dd></div>
-          <div><dt>Coursework</dt>{chips(["Data Analytics", "Artificial Intelligence", "Operating Systems"])}</div>
-          <div><dt>Alongside it</dt><dd>A research internship at IIT Indore that became <Link href="/projects/x-mutest" className="xp-inline-link">X-MuTeST <Arrow /></Link>, and forecasting work at Blackcoffer</dd></div>
-        </dl>
+        <div className="xp-degree-stats">
+          <div className="xp-degree-gpa"><b>8.94</b><small>GPA out of 10</small></div>
+          <div className="xp-degree-progress is-done" role="img" aria-label="Completed"><span style={{ "--done": 1 } as React.CSSProperties} /><small>Completed</small></div>
+        </div>
+        <div className="xp-degree-course"><p>Coursework</p>{chips(["Data Analytics", "Artificial Intelligence", "Operating Systems"])}</div>
+        <p className="xp-degree-note"><span>Alongside it</span>A research internship at IIT Indore that became <Link href="/projects/x-mutest" className="xp-inline-link">X-MuTeST <Arrow /></Link>, and forecasting work at Blackcoffer.</p>
       </article>
 
       <div className="xp-degree-route">
         <Globe />
       </div>
 
-      <article className="xp-degree is-now">
-        <p className="xp-degree-when">2025 — May 2027 · Tempe, Arizona{months !== null && months > 0 && <span> · {months} months to go</span>}</p>
+      <article className="xp-degree is-now" onMouseEnter={fly("tempe")} onFocus={fly("tempe")} tabIndex={-1}>
+        <p className="xp-degree-when">2025 — May 2027 <span>· Tempe, Arizona</span></p>
         <h3>Arizona State University</h3>
         <p className="xp-degree-name">M.S. Computer Science</p>
-        <div className="xp-degree-progress" role="img" aria-label={`About ${Math.round(done * 100)}% of the way through`}>
-          <span style={{ "--done": done } as React.CSSProperties} />
-          <small>{Math.round(done * 100)}% through</small>
+        <div className="xp-degree-stats">
+          <div className="xp-degree-gpa"><b><span className="xp-tip is-text" tabIndex={0} data-tip="Above 4.0 because ASU counts an A+ as 4.33.">4.22</span></b><small>GPA out of 4</small></div>
+          <div className="xp-degree-progress" role="img" aria-label={`About ${Math.round(done * 100)}% of the way through`}>
+            <span style={{ "--done": done } as React.CSSProperties} />
+            <small>{Math.round(done * 100)}% through{months !== null && months > 0 && <><br />{months} months to go</>}</small>
+          </div>
         </div>
-        <dl>
-          <div><dt>GPA</dt><dd><span className="xp-tip is-text" tabIndex={0} data-tip="Above 4.0 because ASU counts an A+ as 4.33.">4.22</span></dd></div>
-          <div><dt>Coursework</dt>{chips(["Data Mining", "Data Visualization", "Distributed Database Systems"])}</div>
-          <div><dt>Right now</dt><dd><Link href="/projects/agentguard" className="xp-inline-link">AgentGuard <Arrow /></Link>, and a Fog-of-War chess agent for CSE 598</dd></div>
-        </dl>
+        <div className="xp-degree-course"><p>Coursework</p>{chips(["Data Mining", "Data Visualization", "Distributed Database Systems"])}</div>
+        <p className="xp-degree-note"><span>Right now</span><Link href="/projects/agentguard" className="xp-inline-link">AgentGuard <Arrow /></Link>, and a Fog-of-War chess agent for CSE 598.</p>
       </article>
     </div>
   )
