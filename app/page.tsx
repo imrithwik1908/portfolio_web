@@ -72,6 +72,24 @@ export default function Home() {
       <section id="contact" className="xp-section xp-section-finale" aria-label="Contact">
         <Contact />
       </section>
+
+      <Colophon />
     </main>
+  )
+}
+
+// How the site was made, and when it last changed. The date and commit are stamped at build time.
+function Colophon() {
+  const built = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/Phoenix" })
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
+  return (
+    <footer className="xp-colophon">
+      <p>Designed and built by me in Tempe, with Next.js on Vercel. Type set in Instrument Serif and Instrument Sans; the stars are one canvas.</p>
+      <p>
+        Last updated {built}{sha && <> · <a href={`https://github.com/imrithwik1908/portfolio_web/commit/${sha}`} target="_blank" rel="noreferrer">{sha}</a></>}
+        {" · "}<a href="https://github.com/imrithwik1908/portfolio_web" target="_blank" rel="noreferrer">View source <Arrow dir="out" /></a>
+        <span className="xp-colophon-keys">{" · "}Press <kbd>?</kbd> for shortcuts, <kbd>⌘K</kbd> to jump</span>
+      </p>
+    </footer>
   )
 }

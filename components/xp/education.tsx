@@ -24,6 +24,7 @@ export function Education() {
   return (
     <div className="xp-degrees">
       <article className="xp-degree" onMouseEnter={fly("dharwad")} onFocus={fly("dharwad")} tabIndex={-1}>
+        <div className="xp-degree-main">
         <p className="xp-degree-when">2021 — May 2025 <span>· Dharwad, India</span></p>
         <h3>IIIT Dharwad</h3>
         <p className="xp-degree-name">B.Tech Computer Science</p>
@@ -31,8 +32,11 @@ export function Education() {
           <div className="xp-degree-gpa"><b>8.94</b><small>GPA out of 10</small></div>
           <div className="xp-degree-progress is-done" role="img" aria-label="Completed"><span style={{ "--done": 1 } as React.CSSProperties} /><small>Completed</small></div>
         </div>
+        </div>
+        <div className="xp-degree-side">
         <div className="xp-degree-course"><p>Coursework</p>{chips(["Data Analytics", "Artificial Intelligence", "Operating Systems"])}</div>
         <p className="xp-degree-note"><span>Alongside it</span>A research internship at IIT Indore that became <Link href="/projects/x-mutest" className="xp-inline-link">X-MuTeST <Arrow /></Link>, and forecasting work at Blackcoffer.</p>
+        </div>
       </article>
 
       <div className="xp-degree-route">
@@ -40,6 +44,7 @@ export function Education() {
       </div>
 
       <article className="xp-degree is-now" onMouseEnter={fly("tempe")} onFocus={fly("tempe")} tabIndex={-1}>
+        <div className="xp-degree-main">
         <p className="xp-degree-when">2025 — May 2027 <span>· Tempe, Arizona</span></p>
         <h3>Arizona State University</h3>
         <p className="xp-degree-name">M.S. Computer Science</p>
@@ -50,8 +55,11 @@ export function Education() {
             <small>{Math.round(done * 100)}% through{months !== null && months > 0 && <><br />{months} months to go</>}</small>
           </div>
         </div>
+        </div>
+        <div className="xp-degree-side">
         <div className="xp-degree-course"><p>Coursework</p>{chips(["Data Mining", "Data Visualization", "Distributed Database Systems"])}</div>
         <p className="xp-degree-note"><span>Right now</span><Link href="/projects/agentguard" className="xp-inline-link">AgentGuard <Arrow /></Link>, and a Fog-of-War chess agent for CSE 598.</p>
+        </div>
       </article>
     </div>
   )

@@ -108,8 +108,11 @@ export function Globe() {
           ctx.beginPath(); ctx.arc(x, y, 4 + pulse * 14, 0, Math.PI * 2); ctx.stroke()
         }
         ctx.font = "500 10px ui-monospace, monospace"
-        ctx.textAlign = x > size / 2 ? "right" : "left"
-        const tx = x + (x > size / 2 ? -9 : 9)
+        // Put the label on whichever side has room, and never past the canvas edge.
+        const tw = ctx.measureText(name).width
+        const right = x + 9 + tw < size - 4
+        ctx.textAlign = right ? "left" : "right"
+        const tx = right ? x + 9 : Math.max(tw + 4, x - 9)
         ctx.strokeStyle = "rgba(5,5,7,0.9)"; ctx.lineWidth = 3; ctx.lineJoin = "round"
         ctx.strokeText(name, tx, y - 7)
         ctx.fillStyle = on ? "rgba(232,236,244,0.95)" : "rgba(232,236,244,0.55)"

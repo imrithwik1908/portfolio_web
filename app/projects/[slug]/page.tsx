@@ -8,6 +8,7 @@ import { ChapterFigures } from "@/components/xp/figures"
 import { PolicyPlayground, EnrollmentDemo } from "@/components/xp/playgrounds"
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
+import { ReadingProgress } from "@/components/xp/reading"
 import { RepoSection } from "@/components/xp/repo-section"
 import { Toc } from "@/components/xp/toc"
 import { getProject, projects } from "@/lib/portfolio-data"
@@ -37,6 +38,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const meta = projectMeta[project.slug]
   const labels = chapterCopy[project.slug]
   const index = projects.findIndex((p) => p.slug === project.slug)
+  // Reading time from the words actually on the page, at a technical-reading pace of 200 words a minute.
+  const words = [project.summary, project.question, ...project.problem, ...project.system, ...project.decisions.flatMap((d) => [d.title, d.body]), project.debugging, ...project.results, ...project.limitations, project.next]
+    .join(" ").split(/\s+/).filter(Boolean).length
+  const minutes = Math.max(1, Math.round(words / 200))
   const next = projects[(index + 1) % projects.length]
 
   // The first sentence of a passage, for the brief.
@@ -95,11 +100,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   ]
 
   return (
+    <>
+    <ReadingProgress />
     <main id="main-content" className="xp xp-project" style={{ "--tint": meta.tint, "--accent": meta.accent } as React.CSSProperties}>
       <header className="xp-project-hero">
         <div className="xp-project-hero-text">
           <Link href="/projects" className="xp-back"><Arrow dir="left" /> All projects</Link>
-          <p className="xp-head-label"><span>{String(index + 1).padStart(2, "0")}</span>{project.eyebrow} · {project.year}</p>
+          <p className="xp-head-label"><span>{String(index + 1).padStart(2, "0")}</span>{project.eyebrow} · {project.year} · {minutes} min read</p>
           <h1>{project.title}</h1>
           <p className="xp-project-question">{project.question}</p>
           <p className="xp-project-summary">{project.summary}</p>
@@ -162,5 +169,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <span>{projectMeta[next.slug].tagline} <Arrow /></span>
       </Link>
     </main>
+    </>
   )
 }

@@ -6,6 +6,7 @@ import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { XpNav } from '@/components/xp/nav'
 import { Ambient } from '@/components/xp/ambient'
+import { CommandMenu } from '@/components/xp/command'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
 
 const geistSans = localFont({
@@ -63,6 +64,7 @@ export default function RootLayout({
         >
           <div className="site-shell relative flex min-h-screen flex-col">
             <Ambient />
+            <CommandMenu />
             <a href="#work" className="xp-skip">Skip to the work</a>
         <XpNav />
             <div className="flex-1">{children}</div>

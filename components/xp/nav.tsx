@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { toast, toggleCloser } from "@/components/xp/ambient"
+import { CommandButton } from "@/components/xp/command"
 import { CopyEmail } from "@/components/xp/copy-email"
 import { useGlider } from "@/components/xp/use-glider"
 import { PALETTES } from "@/components/xp/palette"
@@ -107,6 +108,7 @@ export function XpNav() {
       </div>
       <span className="xp-nav-rule" aria-hidden="true" />
       <CopyEmail className="xp-nav-copy" />
+      <CommandButton />
       <Swatch />
       <button type="button" className={`xp-nav-eye ${closer ? "is-on" : ""}`} aria-pressed={closer} onClick={toggleCloser} title="Look closer (X)">
         <span className="xp-eye" aria-hidden="true" /><span className="sr-only">Look closer: show how each part was built</span>
