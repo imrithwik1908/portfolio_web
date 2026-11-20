@@ -5,7 +5,7 @@ import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
 import { ProjectVisual } from "@/components/xp/project-visual"
 import { ChapterFigures } from "@/components/xp/figures"
-import { PolicyPlayground, EnrollmentDemo } from "@/components/xp/playgrounds"
+import { CrashExplorable, FusionExplorable, PairingExplorable, ProbeExplorable } from "@/components/xp/explorables"
 import { Pipeline } from "@/components/xp/pipeline"
 import { ProjectReader } from "@/components/xp/project-reader"
 import { ReadingProgress } from "@/components/xp/reading"
@@ -24,6 +24,13 @@ const chapterCopy: Record<string, { opening: string; system: string; decisions: 
   "x-mutest": { opening: "Why the label is only half the answer", system: "Training with reasons, not only labels", decisions: "How explanation quality was measured", debugging: "The annotation process needed another pass", results: "What the paper reports", limits: "What the benchmark cannot settle" },
   "tensor-fusion": { opening: "The sentence is not the whole signal", system: "Three representations, one prediction", decisions: "What I kept separate", debugging: "Alignment was the quiet failure mode", results: "The checked-in run", limits: "Where the experiment stops" },
   "course-catalog": { opening: "The same course means two different jobs", system: "One data model, two paths through it", decisions: "Small choices that shaped the flow", debugging: "Enrollment touched both sides", results: "What the repository implements", limits: "What would need hardening" },
+}
+
+const explorableTitle: Record<string, string> = {
+  "tensor-fusion": "Why the vectors get a 1 before they meet.",
+  "x-mutest": "Which words is the model actually leaning on?",
+  agentguard: "An average can rise while cases break.",
+  "course-catalog": "What a crash halfway through enrollment leaves behind.",
 }
 
 export function generateStaticParams() { return projects.map((project) => ({ slug: project.slug })) }
@@ -136,10 +143,16 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
       {flows[project.slug] && (
         <section className="xp-section xp-try xp-walk" aria-labelledby="walk-title">
-          <p className="xp-head-label"><span>↳</span>Walk through it</p>
-          <h2 id="walk-title">The whole system, one step at a time.</h2>
-          <p className="xp-try-intro">A model of how {project.title} actually runs, built from its repository. It narrates itself slowly; use the arrows to go at your own pace, drag to turn it, or click any block.</p>
-          <ArchFlow flow={flows[project.slug]} />
+          <p className="xp-head-label"><span>↳</span>The idea that makes it work</p>
+          <h2 id="walk-title">{explorableTitle[project.slug]}</h2>
+          {project.slug === "tensor-fusion" && <FusionExplorable />}
+          {project.slug === "x-mutest" && <ProbeExplorable />}
+          {project.slug === "agentguard" && <PairingExplorable />}
+          {project.slug === "course-catalog" && <CrashExplorable />}
+          <details className="xp-whole">
+            <summary>See the whole system, step by step</summary>
+            <ArchFlow flow={flows[project.slug]} />
+          </details>
         </section>
       )}
 
@@ -164,8 +177,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               <h2 id={`ch-${c.id}`}>{c.title}</h2>
               {c.body}
               <ChapterFigures slug={project.slug} chapter={c.id} />
-              {project.slug === "agentguard" && c.id === "decisions" && <PolicyPlayground />}
-              {project.slug === "course-catalog" && c.id === "debugging" && <EnrollmentDemo />}
             </div>
           </section>
         ))}

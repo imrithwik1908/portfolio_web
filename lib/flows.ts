@@ -273,7 +273,7 @@ export const flows: Record<string, Flow> = {
       },
       {
         title: "Where it can break",
-        body: "Those saves are separate writes with no transaction around them, so a crash halfway leaves the two sides disagreeing. The student model has a 25-credit limit, and nothing checks it yet. The demo further down this page lets you cause the first one.",
+        body: "Those saves are separate writes with no transaction around them, so a crash halfway leaves the two sides disagreeing. The student model has a 25-credit limit, and nothing checks it yet. The explorable above lets you cause it, and the duplicates a retry adds.",
         file: "server.js · models/Student.js",
         nodes: ["server", "mongo"], edges: [],
       },

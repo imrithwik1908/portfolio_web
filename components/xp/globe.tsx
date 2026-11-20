@@ -22,7 +22,9 @@ function subsolar(date: Date): [number, number] {
   return [-(hours - 12) * 15, decl]
 }
 
-export function Globe() {
+// With `scrub`, the globe is driven by the page instead of by hand: 0 sits on Dharwad, 1 on Tempe,
+// and everything between flies the real route. Nothing spins on its own in that mode.
+export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const rot = useRef<[number, number]>([-20, -18])
   const vel = useRef(0.08)
@@ -50,7 +52,17 @@ export function Globe() {
       frame = requestAnimationFrame(draw)
       if (!visible || !size) return
       t += 1
-      if (target.current) {
+      let flight = -1
+      if (scrub) {
+        const s = Math.min(1, Math.max(0, (scrub.current - 0.22) / 0.56))
+        flight = s * s * (3 - 2 * s)
+        const [lon, lat] = route(flight) as [number, number]
+        const tl = -lon, tp = -Math.max(-35, Math.min(35, lat)) - 8
+        const r = rot.current
+        const dl = ((tl - r[0] + 540) % 360) - 180
+        r[0] += dl * (reduce ? 1 : 0.14); r[1] += (tp - r[1]) * (reduce ? 1 : 0.14)
+        focus.current = flight < 0.02 ? "dharwad" : flight > 0.98 ? "tempe" : null
+      } else if (target.current) {
         const [tl, tp] = target.current
         const r = rot.current
         const dl = ((tl - r[0] + 540) % 360) - 180
@@ -86,8 +98,12 @@ export function Globe() {
 
       // Route with a light travelling along it
       const arc = { type: "LineString" as const, coordinates: Array.from({ length: 65 }, (_, i) => route(i / 64)) }
-      ctx.beginPath(); path(arc); ctx.strokeStyle = `rgba(${lamp},0.8)`; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.4; ctx.stroke(); ctx.setLineDash([])
-      const p = route(((t / 360) % 1))
+      ctx.beginPath(); path(arc); ctx.strokeStyle = `rgba(${lamp},${flight >= 0 ? 0.35 : 0.8})`; ctx.setLineDash([3, 4]); ctx.lineWidth = 1.4; ctx.stroke(); ctx.setLineDash([])
+      if (flight > 0) {
+        const done = { type: "LineString" as const, coordinates: Array.from({ length: 65 }, (_, i) => route((i / 64) * flight)) }
+        ctx.beginPath(); path(done); ctx.strokeStyle = `rgba(${lamp},0.95)`; ctx.lineWidth = 1.8; ctx.stroke()
+      }
+      const p = route(flight >= 0 ? flight : ((t / 360) % 1))
       const center: [number, number] = [-rot.current[0], -rot.current[1]]
       const dot = (c: [number, number], r: number, color: string) => {
         if (geoDistance(c, center) > Math.PI / 2) return
@@ -97,7 +113,14 @@ export function Globe() {
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2); ctx.fill()
         ctx.fillStyle = "#fff4e2"; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
       }
-      dot(p, 1.6, `rgba(${lamp},0.9)`)
+      dot(p, flight >= 0 ? 2.4 : 1.6, `rgba(${lamp},0.9)`)
+      // Mid-flight, the distance rides along beside the light, quietly.
+      if (flight > 0.04 && flight < 0.96 && geoDistance(p, [-rot.current[0], -rot.current[1]]) < Math.PI / 2) {
+        const [x, y] = proj(p)!
+        ctx.font = "10px ui-monospace, monospace"; ctx.textAlign = "left"
+        ctx.fillStyle = `rgba(232,236,244,${(0.55 * Math.sin(Math.PI * flight)).toFixed(2)})`
+        ctx.fillText(`${Math.round(14530 * flight).toLocaleString("en-US")} km`, x + 10, y + 14)
+      }
       const place = (c: [number, number], name: string, on: boolean) => {
         if (geoDistance(c, center) > Math.PI / 2 - 0.05) return
         dot(c, on ? 3 : 2.2, `rgba(${lamp},${on ? 1 : 0.7})`)
@@ -157,14 +180,14 @@ export function Globe() {
       setLabel("Let go and it keeps spinning")
     }
     const up = () => { drag = null }
-    el.addEventListener("pointerdown", down); el.addEventListener("pointermove", move)
+    if (!scrub) { el.addEventListener("pointerdown", down); el.addEventListener("pointermove", move) }
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up)
     return () => {
       cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); window.removeEventListener("xp-globe-fly", onFly)
       el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move)
       el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up)
     }
-  }, [])
+  }, [scrub])
 
   // Double-click: fly to whichever campus is facing away.
   const fly = () => {
@@ -177,9 +200,9 @@ export function Globe() {
 
   return (
     <div className="xp-globe">
-      <canvas ref={canvas} onDoubleClick={fly} aria-label="A globe showing the route from Dharwad, India to Tempe, Arizona, with the current night side shaded" role="img" />
-      <p className="xp-globe-label">{label}</p>
-      <p className="xp-degree-km" title="The shaded half is where it is night right now.">14,530 km apart</p>
+      <canvas ref={canvas} onDoubleClick={scrub ? undefined : fly} className={scrub ? "is-scrub" : undefined} aria-label="A globe showing the route from Dharwad, India to Tempe, Arizona, with the current night side shaded" role="img" />
+      {!scrub && <p className="xp-globe-label">{label}</p>}
+      {!scrub && <p className="xp-degree-km" title="The shaded half is where it is night right now.">14,530 km apart</p>}
     </div>
   )
 }
