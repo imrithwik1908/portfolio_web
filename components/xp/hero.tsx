@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { StarPortrait } from "@/components/xp/star-portrait"
 import { useEffect, useState } from "react"
 import { tempeNow } from "@/components/xp/ambient"
 import { Arrow } from "@/components/xp/arrow"
@@ -37,6 +38,7 @@ function Portrait() {
       {/* A plain image: no optimizer round-trip and no filters, just the photograph. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/profile.jpg" alt="Rithwik standing outdoors at IIIT Dharwad" width={1200} height={1600} loading="eager" fetchPriority="high" decoding="async" />
+      <StarPortrait src="/profile.jpg" />
       <figcaption key={String(proof)}>{proof ? "Yes, that\u2019s really me." : "IIIT Dharwad, 2024"}</figcaption>
     </figure>
     </div>

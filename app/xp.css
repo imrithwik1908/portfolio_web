@@ -1181,3 +1181,24 @@ body, .xp-hero h1 .xp-name, .xp-nav-eye, .xp-caret { transition: color 500ms eas
 @keyframes xp-launch { 0% { transform: translateY(0); } 20% { transform: translateY(3px); } 100% { transform: translateY(-120vh); } }
 @media (max-width: 760px) { .xp-rocket { right: 14px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 42px; height: 42px; } }
 @media (prefers-reduced-motion: reduce) { .xp-rocket.is-launch svg, .xp-rocket.is-launch i { animation: none; } }
+
+/* Star portrait: the photo waits under the starlight, then fades up through it. */
+.xp-star-portrait { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+.xp-portrait.is-starring { background: transparent; }
+.xp-portrait.is-starring img, .xp-portrait.is-starring figcaption { opacity: 0; transition: opacity 1100ms ease; }
+.xp-portrait.is-starring::after { opacity: 0; transition: opacity 1100ms ease; }
+.xp-portrait.is-starring.is-revealed img, .xp-portrait.is-starring.is-revealed figcaption, .xp-portrait.is-starring.is-revealed::after { opacity: 1; }
+.xp-portrait.is-starring { box-shadow: none; transition: box-shadow 1200ms ease; }
+.xp-portrait.is-starring.is-revealed { box-shadow: 0 60px 120px -60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(232, 236, 244, 0.06); }
+.xp-portrait.is-starring:not(.is-revealed) figcaption { visibility: hidden; animation: none; }
+/* Phone nav: everything must fit in one row. */
+@media (max-width: 480px) {
+  .xp-nav { gap: 0; padding: 4px; font-size: 0.8rem; max-width: calc(100vw - 16px); }
+  .xp-nav-home { margin-right: 2px; }
+  .xp-nav-links a { padding: 8px 7px; }
+  .xp-swatch { display: none; }
+  .xp-nav-eye { width: 34px; }
+}
+/* Before the stars arrive, the frame is empty rather than showing the photo early. */
+.xp-portrait:has(.xp-star-portrait):not(.is-starring) img, .xp-portrait:has(.xp-star-portrait):not(.is-starring) figcaption, .xp-portrait:has(.xp-star-portrait):not(.is-starring)::after { opacity: 0; }
+.xp-portrait:has(.xp-star-portrait):not(.is-starring) { background: transparent; box-shadow: none; }
