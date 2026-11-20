@@ -16,6 +16,16 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v))
 const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a))
 const ease = (t: number) => 1 - Math.pow(1 - t, 3)
 const mix = (a: number, b: number, t: number) => a + (b - a) * t
+const smooth = (t: number) => t * t * (3 - 2 * t)
+const ZOOM = 4 // how far the camera dives into each campus
+
+// Camera zoom along the scroll: in to Dharwad while its story plays, out for the flight,
+// in to Tempe after landing, out as the section ends. Smoothstep both ways, so it never snaps.
+function zoomAt(p: number) {
+  const dharwad = smooth(span(p, 0.13, 0.25)) * (1 - smooth(span(p, 0.32, 0.42)))
+  const tempe = smooth(span(p, 0.72, 0.85)) * (1 - smooth(span(p, 0.91, 1)))
+  return 1 + (ZOOM - 1) * Math.max(dharwad, tempe)
+}
 
 type Mark = { when: string; what: React.ReactNode }
 
@@ -56,6 +66,7 @@ export function Education() {
   const [p, setP] = useState(0)
   const [wide, setWide] = useState(true)
   const scrub = useRef(0)
+  const zoom = useRef(1)
   const root = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -77,6 +88,7 @@ export function Education() {
       const r = el.getBoundingClientRect()
       const v = clamp(-r.top / Math.max(1, r.height - window.innerHeight))
       scrub.current = span(v, 0.42, 0.64)
+      zoom.current = zoomAt(v)
       setP(v)
     }
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
@@ -118,7 +130,7 @@ export function Education() {
         </h3>
 
         <div className="xp-reveal-globe" style={{ transform: `translate(${shift}vw, ${lift}vh) scale(${scale})`, opacity: glow }}>
-          <Globe scrub={scrub} />
+          <Globe scrub={scrub} zoom={zoom} />
           <i className="xp-reveal-halo" style={{ opacity: 0.35 + lean * 0.65 }} aria-hidden="true" />
         </div>
 

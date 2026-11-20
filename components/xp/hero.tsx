@@ -8,22 +8,6 @@ import { Note } from "@/components/xp/note"
 import { ResumeLink } from "@/components/xp/resume"
 import { BriefLink } from "@/components/xp/brief"
 
-// The opening shot: letterbox bars part once per visit, the name comes into focus, and the
-// portrait settles. Nothing here waits on the visitor or blocks the page.
-function Letterbox() {
-  const [play, setPlay] = useState(false)
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    try {
-      if (sessionStorage.getItem("opened")) return
-      sessionStorage.setItem("opened", "1")
-    } catch { /* storage unavailable: still play */ }
-    setPlay(true)
-  }, [])
-  if (!play) return null
-  return <div className="xp-letterbox is-opening" aria-hidden="true"><span /><span /></div>
-}
-
 function Portrait() {
   const [proof, setProof] = useState(false)
   useEffect(() => {
@@ -132,7 +116,6 @@ export function Hero() {
 
   return (
     <section className="xp-hero" aria-labelledby="xp-hero-title">
-      <Letterbox />
       <div className="xp-hero-text">
         <p className="xp-hero-meta">
           <span className="xp-tip" tabIndex={0} role="img" aria-label="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." data-tip="Arizona skips daylight saving, so Tempe’s clock never jumps."><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} /></span>
@@ -153,7 +136,7 @@ export function Hero() {
       <Portrait />
 
       <a href="#work" className="xp-scroll-cue" aria-label="Scroll to the work"><span /></a>
-      <Note className="is-hero">The letterbox plays once per visit and is skipped entirely if you prefer reduced motion. The sky icon follows the real hour in Tempe.</Note>
+      <Note className="is-hero">The opening titles play once per visit, skip on any key, and never play if you prefer reduced motion. The sky icon follows the real hour in Tempe.</Note>
     </section>
   )
 }

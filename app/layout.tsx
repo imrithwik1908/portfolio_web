@@ -9,6 +9,7 @@ import { Ambient } from '@/components/xp/ambient'
 import { CommandMenu } from '@/components/xp/command'
 import { PageTransitions } from '@/components/xp/transitions'
 import { Brief } from '@/components/xp/brief'
+import { Intro } from '@/components/xp/intro'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
 
 const geistSans = localFont({
@@ -54,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: "try{var p=localStorage.getItem('xp-palette');if(p)document.documentElement.dataset.palette=p}catch(e){}" }} />
+        <script dangerouslySetInnerHTML={{ __html: "try{var p=localStorage.getItem('xp-palette');if(p)document.documentElement.dataset.palette=p}catch(e){}try{if(sessionStorage.getItem('xp-intro')||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.intro='off';else document.documentElement.classList.add('is-intro')}catch(e){document.documentElement.dataset.intro='off'}" }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} bg-background font-sans`}>
         <ThemeProvider
@@ -65,6 +66,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="site-shell relative flex min-h-screen flex-col">
+            <Intro />
             <Ambient />
             <CommandMenu />
             <PageTransitions />

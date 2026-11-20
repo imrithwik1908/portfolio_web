@@ -24,7 +24,7 @@ function subsolar(date: Date): [number, number] {
 
 // With `scrub`, the globe is driven by the page instead of by hand: 0 sits on Dharwad, 1 on Tempe,
 // and everything between flies the real route. Nothing spins on its own in that mode.
-export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}) {
+export function Globe({ scrub, zoom }: { scrub?: React.MutableRefObject<number>; zoom?: React.MutableRefObject<number> } = {}) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const rot = useRef<[number, number]>([-20, -18])
   const vel = useRef(0.08)
@@ -37,7 +37,7 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
     if (!el) return
     const ctx = el.getContext("2d")!
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    let size = 0, frame = 0, visible = true, t = 0
+    let size = 0, frame = 0, visible = true, t = 0, zc = 1
     const resize = () => {
       size = el.clientWidth
       const dpr = Math.min(2, window.devicePixelRatio || 1)
@@ -47,6 +47,12 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
     resize()
     const ro = new ResizeObserver(resize); ro.observe(el)
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting }); io.observe(el)
+    // Close-ups need finer coastlines; fetch them after the page is up, only for the zooming globe.
+    let detail: typeof land | null = null
+    if (zoom) import("world-atlas/land-50m.json").then((m) => {
+      const topo = (m.default ?? m) as unknown as Topology
+      detail = feature(topo, topo.objects.land as GeometryCollection)
+    }).catch(() => {})
 
     const draw = () => {
       frame = requestAnimationFrame(draw)
@@ -58,7 +64,9 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
         const s = Math.min(1, Math.max(0, scrub.current))
         flight = s * s * (3 - 2 * s)
         const [lon, lat] = route(flight) as [number, number]
-        const tl = -lon, tp = -Math.max(-35, Math.min(35, lat)) - 8
+        // Zoomed in, aim straight at the place; zoomed out, tilt a little to show the arc.
+        const zn = zoom ? Math.min(1, Math.max(0, (zc - 1) / 2)) : 0
+        const tl = -lon, tp = (-Math.max(-35, Math.min(35, lat)) - 8) * (1 - zn) + -lat * zn
         const r = rot.current
         const dl = ((tl - r[0] + 540) % 360) - 180
         r[0] += dl * (reduce ? 1 : 0.14); r[1] += (tp - r[1]) * (reduce ? 1 : 0.14)
@@ -73,7 +81,9 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
         rot.current[0] += vel.current
         vel.current += (0.08 - vel.current) * 0.02
       }
-      const R = size / 2 * 0.86
+      if (zoom) zc += (Math.max(1, zoom.current) - zc) * (reduce ? 1 : 0.12) // ease toward the scroll's zoom every frame
+      const z = zoom ? zc : 1
+      const R = size / 2 * 0.86 * z
       const lamp = currentPalette().lampRgb
       const proj = geoOrthographic().scale(R).translate([size / 2, size / 2]).rotate([rot.current[0], rot.current[1], 0]).clipAngle(90)
       const path = geoPath(proj, ctx)
@@ -90,7 +100,7 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
       ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = ocean; ctx.fill()
 
       ctx.beginPath(); path(geoGraticule10()); ctx.strokeStyle = "rgba(232, 236, 244,0.05)"; ctx.lineWidth = 0.6; ctx.stroke()
-      ctx.beginPath(); path(land); ctx.fillStyle = "#2c3244"; ctx.fill()
+      ctx.beginPath(); path(z > 1.4 && detail ? detail : land); ctx.fillStyle = "#2c3244"; ctx.fill()
       ctx.strokeStyle = `rgba(${lamp},0.25)`; ctx.lineWidth = 0.5; ctx.stroke()
 
       // The real night side right now
@@ -131,7 +141,8 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
           ctx.strokeStyle = `rgba(${lamp},${0.6 * (1 - pulse)})`; ctx.lineWidth = 1
           ctx.beginPath(); ctx.arc(x, y, 4 + pulse * 14, 0, Math.PI * 2); ctx.stroke()
         }
-        ctx.font = "500 10px ui-monospace, monospace"
+        const big = Math.min(1, (z - 1) / 2)
+        ctx.font = `500 ${(10 + 3 * big).toFixed(1)}px ui-monospace, monospace`
         // Put the label on whichever side has room, and never past the canvas edge.
         const tw = ctx.measureText(name).width
         const right = x + 9 + tw < size - 4
@@ -141,6 +152,11 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
         ctx.strokeText(name, tx, y - 7)
         ctx.fillStyle = on ? "rgba(232,236,244,0.95)" : "rgba(232,236,244,0.55)"
         ctx.fillText(name, tx, y - 7)
+        if (on && big > 0.3) {
+          ctx.font = "10px ui-monospace, monospace"
+          ctx.fillStyle = `rgba(232,236,244,${(0.6 * (big - 0.3) / 0.7).toFixed(2)})`
+          ctx.fillText(name === "DHARWAD" ? "KARNATAKA, INDIA" : "ARIZONA, USA", tx, y + 9)
+        }
       }
       place(DHARWAD, "DHARWAD", focus.current === "dharwad")
       place(TEMPE, "TEMPE", focus.current === "tempe")
@@ -149,6 +165,14 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
       const rim = ctx.createRadialGradient(size / 2, size / 2, R * 0.6, size / 2, size / 2, R)
       rim.addColorStop(0, "rgba(0,0,0,0)"); rim.addColorStop(1, "rgba(0,0,0,0.45)")
       ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = rim; ctx.fill()
+
+      // Zoomed in, the frame stops being a ball: its edges dissolve into space, like a lens.
+      if (z > 1.01) {
+        const k = Math.min(1, (z - 1) / 0.6)
+        const fade = ctx.createRadialGradient(size / 2, size / 2, size * (0.5 - 0.2 * k), size / 2, size / 2, size / 2)
+        fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.save(); ctx.globalCompositeOperation = "destination-in"; ctx.fillStyle = fade; ctx.fillRect(0, 0, size, size); ctx.restore()
+      }
     }
     draw()
 
@@ -188,7 +212,7 @@ export function Globe({ scrub }: { scrub?: React.MutableRefObject<number> } = {}
       el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move)
       el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up)
     }
-  }, [scrub])
+  }, [scrub, zoom])
 
   // Double-click: fly to whichever campus is facing away.
   const fly = () => {
