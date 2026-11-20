@@ -1917,6 +1917,8 @@ html[data-intro="off"] .xp-opening { display: none; }
 .xp-opening.is-leaving { opacity: 0; pointer-events: none; }
 .xp-opening canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .xp-opening-line { position: relative; margin: 0; color: rgba(226, 230, 238, 0.72); font: 400 0.82rem var(--xp-sans); letter-spacing: 0.42em; text-indent: 0.42em; text-transform: uppercase; animation: xp-opening-line 3600ms 900ms ease-in-out both; }
-@keyframes xp-opening-line { 0% { opacity: 0; letter-spacing: 0.5em; } 30% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.38em; } }
+@keyframes xp-opening-line { 0% { opacity: 0; } 20% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; } }
+.xp-opening-line span { display: inline-block; min-width: 0.62em; text-align: center; transition: color 600ms ease, opacity 600ms ease; }
+.xp-opening-line span.is-noise { color: rgba(226, 230, 238, 0.32); }
 html.is-intro { overflow: hidden; }
 html.is-intro .xp-hero, html.is-intro .xp-hero *, html.is-intro .xp-nav, html.is-intro .xp-nav * { animation-play-state: paused !important; }

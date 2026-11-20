@@ -8,9 +8,17 @@ import { useEffect, useRef, useState } from "react"
 
 const LENGTH = 4200 // ms before the fade to the page begins
 const FADE = 900
+const NAME = "SAI RITHWIK REDDY CHIRRA"
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const DECODE_AT = 1000, PER_LETTER = 75, SHUFFLE_MS = 95
+
+// The same idea as the coded line at the end of the site, slowed down: letters shuffle quietly,
+// then settle one by one, left to right, with a little unevenness so it never feels mechanical.
+const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
 
 export function Intro() {
   const [phase, setPhase] = useState<"play" | "leave" | "gone">("play")
+  const [name, setName] = useState(NAME)
   const canvas = useRef<HTMLCanvasElement>(null)
   const ended = useRef(false)
 
@@ -33,6 +41,19 @@ export function Intro() {
     const t0 = performance.now()
     let frame = 0
 
+    const settleAt = Array.from(NAME, (_, i) => DECODE_AT + i * PER_LETTER + Math.random() * 140)
+    let lastShuffle = 0
+    setName(noise())
+    const decode = (now: number) => {
+      const t = now - t0
+      if (now - lastShuffle < SHUFFLE_MS) return
+      lastShuffle = now
+      setName(Array.from(NAME, (c, i) => {
+        if (c === " " || t >= settleAt[i]) return c
+        return GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+      }).join(""))
+    }
+
     const end = () => {
       if (ended.current) return
       ended.current = true
@@ -43,6 +64,7 @@ export function Intro() {
 
     const draw = (now: number) => {
       const t = now - t0
+      if (t < DECODE_AT + NAME.length * PER_LETTER + 400) decode(now)
       const fadeIn = Math.min(1, t / 1200)
       ctx.clearRect(0, 0, W, H)
       const f = Math.max(W, H) * 0.42, cx = W / 2, cy = H / 2
@@ -81,7 +103,9 @@ export function Intro() {
   return (
     <div className={`xp-opening ${phase === "leave" ? "is-leaving" : ""}`} aria-hidden="true">
       <canvas ref={canvas} />
-      <p className="xp-opening-line">Sai Rithwik Reddy Chirra</p>
+      <p className="xp-opening-line">
+        {Array.from(name, (c, i) => <span key={i} className={c === NAME[i] ? undefined : "is-noise"}>{c}</span>)}
+      </p>
     </div>
   )
 }
