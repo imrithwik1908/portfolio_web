@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
 import { notFound } from "next/navigation"
 import { AgentGuardBench } from "@/components/xp/agentguard-bench"
+import { LiveGate } from "@/components/xp/live-gate"
 import { ProjectVisual } from "@/components/xp/project-visual"
 import { ChapterFigures } from "@/components/xp/figures"
 import { CrashExplorable, FusionExplorable, PairingExplorable, ProbeExplorable } from "@/components/xp/explorables"
@@ -184,6 +185,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <h2 id="try-title">Ten questions, two versions, one release decision.</h2>
           <p className="xp-try-intro">The repository&apos;s demo runs a support assistant twice on the same policy questions. The candidate reads more documents than the baseline. Pick a question to see what each version read and said, then run the release check.</p>
           <AgentGuardBench />
+          <LiveGate />
         </section>
       )}
 

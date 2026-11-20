@@ -13,6 +13,7 @@ export function toast(message: string) {
 
 const SHORTCUTS = [
   ["⌘ / Ctrl + K", "Jump anywhere: projects, résumé, email"],
+  ["B", "The 30-second version"],
   ["X", "Show how each part of the site was built"],
   ["?", "This card"],
   ["← →", "Step through experience, figures and the demo"],

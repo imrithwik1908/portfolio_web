@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { tempeNow } from "@/components/xp/ambient"
 import { Arrow } from "@/components/xp/arrow"
 import { Note } from "@/components/xp/note"
 import { ResumeLink } from "@/components/xp/resume"
+import { BriefLink } from "@/components/xp/brief"
 
 // The opening shot: letterbox bars part once per visit, the name comes into focus, and the
 // portrait settles. Nothing here waits on the visitor or blocks the page.
@@ -43,12 +44,46 @@ function Portrait() {
   )
 }
 
+// The roles, one at a time, right under the name. The outgoing word's letters lift away while the
+// incoming word's letters rise into place, and the slot eases to the new word's width.
+const ROLES = ["ML engineer", "Data scientist", "ML researcher"]
+
+function Roles() {
+  const [k, setK] = useState(0)
+  const [widths, setWidths] = useState<number[]>([])
+  const sizer = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const measure = () => setWidths(Array.from(sizer.current?.children ?? []).map((c) => (c as HTMLElement).offsetWidth))
+    measure()
+    document.fonts?.ready.then(measure)
+    window.addEventListener("resize", measure)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return () => window.removeEventListener("resize", measure)
+    const id = window.setInterval(() => { if (!document.hidden) setK((v) => v + 1) }, 3200)
+    return () => { window.clearInterval(id); window.removeEventListener("resize", measure) }
+  }, [])
+  const now = k % ROLES.length, before = (k + ROLES.length - 1) % ROLES.length
+  const letters = (word: string, mode: "in" | "out" | "still") => Array.from(word).map((ch, i) => (
+    <span key={i} className={`is-${mode}`} style={{ "--i": i } as React.CSSProperties}>{ch === " " ? "\u00a0" : ch}</span>
+  ))
+  return (
+    <p className="xp-roles" aria-label={`Open to ${ROLES.join(", ")} roles`}>
+      <span className="xp-roles-pulse" aria-hidden="true" />
+      <span aria-hidden="true">Open to</span>
+      <span className="xp-roles-slot" aria-hidden="true" style={widths[now] ? { width: widths[now] } : undefined}>
+        {k > 0 && <span key={`o${k}`} className="xp-roles-word">{letters(ROLES[before], "out")}</span>}
+        <span key={`i${k}`} className="xp-roles-word">{letters(ROLES[now], k > 0 ? "in" : "still")}</span>
+      </span>
+      <span aria-hidden="true">roles</span>
+      <span ref={sizer} className="xp-roles-sizer" aria-hidden="true">{ROLES.map((r) => <span key={r}>{r}</span>)}</span>
+    </p>
+  )
+}
+
 // What's on the desk, typed out one line at a time. Every line is something real and current.
 const DESK = [
   "a release gate for LLM apps (AgentGuard)",
   "a chess agent that plays in the fog (CSE 598)",
   "the last stretch of an M.S. at ASU",
-  "ML engineering and data science roles",
 ]
 
 function Typed() {
@@ -64,7 +99,7 @@ function Typed() {
   }, [chars, line])
   return (
     <p className="xp-typed" aria-label={`Right now: ${DESK.join("; ")}`}>
-      <span aria-hidden="true">{line === DESK.length - 1 ? "Looking for" : "Working on"}</span>
+      <span aria-hidden="true">Working on</span>
       <span aria-hidden="true">{DESK[line].slice(0, chars)}<i className="xp-caret" /></span>
     </p>
   )
@@ -107,6 +142,7 @@ export function Hero() {
           Tempe, Arizona{now && <> · <Offset label={`${now.part}, ${now.time}`} /></>}
         </p>
         <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name">Rithwik</em>.</h1>
+        <Roles />
         <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
         <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an <span className="xp-tip is-text" tabIndex={0} data-tip="X-MuTeST: explainable hate-speech detection in English, Hindi and Telugu.">AAAI 2026 paper</span>, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
         <Typed />
@@ -114,6 +150,7 @@ export function Hero() {
           <Link href="/#work" className="xp-button">See what I&apos;ve built <Arrow dir="down" /></Link>
           <ResumeLink>Open my résumé <Arrow /></ResumeLink>
         </div>
+        <BriefLink />
       </div>
 
       <Portrait />
