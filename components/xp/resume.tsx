@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
-import { EMAIL } from "@/components/xp/copy-email"
+import resume from "@/lib/resume.json"
 
-export const RESUME_PDF = "https://drive.google.com/file/d/1LF8cf2CkC7JzFfhFVyHCXXfUYF6L9pZd/view?usp=sharing"
+export const RESUME_PDF = "/Sai_Rithwik_Reddy_Chirra_Resume.pdf"
+export const RESUME_DOCX = "/Sai_Rithwik_Reddy_Chirra_Resume.docx"
 
 // Opens the résumé as a case file on the page instead of sending people to a PDF viewer.
 export function openResume() {
@@ -59,7 +60,8 @@ export function ResumeDossier() {
         <span>Résumé · Sai Rithwik Reddy Chirra</span>
         <div>
           <button type="button" className="xp-link" onClick={() => window.print()}>Print</button>
-          <a className="xp-link" href={RESUME_PDF} target="_blank" rel="noreferrer">PDF <Arrow dir="out" /></a>
+          <a className="xp-link" href={RESUME_PDF} download>Download PDF <Arrow dir="down" /></a>
+          <a className="xp-link" href={RESUME_DOCX} download>Word <Arrow dir="down" /></a>
           <button type="button" className="xp-dossier-close" onClick={() => setOpen(false)} aria-label="Close the résumé">Close <kbd>Esc</kbd></button>
         </div>
       </div>
@@ -71,69 +73,56 @@ export function ResumeDossier() {
   )
 }
 
-// The résumé body, shared by the on-page case file and the print copy below.
+// The résumé body, shared by the on-page case file and the print copy below. It reads the same
+// lib/resume.json that scripts/build_resume.py turns into the downloadable PDF and DOCX.
 function ResumeSheet() {
+  const r = resume
   return (
     <>
     <header className="xp-sheet-head">
       <div>
-        <h2>Sai Rithwik Reddy Chirra</h2>
-        <p>ML engineering and data science · Tempe, Arizona · {EMAIL}</p>
+        <h2>{r.name}</h2>
+        <p>{r.contact.map((c, i) => <span key={c.label}>{i > 0 && " · "}{c.href ? <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer">{c.label}</a> : c.label}</span>)}</p>
       </div>
       <span className="xp-sheet-stamp" aria-hidden="true">Seeking ML /<br />DS roles</span>
     </header>
 
-    <p className="xp-sheet-summary">Published ML researcher (AAAI 2026) and M.S. Computer Science student who builds models and the systems around them: forecasting pipelines, explainable NLP, and evaluation tooling that decides whether an LLM change is safe to ship.</p>
+    <p className="xp-sheet-summary">{r.summary}</p>
 
     <section>
       <h3>Experience</h3>
-      <article>
-        <div className="xp-sheet-row"><strong>Data Science Associate, Blackcoffer</strong><span>Dec 2024 – May 2025</span></div>
-        <ul>
-          <li>Built time-series forecasting models in Python on a 40K+ record mall-trajectory dataset; 18% more accurate than the earlier method, 82% overall.</li>
-          <li>Brought ad-revenue mean daily error down to $142 by finding three hidden patterns in user behaviour, enabling 15% more efficient budget allocation.</li>
-          <li>Conducted preprocessing, feature engineering and validation so results stayed reproducible.</li>
-        </ul>
-      </article>
-      <article>
-        <div className="xp-sheet-row"><strong>Summer Research Intern (AI/ML), IIT Indore</strong><span>Apr – Nov 2024</span></div>
-        <ul>
-          <li>Developed X-MuTeST, explainable hate-speech detection for English, Hindi and Telugu, with human-rationale supervision and MuRIL, XLM-R and LLaMA 3.1.</li>
-          <li>Wrote the technical reports on model design and deployment; pipeline iterations cut inference latency by 20%.</li>
-        </ul>
-      </article>
+      {r.experience.map((x) => (
+        <article key={x.org}>
+          <div className="xp-sheet-row"><strong>{x.role}, {x.org}</strong><span>{x.when}</span></div>
+          <ul>{x.bullets.map((b) => <li key={b}>{b}</li>)}</ul>
+        </article>
+      ))}
     </section>
 
     <section>
       <h3>Projects</h3>
-      <article>
-        <div className="xp-sheet-row"><strong>AgentGuard</strong><span>2026</span></div>
-        <ul><li>Regression testing and release gate for LLM apps: Python SDK, FastAPI, PostgreSQL, Redis / ARQ workers, Next.js. Paired baseline/candidate evaluation with PASS, BLOCK or REVIEW decisions.</li></ul>
-      </article>
-      <article>
-        <div className="xp-sheet-row"><strong>Tensor Fusion</strong><span>2024</span></div>
-        <ul><li>Multimodal sentiment analysis on CMU-MOSI fusing text, audio and video; 70.4% binary accuracy, F1 0.709.</li></ul>
-      </article>
-      <article>
-        <div className="xp-sheet-row"><strong>Course Catalog</strong><span>2024</span></div>
-        <ul><li>Role-based course system with Google sign-in, Express and MongoDB; separate student and professor flows over one data model.</li></ul>
-      </article>
+      {r.projects.map((p) => (
+        <article key={p.name}>
+          <div className="xp-sheet-row"><strong><a href={p.href} target="_blank" rel="noreferrer">{p.name}</a>: {p.what}</strong><span>{p.when}</span></div>
+          <p className="xp-sheet-stack">{p.stack}</p>
+          <ul>{p.bullets.map((b) => <li key={b}>{b}</li>)}</ul>
+        </article>
+      ))}
     </section>
 
     <section>
       <h3>Publication</h3>
-      <p><strong>X-MuTeST: A Multilingual Benchmark for Explainable Hate Speech Detection and a Novel LLM-Consulted Explanation Framework.</strong> Proceedings of the AAAI Conference on Artificial Intelligence, 40(46), 2026.</p>
+      <p><strong>{r.publication.title}.</strong> {r.publication.authors}. {r.publication.venue}. <a href={r.publication.href} target="_blank" rel="noreferrer">DOI</a></p>
     </section>
 
     <section className="xp-sheet-split">
       <div>
         <h3>Education</h3>
-        <p><strong>M.S. Computer Science</strong>, Arizona State University · May 2027 · GPA 4.22</p>
-        <p><strong>B.Tech Computer Science</strong>, IIIT Dharwad · May 2025 · GPA 8.94/10</p>
+        {r.education.map((e) => <p key={e.school}><strong>{e.degree}</strong>, {e.school} · {e.when} · {e.gpa}</p>)}
       </div>
       <div>
         <h3>Skills</h3>
-        <p>Python, C++, JavaScript, TypeScript · PyTorch, TensorFlow, scikit-learn, Hugging Face · FastAPI, Flask, Node.js · PostgreSQL, MongoDB, Neo4j, Redis · GCP, AWS, IBM Cloud, Jenkins, Power BI</p>
+        {r.skills.map((s) => <p key={s.group}><strong>{s.group}:</strong> {s.items}</p>)}
       </div>
     </section>
     </>

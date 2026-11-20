@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "@/components/xp/ambient"
 import { EMAIL } from "@/components/xp/copy-email"
-import { openResume } from "@/components/xp/resume"
+import { RESUME_PDF, openResume } from "@/components/xp/resume"
 
 // The 30-second version, for anyone skimming: who, what roles, when, three pieces of proof, and
 // every way to follow up. Opens from the hero, from ⌘K, or by pressing "b".
@@ -82,6 +82,7 @@ export function Brief() {
 
         <div className="xp-brief-actions" style={{ "--i": 8 } as React.CSSProperties}>
           <button type="button" className="xp-button" tabIndex={open ? 0 : -1} onClick={() => { setOpen(false); openResume() }}>Open the résumé</button>
+          <a className="xp-brief-ghost" href={RESUME_PDF} download tabIndex={open ? 0 : -1}>Download PDF ↓</a>
           <button type="button" className="xp-brief-ghost" tabIndex={open ? 0 : -1} onClick={copy}>Copy email</button>
           <a className="xp-brief-ghost" href="https://www.linkedin.com/in/sairithwikreddy" target="_blank" rel="noreferrer" tabIndex={open ? 0 : -1}>LinkedIn ↗</a>
           <a className="xp-brief-ghost" href="https://github.com/imrithwik1908" target="_blank" rel="noreferrer" tabIndex={open ? 0 : -1}>GitHub ↗</a>

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "@/components/xp/ambient"
 import { EMAIL } from "@/components/xp/copy-email"
-import { openResume } from "@/components/xp/resume"
+import { RESUME_PDF, openResume } from "@/components/xp/resume"
 import { projects } from "@/lib/portfolio-data"
 
 type Item = { group: string; label: string; hint?: string; run: () => void }
@@ -25,6 +25,7 @@ export function CommandMenu() {
   const items: Item[] = useMemo(() => [
     { group: "Actions", label: "The 30-second version", hint: "Roles, proof, contact", run: () => window.dispatchEvent(new Event("xp:brief")) },
     { group: "Actions", label: "Open my résumé", hint: "Read it here, or print", run: openResume },
+    { group: "Actions", label: "Download my résumé", hint: "One-page PDF, ATS-friendly", run: () => { const a = document.createElement("a"); a.href = RESUME_PDF; a.download = ""; a.click() } },
     { group: "Actions", label: "Copy my email", hint: EMAIL, run: () => { navigator.clipboard?.writeText(EMAIL).then(() => toast("Email copied."), () => { window.location.href = `mailto:${EMAIL}` }) } },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),

@@ -1,0 +1,131 @@
+{
+  "_note": "Single source for the résumé: the site's résumé view and scripts/build_resume.py (PDF + DOCX) both read this file. Every figure is from the user's own résumé or verified in the project repositories. Phone number deliberately left off the public copy.",
+  "name": "Sai Rithwik Reddy Chirra",
+  "contact": [
+    {
+      "label": "sairithwikreddy.chirra@gmail.com",
+      "href": "mailto:sairithwikreddy.chirra@gmail.com"
+    },
+    {
+      "label": "Tempe, AZ"
+    },
+    {
+      "label": "sairithwikreddy.vercel.app",
+      "href": "https://sairithwikreddy.vercel.app"
+    },
+    {
+      "label": "linkedin.com/in/sairithwikreddy",
+      "href": "https://www.linkedin.com/in/sairithwikreddy"
+    },
+    {
+      "label": "github.com/imrithwik1908",
+      "href": "https://github.com/imrithwik1908"
+    }
+  ],
+  "summary": "ML engineer and published researcher (AAAI 2026) completing an M.S. in Computer Science at Arizona State (May 2027). I build models and the production software around them: LLM evaluation tooling, explainable NLP and forecasting.",
+  "education": [
+    {
+      "school": "Arizona State University",
+      "place": "Tempe, AZ",
+      "degree": "Master of Science, Computer Science",
+      "when": "2025 – May 2027 (expected)",
+      "gpa": "GPA 4.22 / 4.00",
+      "detail": "Coursework: Data Mining, Data Visualization, Distributed Database Systems"
+    },
+    {
+      "school": "Indian Institute of Information Technology, Dharwad",
+      "place": "Dharwad, India",
+      "degree": "Bachelor of Technology, Computer Science",
+      "when": "2021 – May 2025",
+      "gpa": "GPA 8.94 / 10",
+      "detail": "Coursework: Data Analytics, Artificial Intelligence, Operating Systems"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Data Science Associate",
+      "org": "Blackcoffer",
+      "place": "India",
+      "when": "Dec 2024 – May 2025",
+      "bullets": [
+        "Improved forecast accuracy by 18% over the prior method (82% overall) by building and validating time-series models in Python on a 40K+ record retail customer-trajectory dataset.",
+        "Reduced the mean daily error of digital ad-revenue forecasts to $142 by identifying 3 hidden patterns in user-behavior data, enabling 15% more efficient marketing budget allocation."
+      ]
+    },
+    {
+      "role": "Summer Research Intern, AI/ML",
+      "org": "Indian Institute of Technology Indore",
+      "place": "Indore, India",
+      "when": "Apr 2024 – Nov 2024",
+      "bullets": [
+        "Co-developed X-MuTeST, explainable hate-speech detection for English, Hindi and Telugu on a 16,830-post benchmark with word-level human rationales, reaching 88.8%, 87.5% and 86.0% accuracy; published at AAAI 2026.",
+        "Trained MuRIL and XLM-R with two-stage attention supervision (human rationales, then an n-gram perturbation probe merged with LLaMA 3.1 rationales); evaluated explanations with Token-F1, IOU-F1, comprehensiveness and sufficiency.",
+        "Reduced model inference latency by 20% through iterative pipeline improvements and documented model design and deployment in technical reports."
+      ]
+    },
+    {
+      "role": "Full Stack Developer Intern",
+      "org": "CodeAlpha",
+      "place": "Remote",
+      "when": "Jun 2023 – Jul 2023",
+      "bullets": [
+        "Built responsive web pages and a Node.js / EJS application."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "AgentGuard",
+      "what": "Regression testing and release gate for LLM applications",
+      "stack": "Python, FastAPI, PostgreSQL, Redis/ARQ, Next.js, Docker",
+      "when": "2026",
+      "href": "https://github.com/imrithwik1908/AgentGuard",
+      "bullets": [
+        "Built and deployed an end-to-end platform that records LLM, RAG and agent runs through a fail-open Python SDK, grades them with 13 evaluators (9 rule-based, 4 LLM-judge) and returns PASS, BLOCK or REVIEW to CI with stated reasons.",
+        "Designed atomic trace ingestion (validation, redaction, one transaction) and asynchronous evaluation on Redis/ARQ workers with SKIP LOCKED job claiming and stuck-job recovery.",
+        "Replaced average-score comparison with per-case pairing, surfacing 2 regressions in the demo release despite most checks passing; covered by PostgreSQL integration tests across 8 test modules."
+      ]
+    },
+    {
+      "name": "Tensor Fusion Network",
+      "what": "Multimodal sentiment analysis",
+      "stack": "PyTorch, CMU-MOSI, MultiBench",
+      "when": "2024",
+      "href": "https://github.com/imrithwik1908/Tensor-Fusion-Network",
+      "bullets": [
+        "Fused face, voice and text through an outer product of 1-augmented embeddings (140,481 interaction features) that keeps unimodal and bimodal signals.",
+        "Reached 70.4% accuracy and 0.709 F1 on a balanced binary test set (50% chance) and 1.10 MAE on -3 to +3 sentiment regression."
+      ]
+    },
+    {
+      "name": "Course Catalog",
+      "what": "Role-based course registration",
+      "stack": "Node.js, Express, MongoDB, EJS, Google OAuth",
+      "when": "2024",
+      "href": "https://github.com/imrithwik1908/course_catalog",
+      "bullets": [
+        "Built a server-rendered app where Google sign-in assigns student or professor roles from the institutional email; 10 Express routes, 3 Mongoose models, session cart."
+      ]
+    }
+  ],
+  "publication": {
+    "title": "X-MuTeST: A Multilingual Benchmark for Explainable Hate Speech Detection and a Novel LLM-Consulted Explanation Framework",
+    "venue": "Proceedings of the AAAI Conference on Artificial Intelligence, 40(46), 2026",
+    "authors": "Co-author (4th of 6)",
+    "href": "https://doi.org/10.1609/aaai.v40i46.41261"
+  },
+  "skills": [
+    {
+      "group": "Languages",
+      "items": "Python, SQL, TypeScript, JavaScript, C++"
+    },
+    {
+      "group": "ML and data",
+      "items": "PyTorch, Hugging Face Transformers, scikit-learn, NLP, LLM evaluation, explainable AI, multimodal learning, time-series forecasting"
+    },
+    {
+      "group": "Systems and tools",
+      "items": "FastAPI, Flask, Node.js, PostgreSQL, Redis, MongoDB, Neo4j, Docker, Git, Jenkins, AWS, GCP, Next.js"
+    }
+  ]
+}

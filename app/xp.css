@@ -1908,3 +1908,5 @@ html.has-brief { overflow: hidden; }
 .xp-hero h1 + .xp-roles { margin-top: clamp(30px, 3.4vw, 44px); }
 .xp-roles + .xp-hero-line { margin-top: clamp(30px, 3.4vw, 44px) !important; }
 .xp-roles { display: flex; width: fit-content; }
+.xp-sheet-stack { margin: 2px 0 4px !important; color: var(--xp-muted, #666); font-size: 0.85em; }
+.xp-sheet-head p a, .xp-sheet-row a, .xp-sheet section a { color: inherit; text-decoration: underline; text-decoration-color: rgba(127, 127, 127, 0.45); text-underline-offset: 2px; }
