@@ -44,34 +44,31 @@ function Portrait() {
   )
 }
 
-// The roles, one at a time, right under the name. The outgoing word's letters lift away while the
-// incoming word's letters rise into place, and the slot eases to the new word's width.
-const ROLES = ["ML engineer", "Data scientist", "ML researcher"]
+// The roles, as a small status pill under the name. The role word slides up through a clipped
+// slot, and the pill eases to the new word's width.
+const ROLES = ["ML engineering", "Data science", "ML research"]
 
 function Roles() {
   const [k, setK] = useState(0)
   const [widths, setWidths] = useState<number[]>([])
   const sizer = useRef<HTMLSpanElement>(null)
   useEffect(() => {
-    const measure = () => setWidths(Array.from(sizer.current?.children ?? []).map((c) => (c as HTMLElement).offsetWidth))
+    const measure = () => setWidths(Array.from(sizer.current?.children ?? []).map((c) => (c as HTMLElement).getBoundingClientRect().width))
     measure()
     document.fonts?.ready.then(measure)
     window.addEventListener("resize", measure)
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return () => window.removeEventListener("resize", measure)
-    const id = window.setInterval(() => { if (!document.hidden) setK((v) => v + 1) }, 3200)
+    const id = window.setInterval(() => { if (!document.hidden) setK((v) => v + 1) }, 3000)
     return () => { window.clearInterval(id); window.removeEventListener("resize", measure) }
   }, [])
   const now = k % ROLES.length, before = (k + ROLES.length - 1) % ROLES.length
-  const letters = (word: string, mode: "in" | "out" | "still") => Array.from(word).map((ch, i) => (
-    <span key={i} className={`is-${mode}`} style={{ "--i": i } as React.CSSProperties}>{ch === " " ? "\u00a0" : ch}</span>
-  ))
   return (
     <p className="xp-roles" aria-label={`Open to ${ROLES.join(", ")} roles`}>
       <span className="xp-roles-pulse" aria-hidden="true" />
       <span aria-hidden="true">Open to</span>
-      <span className="xp-roles-slot" aria-hidden="true" style={widths[now] ? { width: widths[now] } : undefined}>
-        {k > 0 && <span key={`o${k}`} className="xp-roles-word">{letters(ROLES[before], "out")}</span>}
-        <span key={`i${k}`} className="xp-roles-word">{letters(ROLES[now], k > 0 ? "in" : "still")}</span>
+      <span className="xp-roles-slot" aria-hidden="true" style={widths[now] ? { width: Math.ceil(widths[now]) } : undefined}>
+        {k > 0 && <span key={`o${k}`} className="xp-roles-word is-out">{ROLES[before]}</span>}
+        <span key={`i${k}`} className={`xp-roles-word ${k > 0 ? "is-in" : ""}`}>{ROLES[now]}</span>
       </span>
       <span aria-hidden="true">roles</span>
       <span ref={sizer} className="xp-roles-sizer" aria-hidden="true">{ROLES.map((r) => <span key={r}>{r}</span>)}</span>
