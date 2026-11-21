@@ -41,7 +41,7 @@ const NAME = "SAI RITHWIK REDDY CHIRRA"
 const R_AT = 4
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const CARDS: [number, string][] = [[2, "Tempe, Arizona"], [4, "Machine learning systems"]]
-const NAME_AT = beat(6), PER_LETTER = 22, SHUFFLE_MS = 90
+const NAME_AT = beat(6), PER_LETTER = 50, SHUFFLE_MS = 120 // ~1.3 s: slow enough to read as a reveal
 const PUSH_AT = beat(6.5), PUSH_MS = beat(3.6)
 const ISOLATE_AT = beat(8.5)
 const CREST_AT = beat(10)                    // the resolving chord: a glint of sun at the limb
@@ -140,7 +140,7 @@ export function Intro() {
     const musicOut = (s = 2.5) => score.current?.fadeOut(s)
 
     // The name decode, driven by the scene's frame loop.
-    const settleAt = Array.from(NAME, (_, i) => NAME_AT + 40 + i * PER_LETTER + Math.random() * 60)
+    const settleAt = Array.from(NAME, (_, i) => NAME_AT + 60 + i * PER_LETTER + Math.random() * 110)
     let lastShuffle = 0, decoding = true
     setName(noise())
     const decode = (now: number) => {
