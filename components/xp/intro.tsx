@@ -24,8 +24,10 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 // Camera language throughout: a dolly forward, a sideways truck with parallax and foreground bokeh,
 // a gentle dolly-zoom and rack focus onto the name, a tilt-down reveal during which the widescreen
 // letterbox retracts so the frame opens up, and a slow pan along the limb while sunrise light runs
-// along the rim. Small things for whoever notices: a satellite crossing high in frame, lens ghosts
-// opposite the sun, colour fringing on bright edge stars, handheld float, a film timecode.
+// along the rim. Small things for whoever notices: a satellite whose light blinks "HI" in Morse, one
+// shooting star, a constellation that briefly joins into an R, lens ghosts opposite the sun, colour
+// fringing on bright edge stars, handheld float, a film timecode, and a reel-change cue mark
+// flashed in the corner just before lift-off.
 // Motion after the decode runs on the compositor (Web Animations); the hero is staged and measured
 // a beat before the glide, and the page under the intro stays still until the landing.
 // Sound starts on its own where the browser allows, otherwise on the first click or key, joining in
@@ -45,6 +47,13 @@ const DISSOLVE_AT = beat(13), FADE = 1500
 const PULSE_UNTIL = beat(12)                 // the picture breathes with the pulse until lift-off
 const CINEMA = "cubic-bezier(0.45, 0, 0.2, 1)"
 
+// "HI" in Morse (···· ··): 150 ms dots, 150 ms gaps, a letter gap, then a long pause before repeating.
+const MORSE = [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+const MORSE_LOOP = MORSE.length * 150
+const morseOn = (ms: number) => MORSE[Math.floor(ms / 150)] === 1
+// A small constellation shaped like an R: stem, bowl, leg.
+const R_STARS: [number, number][] = [[0, 0], [0, 1], [0.55, 0.06], [0.62, 0.32], [0, 0.5], [0.62, 1]]
+const R_LINES: [number, number][] = [[0, 1], [0, 2], [2, 3], [3, 4], [4, 5]]
 const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
 const ease = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t))
 
@@ -179,22 +188,48 @@ export function Intro() {
         // Lens fringing: the brightest stars near the frame's edge split very slightly into colour.
         const edge = Math.hypot(x - W / 2, y - H / 2) / Math.hypot(W / 2, H / 2)
         if (close > 0.55 && edge > 0.55) {
-          const o = (edge - 0.55) * 3
-          ctx.fillStyle = `rgba(255,120,120,${a * 0.35})`; ctx.beginPath(); ctx.arc(x - o, y, rad, 0, 6.283); ctx.fill()
-          ctx.fillStyle = `rgba(120,160,255,${a * 0.35})`; ctx.beginPath(); ctx.arc(x + o, y, rad, 0, 6.283); ctx.fill()
+          const o = (edge - 0.55) * 6
+          ctx.fillStyle = `rgba(255,110,110,${a * 0.5})`; ctx.beginPath(); ctx.arc(x - o, y, rad, 0, 6.283); ctx.fill()
+          ctx.fillStyle = `rgba(110,150,255,${a * 0.5})`; ctx.beginPath(); ctx.arc(x + o, y, rad, 0, 6.283); ctx.fill()
         }
         ctx.fillStyle = `rgba(226,230,238,${a})`
         ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill()
       }
 
-      // A single satellite crossing high in the frame, its light blinking every two beats.
-      const sat = (t - beat(3)) / beat(7)
+      // A satellite crossing high in the frame. Its light blinks "HI" in Morse code, on a loop.
+      const sat = (t - beat(2.5)) / beat(8)
       if (sat > 0 && sat < 1) {
-        const x = W * lerp(0.14, 0.86, sat) + (cx - W / 2) * 0.05, y = H * lerp(0.2, 0.31, sat) - (H * 0.22) * tilt
+        const x = W * lerp(0.12, 0.88, sat) + (cx - W / 2) * 0.05, y = H * lerp(0.19, 0.3, sat) - (H * 0.22) * tilt
         const fade = Math.min(1, sat * 6, (1 - sat) * 6)
-        ctx.fillStyle = `rgba(220,226,238,${0.55 * fade})`; ctx.fillRect(x, y, 1.4, 1.4)
-        const blink = ((t - beat(3)) % beat(2)) / beat(2)
-        if (blink < 0.08) { ctx.fillStyle = `rgba(255,170,150,${0.7 * fade})`; ctx.beginPath(); ctx.arc(x + 0.7, y + 0.7, 1.6, 0, 6.283); ctx.fill() }
+        ctx.fillStyle = `rgba(226,232,244,${0.85 * fade})`; ctx.beginPath(); ctx.arc(x, y, 1.1, 0, 6.283); ctx.fill()
+        if (morseOn((t - beat(2.5)) % MORSE_LOOP)) {
+          const g = ctx.createRadialGradient(x, y, 0, x, y, 5)
+          g.addColorStop(0, `rgba(255,150,120,${0.95 * fade})`); g.addColorStop(1, "rgba(255,150,120,0)")
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 5, 0, 6.283); ctx.fill()
+        }
+      }
+
+      // One shooting star, quick and thin, on its way somewhere else.
+      const mt = (t - beat(5.3)) / 520
+      if (mt > 0 && mt < 1) {
+        const x0 = W * 0.18 + (cx - W / 2) * 0.1, y0 = H * 0.16, len = W * 0.16
+        const hx = x0 + len * ease(mt), hy = y0 + len * 0.42 * ease(mt)
+        const g = ctx.createLinearGradient(hx - len * 0.35, hy - len * 0.147, hx, hy)
+        g.addColorStop(0, "rgba(226,232,244,0)"); g.addColorStop(1, `rgba(236,240,250,${0.7 * Math.sin(Math.PI * mt)})`)
+        ctx.strokeStyle = g; ctx.lineWidth = 1.2; ctx.lineCap = "round"
+        ctx.beginPath(); ctx.moveTo(hx - len * 0.35, hy - len * 0.147); ctx.lineTo(hx, hy); ctx.stroke()
+      }
+
+      // A constellation that, for a beat or two, quietly joins up into an R.
+      const cst = ease((t - beat(3.4)) / beat(1)) * (1 - ease((t - beat(5.6)) / beat(1)))
+      if (cst > 0) {
+        const ox = W * 0.78 + (cx - W / 2) * 0.12, oy = H * 0.2, sc = Math.min(W, H) * 0.085
+        const pts = R_STARS.map(([px, py]) => [ox + px * sc, oy + py * sc] as const)
+        ctx.strokeStyle = `rgba(200,214,240,${0.16 * cst})`; ctx.lineWidth = 0.8
+        ctx.beginPath()
+        R_LINES.forEach(([i, j]) => { ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[j][0], pts[j][1]) })
+        ctx.stroke()
+        for (const [px, py] of pts) { ctx.fillStyle = `rgba(232,236,246,${0.25 + 0.6 * cst})`; ctx.beginPath(); ctx.arc(px, py, 1.3, 0, 6.283); ctx.fill() }
       }
 
       // Foreground bokeh: a few large soft discs sliding past the lens with the truck and dolly.
@@ -255,6 +290,15 @@ export function Intro() {
         }
       }
       ctx.restore() // end of the letterboxed, hand-held frame
+
+      // A reel-change cue mark, the dot old projectionists watched for, flashed just before lift-off.
+      const cue = t - beat(11.5)
+      if (cue > 0 && cue < 170) {
+        const x = W - Math.max(46, W * 0.05), y = Math.max(46, H * 0.07)
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 11)
+        g.addColorStop(0, "rgba(236,238,244,0.34)"); g.addColorStop(0.7, "rgba(236,238,244,0.22)"); g.addColorStop(1, "rgba(236,238,244,0)")
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 11, 0, 6.283); ctx.fill()
+      }
 
       // A film timecode in the corner, at 24 frames a second, for anyone who looks.
       if (tc.current) {
