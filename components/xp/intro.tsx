@@ -1,6 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { geoContains, geoOrthographic, geoPath } from "d3-geo"
+import { feature } from "topojson-client"
+import type { GeometryCollection, Topology } from "topojson-specification"
+import land110 from "world-atlas/land-110m.json"
 import { beat, createScore, type Score } from "@/components/xp/score"
 
 // The opening: about nine seconds, cut to an original score on one shared clock (96 BPM, a beat =
@@ -11,8 +15,7 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 //   beat 0      the pulse starts with the picture; stars and haze surface within a second
 //   beat 2      "TEMPE, ARIZONA", a light sweeping across it as the piano figure enters
 //   beat 4      "MACHINE LEARNING SYSTEMS", as the figure answers
-//   beat 6      the name is revealed as the pad comes in: by default a transit (a band of light drifts
-//               behind it and the letters catch the light in turn), or the letter-by-letter decode
+//   beat 6      the name decodes, letter by letter, as the pad comes in
 //   beat 6.5    a slow push-in on the whole name
 //   beat 8.5    everything but the R of RITHWIK softens away
 //   beat 8–10.5 the camera tilts down: the stars rise out of frame and the planet's dark limb rises in
@@ -25,7 +28,7 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 // Camera language throughout: a dolly forward, a sideways truck with parallax and foreground bokeh,
 // a gentle dolly-zoom and rack focus onto the name, a tilt-down reveal during which the widescreen
 // letterbox retracts so the frame opens up, and a slow pan along the limb while sunrise light runs
-// along the rim. Small things for whoever notices: a satellite whose light blinks "HI" in Morse, one
+// along the rim over a night-side Earth lit with cities (Dharwad among them). Small things for whoever notices: a satellite whose light blinks "HI" in Morse, one
 // shooting star, lens ghosts opposite the sun, colour
 // fringing on bright edge stars, handheld float, a film timecode, and a reel-change cue mark
 // flashed in the corner just before lift-off.
@@ -37,7 +40,8 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 const NAME = "SAI RITHWIK REDDY CHIRRA"
 const R_AT = 4
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const CARDS: [number, string][] = [[2, "Tempe, Arizona"], [4, "Machine learning systems"]]
+// Opening credits, film-style: a small line above a main line. Original wording, true to the person.
+const CARDS: [number, string, string][] = [[2, "presented from", "Tempe, Arizona"], [4, "in association with", "Machine learning systems"]]
 const NAME_AT = beat(6), PER_LETTER = 22, SHUFFLE_MS = 90
 const PUSH_AT = beat(6.5), PUSH_MS = beat(3.6)
 const ISOLATE_AT = beat(8.5)
@@ -64,16 +68,44 @@ const MORSE: number[] = (() => {
 })()
 const MORSE_UNIT = 110
 const morseOn = (ms: number) => MORSE[Math.floor(ms / MORSE_UNIT)] === 1
+// Night-side Earth for the reveal: real coastlines, with city lights scattered only on land, clustered
+// the way cities are. The visible strip faces northern India and its neighbours.
+const LAND = feature(land110 as unknown as Topology, (land110 as unknown as Topology).objects.land as GeometryCollection)
+const DHARWAD: [number, number] = [75.0, 15.39]
+type Light = { lon: number; lat: number; b: number; big: boolean }
+// Generated in small slices while the intro plays (each land test is ~0.2 ms), so nothing stalls.
+function growLights(out: Light[], timers: number[]) {
+  const onLand = (lon: number, lat: number) => geoContains(LAND, [lon, lat])
+  const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5
+  // A quiet hello from home: a small, slightly warmer cluster at Dharwad.
+  for (let i = 0; i < 9; i++) out.push({ lon: DHARWAD[0] + gauss() * 0.18, lat: DHARWAD[1] + gauss() * 0.14, b: 0.9, big: i === 0 })
+  let centres = 0, rural = 0
+  const slice = () => {
+    const until = performance.now() + 6
+    while (performance.now() < until) {
+      const lon = 35 + Math.random() * 95, lat = -8 + Math.random() * 52
+      if (centres < 90) {
+        if (!onLand(lon, lat)) continue
+        centres++
+        const size = Math.random() < 0.15 ? 26 : 6 + Math.random() * 12, spread = 0.25 + Math.random() * 0.9
+        for (let i = 0; i < size; i++) {
+          const p: [number, number] = [lon + gauss() * spread, lat + gauss() * spread * 0.8]
+          if (onLand(p[0], p[1])) out.push({ lon: p[0], lat: p[1], b: 0.35 + Math.random() * 0.65, big: i === 0 })
+        }
+      } else if (rural < 700) {
+        rural++
+        if (onLand(lon, lat)) out.push({ lon, lat, b: 0.12 + Math.random() * 0.25, big: false })
+      } else return
+    }
+    timers.push(window.setTimeout(slice, 30))
+  }
+  timers.push(window.setTimeout(slice, 400))
+}
+
 const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
 const ease = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t))
 // Smootherstep: zero velocity and zero acceleration at both ends, for moves that must never feel cut.
 const glide = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10))
-
-// How the name is revealed. "transit": the name waits in black and a band of light drifts behind it,
-// so it appears in silhouette and each letter catches the light as it passes. "decode": the earlier
-// letter-by-letter decode. Switch the default here, or compare with ?reveal=decode / ?reveal=transit.
-const DEFAULT_REVEAL: "transit" | "decode" = "transit"
-const TRANSIT_AT = beat(6.1), TRANSIT_MS = beat(2.3)
 
 export function Intro() {
   const [phase, setPhase] = useState<"play" | "leave" | "gone">("play")
@@ -82,7 +114,6 @@ export function Intro() {
   const [card, setCard] = useState(-1)
   const [nameOn, setNameOn] = useState(false)
   const [name, setName] = useState(NAME)
-  const [reveal, setReveal] = useState<"transit" | "decode">(DEFAULT_REVEAL)
   const canvas = useRef<HTMLCanvasElement>(null)
   const line = useRef<HTMLParagraphElement>(null)
   const rSpan = useRef<HTMLSpanElement>(null)
@@ -110,12 +141,9 @@ export function Intro() {
     const musicOut = (s = 2.5) => score.current?.fadeOut(s)
 
     // The name decode, driven by the scene's frame loop.
-    const param = new URLSearchParams(window.location.search).get("reveal")
-    const mode: "transit" | "decode" = param === "decode" || param === "transit" ? param : DEFAULT_REVEAL
-    setReveal(mode)
     const settleAt = Array.from(NAME, (_, i) => NAME_AT + 40 + i * PER_LETTER + Math.random() * 60)
-    let lastShuffle = 0, decoding = mode === "decode"
-    if (decoding) setName(noise())
+    let lastShuffle = 0, decoding = true
+    setName(noise())
     const decode = (now: number) => {
       if (now - lastShuffle < SHUFFLE_MS) return
       lastShuffle = now
@@ -136,6 +164,8 @@ export function Intro() {
     window.addEventListener("resize", fit)
     const stars = Array.from({ length: 380 }, (_, i) => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 0.85 + 0.15, tw: Math.random() * 6.28, layer: i % 3 }))
     // Out-of-focus particles very close to the lens: they slide past faster than the stars.
+    const lights: Light[] = []
+    growLights(lights, timers)
     const near = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random(), r: 6 + Math.random() * 18, v: 0.6 + Math.random() * 0.8 }))
     const grains = Array.from({ length: 3 }, () => {
       const g = document.createElement("canvas"); g.width = g.height = 160
@@ -158,7 +188,6 @@ export function Intro() {
       const t = now - t0
       const dt = Math.min(48, t - lastT); lastT = t
       if (decoding) decode(now)
-      const transit = mode === "transit" ? (t - TRANSIT_AT) / TRANSIT_MS : -1
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H)
 
       const truck = ease((t - beat(1.5)) / beat(5))
@@ -243,25 +272,6 @@ export function Intro() {
         ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill()
       }
 
-      // Transit reveal: a soft band of distant light drifts behind the name, left to right. The letters,
-      // still black, show as silhouettes against it, and each catches the light as the band passes.
-      if (transit > -0.2 && transit < 1.3 && line.current) {
-        const box = line.current.getBoundingClientRect()
-        const p = glide(transit)
-        const bx = lerp(box.left - box.width * 0.3, box.right + box.width * 0.2, p)
-        const env = Math.min(1, Math.max(0, (transit + 0.2) / 0.35), Math.max(0, (1.3 - transit) / 0.45))
-        const bw = Math.max(box.width * 0.3, 140), by = box.top + box.height / 2
-        const g = ctx.createRadialGradient(bx, by, 0, bx, by, bw)
-        g.addColorStop(0, `rgba(205,216,238,${0.3 * env})`); g.addColorStop(0.35, `rgba(150,168,205,${0.12 * env})`); g.addColorStop(1, "rgba(0,0,0,0)")
-        ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.18); ctx.scale(0.55, 2.4); ctx.translate(-bx, -by)
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, bw, 0, 6.283); ctx.fill(); ctx.restore()
-        for (const sp of Array.from(line.current.children) as HTMLElement[]) {
-          if (sp.classList.contains("is-lit")) continue
-          const r = sp.getBoundingClientRect()
-          if (r.left + r.width / 2 < bx - 6 || transit >= 1.05) sp.classList.add("is-lit")
-        }
-      }
-
       // A satellite crossing high in the frame, its light blinking "HIRE ME" in Morse as it goes.
       const sat = (t - beat(2.5)) / beat(8)
       if (sat > 0 && sat < 1) {
@@ -306,6 +316,24 @@ export function Intro() {
         rim.addColorStop(0.3, `rgba(100,118,170,${0.12 * tilt})`); rim.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.04, 0, 6.283); ctx.fill()
         ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.fill()
+
+        // The night side: faint land, then city lights, foreshortened toward the horizon.
+        const proj = geoOrthographic().scale(R).translate([pcx, pcy]).rotate([-78 - 5 * pan, 60]).clipAngle(90)
+        ctx.save(); ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.clip()
+        ctx.beginPath(); geoPath(proj, ctx)(LAND); ctx.fillStyle = `rgba(28,34,52,${0.35 * tilt})`; ctx.fill()
+        const sunX = pcx + W * 0.08
+        for (const l of lights) {
+          const pt = proj([l.lon, l.lat])
+          if (!pt || pt[1] > H + 4 || pt[0] < -4 || pt[0] > W + 4) continue
+          const dawnFade = 1 - 0.85 * glint * Math.max(0, 1 - Math.abs(pt[0] - sunX) / (W * 0.18))
+          const a = l.b * tilt * dawnFade * (0.85 + 0.15 * Math.sin(now / 600 + l.lon * 9))
+          if (l.big) { ctx.fillStyle = `rgba(255,186,110,${0.18 * a})`; ctx.fillRect(pt[0] - 3, pt[1] - 1.4, 6, 2.8) }
+          ctx.fillStyle = `rgba(255,${200 + 30 * l.b},${130 + 40 * l.b},${Math.min(1, 1.05 * a)})`; ctx.fillRect(pt[0] - 0.7, pt[1] - 0.45, 1.4, 0.9)
+        }
+        ctx.restore()
+        // Airglow: the thin, faintly green layer that hangs just above the night-side horizon.
+        ctx.strokeStyle = `rgba(120,200,150,${0.12 * tilt})`; ctx.lineWidth = 2
+        ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.0025, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke()
 
         // Sunrise from orbit: a small glint just beyond the limb, then the light runs along the rim in
         // both directions, a thin warm inner band under a soft blue outer one.
@@ -476,8 +504,14 @@ export function Intro() {
   return (
     <div className={`xp-opening ${phase === "leave" ? "is-leaving" : ""}`} aria-hidden="true">
       <canvas ref={canvas} />
-      {card >= 0 && <p key={card} className="xp-opening-line xp-opening-card">{CARDS[card][1]}</p>}
-      <p ref={line} className={`xp-opening-line ${reveal === "transit" ? "is-transit" : ""} ${isolate ? "is-isolate" : ""} ${dawn ? "is-dawn" : ""} ${nameOn ? "is-on" : ""}`}>
+      {card >= 0 && (
+        <p key={card} className="xp-opening-line xp-opening-card">
+          <small>{CARDS[card][1]}</small>
+          <span>{CARDS[card][2]}</span>
+        </p>
+      )}
+      <p className={`xp-opening-starring ${nameOn && !isolate ? "is-on" : ""}`} aria-hidden="true">starring</p>
+      <p ref={line} className={`xp-opening-line ${isolate ? "is-isolate" : ""} ${dawn ? "is-dawn" : ""} ${nameOn ? "is-on" : ""}`}>
         {Array.from(name, (c, i) => (
           <span key={i} ref={i === R_AT ? rSpan : undefined} className={[c === NAME[i] ? "" : "is-noise", i === R_AT ? "is-r" : ""].join(" ").trim() || undefined}>{c}</span>
         ))}
