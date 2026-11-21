@@ -18,7 +18,7 @@ import { currentPalette } from "@/components/xp/palette"
 
 type Scene = {
   id: string; when: string; place: string; role: string; title: string; org: string; stack: string[]; question: string; line: string
-  stats: [string, string][]; did: string[]; results: string[]; link?: { href: string; label: string }
+  stats: [string, string][]; story: { label: string; body: React.ReactNode }[]; link?: { href: string; label: string }
 }
 
 const SCENES: Scene[] = [
@@ -29,12 +29,11 @@ const SCENES: Scene[] = [
     question: "Which words actually support the label?",
     line: "Hate-speech detection in English, Hindi and Telugu that has to point at the words behind its answer.",
     stats: [["AAAI", "2026 paper"], ["−20%", "inference latency"]],
-    did: [
-      "Trained with two-stage attention supervision: human rationales first, then n-gram perturbation scores that measure how predictions shift",
-      "Chose the encoder per language from validation results (MuRIL for English and Telugu, XLM-R for Hindi) and merged model rationales with LLaMA 3.1 suggestions",
-      "Evaluated explanations for plausibility (Token-F1, IOU-F1) and faithfulness (comprehensiveness, sufficiency), not just accuracy",
+    story: [
+      { label: "The problem", body: <>A hate-speech classifier can be <b>right for the wrong reason</b>, and in Hindi and Telugu there was almost no data showing which words a label actually rests on.</> },
+      { label: "What I did", body: <>I taught the models to <b>look where people look</b>: first by steering their attention toward the words annotators marked, then by refining it with a probe that tests which words really move the prediction. I picked the encoder per language from validation results (MuRIL for English and Telugu, XLM-R for Hindi) and merged the model&apos;s explanations with LLaMA 3.1&apos;s.</> },
+      { label: "What came of it", body: <>We graded the <b>explanations, not just the labels</b>: do they match what people marked, and does the model truly depend on those words. Inference got <b>20% faster</b> across iterations, and the work was <b>published at AAAI 2026</b>.</> },
     ],
-    results: ["Cut inference latency by 20% across pipeline iterations", "Published at AAAI 2026"],
     link: { href: "/projects/x-mutest", label: "X-MuTeST" },
   },
   {
@@ -44,12 +43,11 @@ const SCENES: Scene[] = [
     question: "What can this data actually support?",
     line: "Two forecasting problems that arrived as business questions, with no clean benchmark to lean on.",
     stats: [["+18%", "accuracy over the earlier method"], ["$142", "mean daily ad-revenue error"]],
-    did: [
-      "Built time-series models in Python on a 40K+ record dataset of shoppers' paths through a mall, and validated them against the approach already in use",
-      "Did the preprocessing and feature engineering to make the data trustworthy before modelling, and kept the pipeline reproducible",
-      "Forecast daily digital-ad revenue, and traced the remaining error back to three patterns in user behaviour",
+    story: [
+      { label: "The problem", body: <>The questions came from the business, not a benchmark: <b>how shoppers move through a mall</b>, and <b>how much ad revenue tomorrow will bring</b>.</> },
+      { label: "What I did", body: <>I made the data <b>trustworthy before modelling</b>, cleaning and engineering features from 40K+ shopper-path records, and validated every model against the method already in use, so an improvement meant something. When the ad-revenue error stopped shrinking, I traced what was left to <b>three patterns in user behaviour</b>.</> },
+      { label: "What came of it", body: <>Forecasts became <b>18% more accurate</b> than the earlier method (82% overall), and daily ad-revenue error fell to <b>$142</b>, which freed about <b>15% of the marketing budget</b> to be reallocated.</> },
     ],
-    results: ["Trajectory forecasts 18% more accurate than the earlier method, 82% overall", "Ad-revenue mean daily error down to $142, which freed about 15% of the marketing budget to be reallocated"],
   },
   {
     id: "now", when: "2025 – present", place: "Arizona State", role: "M.S. Computer Science · building AgentGuard",
@@ -58,12 +56,11 @@ const SCENES: Scene[] = [
     question: "What changed, and is it safe to release?",
     line: "A release gate that tells you which cases a new LLM version broke, not just whether the average moved.",
     stats: [["13", "checks on every run"], ["0", "LLM votes in the final call"]],
-    did: [
-      "A Python SDK that captures runs and nested spans, and fails open so it can never take down the app it instruments",
-      "A FastAPI service that ingests each trace in one transaction into PostgreSQL, with evaluation pushed to Redis / ARQ workers off the request path",
-      "Pairing logic that compares the same case and evaluator across versions, and a policy engine that returns PASS, BLOCK or REVIEW with reasons, never an LLM's opinion",
+    story: [
+      { label: "The problem", body: <>When a team changes a prompt or a model, <b>the average score can rise while specific answers break</b>. AgentGuard shows which ones, before the release.</> },
+      { label: "What I did", body: <>A small Python library records every step an AI app takes and <b>can never crash the app it watches</b>. A FastAPI service saves each run in one transaction to PostgreSQL, and background workers grade the answers off the request path. Each test case is then <b>compared with itself across versions</b>, and plain rules, not another AI, return PASS, BLOCK or REVIEW with reasons.</> },
+      { label: "What came of it", body: <>A working, deployed system with integration tests on saving, isolation, pairing and the release rules. The bug I&apos;m gladdest I caught: <b>old results were leaking into new comparisons</b> and flattering them; pairing only the latest finished run fixed it.</> },
     ],
-    results: ["Found and fixed a comparison bug where older runs leaked into current results, by scoping pairs to the latest finished job", "Integration tests cover atomic ingestion, workspace isolation, pairing and release policy"],
     link: { href: "/projects/agentguard", label: "AgentGuard" },
   },
 ]
@@ -300,7 +297,7 @@ export function Thread() {
             <p className="xp-thread-role">{s.org}</p>
             <p className="xp-thread-q">“{s.question}”</p>
             <p className="xp-thread-line">{s.line}</p>
-            <ul>{[...s.did, ...s.results].map((d) => <li key={d}>{d}</li>)}</ul>
+            {s.story.map((st) => <p key={st.label} className="xp-thread-story"><span>{st.label}</span>{st.body}</p>)}
           </article>
         ))}
       </div>
@@ -317,7 +314,7 @@ export function Thread() {
 
   return (
     <div ref={root} className="xp-thread">
-      <div className="xp-thread-stage">
+      <div className={`xp-thread-stage ${details ? "has-details" : ""}`}>
         <canvas ref={canvas} className="xp-thread-canvas" aria-hidden="true" />
 
         <header className="xp-thread-head" key={s.id} style={{ opacity: vis, transform: `translateY(${(1 - vis) * 14}px)`, filter: `blur(${(1 - vis) * 6}px)` }}>
@@ -360,10 +357,15 @@ export function Thread() {
         </footer>
 
         <aside className={`xp-thread-details ${details ? "is-open" : ""}`} aria-hidden={!details}>
-          <p className="xp-thread-when">What I did</p>
-          <ul>{s.did.map((d) => <li key={d}>{d}</li>)}</ul>
-          <p className="xp-thread-when">What came of it</p>
-          <ul>{s.results.map((d) => <li key={d}>{d}</li>)}</ul>
+          <p className="xp-thread-when">{s.title}<span>{s.org}</span></p>
+          <ol className="xp-thread-beats">
+            {s.story.map((st, i) => (
+              <li key={st.label} style={{ "--i": i } as React.CSSProperties}>
+                <p className="xp-thread-beat-label">{st.label}</p>
+                <p>{st.body}</p>
+              </li>
+            ))}
+          </ol>
         </aside>
 
         <p className="xp-thread-count" aria-hidden="true"><span>{String(idx + 1).padStart(2, "0")}</span> / {String(SCENES.length).padStart(2, "0")}</p>

@@ -2039,3 +2039,21 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
   .xp-thread-head h3 { font-size: 1.9rem; }
   .xp-thread-stack li { font-size: 0.62rem; }
 }
+
+/* "How I did it": three short beats (problem, approach, result) that read as one story. */
+.xp-thread-details { width: min(540px, calc(100vw - 2 * var(--xp-pad))); padding: 24px 26px 22px; }
+.xp-thread-details > .xp-thread-when span { margin-left: 1em; padding-left: 1em; border-left: 1px solid var(--xp-line-strong); color: var(--xp-ink-2); }
+.xp-thread-beats { display: grid; gap: 16px; margin: 16px 0 0; padding: 0; list-style: none; counter-reset: beat; }
+.xp-thread-beats li { position: relative; padding-left: 34px; counter-increment: beat; opacity: 0; transform: translateY(8px); }
+.xp-thread-details.is-open .xp-thread-beats li { animation: xp-rise 520ms calc(80ms + var(--i) * 110ms) var(--xp-spring) both; }
+.xp-thread-beats li::before { content: counter(beat, decimal-leading-zero); position: absolute; left: 0; top: 1px; color: var(--xp-lamp); font: 0.7rem var(--xp-mono); }
+.xp-thread-beats li:not(:last-child)::after { content: ""; position: absolute; left: 8px; top: 20px; bottom: -12px; width: 1px; background: linear-gradient(var(--xp-line-strong), transparent); }
+.xp-thread-beat-label { margin: 0 0 4px; color: var(--xp-muted); font: 0.68rem var(--xp-mono); letter-spacing: 0.12em; text-transform: uppercase; }
+.xp-thread-beats p:not(.xp-thread-beat-label) { margin: 0; color: var(--xp-ink-2); font-size: 0.93rem; line-height: 1.6; }
+.xp-thread-beats b, .xp-thread-story b { color: var(--xp-ink); font-weight: 500; }
+.xp-thread-story { margin: 8px 0 0; color: var(--xp-ink-2); line-height: 1.6; }
+.xp-thread-story span { display: block; color: var(--xp-muted); font: 0.68rem var(--xp-mono); letter-spacing: 0.12em; text-transform: uppercase; }
+@media (max-width: 760px) { .xp-thread-details { top: auto; bottom: calc(84px + env(safe-area-inset-bottom)); right: 12px; left: 12px; width: auto; max-height: 62vh; transform: translateY(12px); } .xp-thread-details.is-open { transform: none; } }
+.xp-thread-stage > :not(.xp-thread-details):not(.xp-thread-foot) { transition: opacity 400ms ease, filter 400ms ease; }
+.xp-thread-stage.has-details > :not(.xp-thread-details):not(.xp-thread-foot) { opacity: 0.22 !important; filter: blur(2px) !important; }
+.xp-thread-stage.has-details .xp-thread-foot > :not(.xp-thread-actions) { opacity: 0.22; transition: opacity 400ms ease; }
