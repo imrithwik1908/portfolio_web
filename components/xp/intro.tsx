@@ -73,7 +73,7 @@ const LAND = feature(land110 as unknown as Topology, (land110 as unknown as Topo
 const DHARWAD: [number, number] = [75.0, 15.39]
 type Light = { lon: number; lat: number; b: number; big: boolean; w: number }
 // Generated in small slices while the intro plays (each land test is ~0.2 ms), so nothing stalls.
-function growLights(out: Light[], timers: number[]) {
+function growLights(out: Light[], timers: number[], lite: boolean) {
   const onLand = (lon: number, lat: number) => geoContains(LAND, [lon, lat])
   const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5
   // A quiet hello from home: a small, slightly warmer cluster at Dharwad.
@@ -83,7 +83,7 @@ function growLights(out: Light[], timers: number[]) {
     const until = performance.now() + 6
     while (performance.now() < until) {
       const lon = 35 + Math.random() * 95, lat = -8 + Math.random() * 52
-      if (centres < 90) {
+      if (centres < (lite ? 55 : 90)) {
         if (!onLand(lon, lat)) continue
         centres++
         const size = Math.random() < 0.15 ? 26 : 6 + Math.random() * 12, spread = 0.25 + Math.random() * 0.9
@@ -91,7 +91,7 @@ function growLights(out: Light[], timers: number[]) {
           const p: [number, number] = [lon + gauss() * spread, lat + gauss() * spread * 0.8]
           if (onLand(p[0], p[1])) out.push({ lon: p[0], lat: p[1], b: 0.35 + Math.random() * 0.65, big: i === 0, w: Math.random() < 0.7 ? 1 : 0 })
         }
-      } else if (rural < 700) {
+      } else if (rural < (lite ? 320 : 700)) {
         rural++
         if (onLand(lon, lat)) out.push({ lon, lat, b: 0.12 + Math.random() * 0.25, big: false, w: 1 })
       } else return
@@ -161,11 +161,15 @@ export function Intro() {
     const fit = () => { W = window.innerWidth; H = window.innerHeight; el.width = W * dpr; el.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0) }
     fit()
     window.addEventListener("resize", fit)
-    const stars = Array.from({ length: 380 }, (_, i) => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 0.85 + 0.15, tw: Math.random() * 6.28, layer: i % 3 }))
+    // Quality: phones and slower machines get a lighter scene; a frame-time check can lighten it further.
+    const lite = window.innerWidth < 760 || (navigator.hardwareConcurrency || 8) <= 4
+    let degrade = false, frames = 0, slow = 0
+    const portrait = () => H > W
+    const stars = Array.from({ length: lite ? 220 : 380 }, (_, i) => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 0.85 + 0.15, tw: Math.random() * 6.28, layer: i % 3 }))
     // Out-of-focus particles very close to the lens: they slide past faster than the stars.
     const lights: Light[] = []
-    growLights(lights, timers)
-    const near = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random(), r: 6 + Math.random() * 18, v: 0.6 + Math.random() * 0.8 }))
+    growLights(lights, timers, lite)
+    const near = Array.from({ length: lite ? 8 : 14 }, () => ({ x: Math.random(), y: Math.random(), r: (lite ? 4 : 6) + Math.random() * (lite ? 9 : 18), v: 0.6 + Math.random() * 0.8 }))
     const grains = Array.from({ length: 3 }, () => {
       const g = document.createElement("canvas"); g.width = g.height = 160
       const gx = g.getContext("2d")!, img = gx.createImageData(160, 160)
@@ -182,10 +186,11 @@ export function Intro() {
     //   pan:    during the hold, a slow pan along the limb
     const lerp = (a: number, b: number, k: number) => a + (b - a) * k
     let lastT = 0
-    let frame = 0, fi = 0
+    let frame = 0, fi = 0, handed = false
     const draw = (now: number) => {
       const t = now - t0
       const dt = Math.min(48, t - lastT); lastT = t
+      if (!degrade && frames < 90) { frames++; if (dt > 26) slow++; if (frames === 90 && slow > 30) degrade = true }
       if (decoding) decode(now)
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H)
 
@@ -199,12 +204,16 @@ export function Intro() {
       const breath = t < PULSE_UNTIL ? 1 + 0.1 * Math.exp(-phase * 6) : 1
       const glint = ease((t - beat(9.6)) / beat(0.8))
       const flash = t > CREST_AT ? Math.exp(-(t - CREST_AT) / 900) : 0
+      // Eyes adjusting: at the glint, everything but the sun dips a little darker, then recovers.
+      const expo = t > CREST_AT && t < CREST_AT + 1100 ? 1 - 0.24 * Math.sin(Math.PI * (t - CREST_AT) / 1100) : 1
+      // The opening shot: tight on a single star, then the camera pulls back to reveal the field.
+      const pull = glide(t / 1500)
 
       // Vanishing point: trucks right-to-left, then rises as the camera tilts down.
       const cx = W * lerp(0.42, 0.56, truck) - W * 0.03 * pan
       const cy = H * lerp(0.5, 0.28, tilt)
       // A gentle dolly-zoom: the lens widens as the camera settles, so depth shifts under the name.
-      const f = Math.max(W, H) * lerp(0.42, 0.5, settle)
+      const f = Math.max(W, H) * lerp(0.42, 0.5, settle) * lerp(7, 1, pull)
 
       // Framing: a widescreen letterbox that, as the planet is revealed, grows into a tall large-format frame.
       // The gate: a 2.39:1 scope frame that grows into a tall 1.43:1 large-format frame for the reveal,
@@ -214,8 +223,10 @@ export function Intro() {
       // make one side stop while the other starts, which reads as a cut). Same for the final opening.
       const open = glide((t - beat(8)) / beat(3))
       const toScreen = glide((t - beat(12.3)) / beat(2.2))
-      const scopeW = W, scopeH = Math.min(H, W / 2.39)
-      const largeW = Math.min(W, H * 1.43), largeH = Math.min(H, W / 1.43)
+      // On a portrait phone a 2.39:1 band would be a sliver, so the scope frame is a wide band of the
+      // screen and the large-format frame is the full screen.
+      const scopeW = W, scopeH = portrait() ? H * 0.56 : Math.min(H, W / 2.39)
+      const largeW = portrait() ? W : Math.min(W, H * 1.43), largeH = portrait() ? H : Math.min(H, W / 1.43)
       const fw = lerp(lerp(scopeW, largeW, open), W, toScreen), fh = lerp(lerp(scopeH, largeH, open), H, toScreen)
       const aspect = fw / fh
       const fx = (W - fw) / 2, fy = (H - fh) / 2
@@ -242,13 +253,18 @@ export function Intro() {
       for (const [hx, hy, hr, ha] of [[0.32, 0.34, 0.55, 0.045], [0.72, 0.58, 0.45, 0.03]] as const) {
         const x = W * hx + (cx - W / 2) * 0.15, y = H * hy + (cy - H / 2) * 0.15
         const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(W, H) * hr)
-        g.addColorStop(0, `rgba(118,132,168,${ha * haze * breath})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        g.addColorStop(0, `rgba(118,132,168,${ha * haze * breath * expo})`); g.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
       }
 
       // Stars: three depths surfacing within the first second; the dolly carries them past.
       const dim = 1 - 0.25 * glint
+      const handing = !handed && t > DISSOLVE_AT - 60
+      const handoffStars: { x: number; y: number; r: number }[] = []
+      let si = 0
       for (const s of stars) {
+        si++
+        if (degrade && si % 2) continue
         const show = ease((t - s.layer * 280) / 700)
         if (!show) continue
         s.z -= speed * dt / 16
@@ -258,17 +274,28 @@ export function Intro() {
         const close = 1 - s.z
         const tw = 0.85 + 0.15 * Math.sin(now / 900 + s.tw)
         const soft = 1 + 1.2 * focus * (0.4 + close)                     // defocused stars grow and fade
-        const a = Math.min(1, (0.12 + 0.7 * close) * tw * show * breath * dim / (1 + 0.9 * focus))
+        const a = Math.min(1, (0.12 + 0.7 * close) * tw * show * breath * dim * expo / (1 + 0.9 * focus))
         const rad = (0.35 + close * 1.25) * soft
         // Lens fringing: the brightest stars near the frame's edge split very slightly into colour.
         const edge = Math.hypot(x - W / 2, y - H / 2) / Math.hypot(W / 2, H / 2)
-        if (close > 0.55 && edge > 0.55) {
+        if (!lite && !degrade && close > 0.55 && edge > 0.55) {
           const o = (edge - 0.55) * 6
           ctx.fillStyle = `rgba(255,110,110,${a * 0.5})`; ctx.beginPath(); ctx.arc(x - o, y, rad, 0, 6.283); ctx.fill()
           ctx.fillStyle = `rgba(110,150,255,${a * 0.5})`; ctx.beginPath(); ctx.arc(x + o, y, rad, 0, 6.283); ctx.fill()
         }
         ctx.fillStyle = `rgba(226,230,238,${a})`
         ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill()
+        if (handing && a > 0.08) handoffStars.push({ x, y, r: rad })
+      }
+      // Seamless last frame: the page's own starfield takes over these exact positions, so as the
+      // intro dissolves the same stars simply carry on.
+      if (handing) { handed = true; window.dispatchEvent(new CustomEvent("xp-intro-stars", { detail: handoffStars })) }
+      // The first star: the one the opening shot is tight on, settling into the field as we pull back.
+      const first = 1 - ease((t - 1200) / 1400)
+      if (first > 0) {
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6)
+        g.addColorStop(0, `rgba(240,244,252,${0.95 * first * ease(t / 400)})`); g.addColorStop(0.35, `rgba(220,228,246,${0.25 * first})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 6.283); ctx.fill()
       }
 
       // A satellite crossing high in the frame, its light blinking "HIRE ME" in Morse as it goes.
@@ -308,7 +335,7 @@ export function Intro() {
       // The planet: revealed by the tilt, then panned along during the hold.
       if (tilt > 0) {
         const R = Math.max(W, H) * 1.4
-        const pcx = W * 0.5 - W * 0.06 * pan, pcy = H * lerp(1.12, 0.8, tilt) + R
+        const pcx = W * 0.5 - W * 0.06 * pan, pcy = fy + fh * lerp(1.12, 0.8, tilt) + R
         const rim = ctx.createRadialGradient(pcx, pcy, R * 0.988, pcx, pcy, R * 1.04)
         const warm = 0.35 * glint
         rim.addColorStop(0, `rgba(${150 + 90 * warm},${172 + 30 * warm},${222 - 50 * warm},${0.5 * tilt * breath})`)
@@ -325,11 +352,15 @@ export function Intro() {
         for (const l of lights) {
           const pt = proj([l.lon, l.lat])
           if (!pt || pt[1] > H + 4 || pt[0] < -4 || pt[0] > W + 4) continue
-          const dawnFade = 1 - 0.85 * glint * Math.max(0, 1 - Math.abs(pt[0] - sunX) / (W * 0.18))
-          const a = l.b * tilt * dawnFade * (0.85 + 0.15 * Math.sin(now / 600 + l.lon * 9))
+          // Dawn: a terminator sweeps out from the sun and the cities it crosses switch off, one by one.
+          const h = Math.abs(Math.sin(l.lon * 12.9898 + l.lat * 78.233) * 43758.5453) % 1
+          const reach = W * 0.38 * ease((t - CREST_AT + 150) / beat(3.6)) * (0.8 + 0.4 * h)
+          const off = Math.min(1, Math.max(0, (reach - Math.abs(pt[0] - sunX)) / (W * 0.012)))
+          const dawnFade = 1 - 0.95 * off
+          const a = l.b * tilt * dawnFade * expo * (0.85 + 0.15 * Math.sin(now / 600 + l.lon * 9))
           // City glow: the soft orange haze of light pollution around each city's centre, flattened
           // by the angle we see it at.
-          if (l.big) {
+          if (l.big && !degrade) {
             const gr = 7 + 9 * l.b
             const g = ctx.createRadialGradient(pt[0], pt[1], 0, pt[0], pt[1], gr)
             g.addColorStop(0, `rgba(255,170,90,${0.22 * a})`); g.addColorStop(1, "rgba(255,150,70,0)")
@@ -399,7 +430,7 @@ export function Intro() {
       // A film timecode in the corner, at 24 frames a second, for anyone who looks.
       if (tc.current) {
         const fr = Math.floor(t / (1000 / 24)), sec = Math.floor(fr / 24)
-        tc.current.textContent = `00:00:${String(sec).padStart(2, "0")}:${String(fr % 24).padStart(2, "0")}   ${toScreen > 0.5 ? "" : aspect > 1.9 ? "2.39 : 1" : "1.43 : 1"}`
+        tc.current.textContent = `00:00:${String(sec).padStart(2, "0")}:${String(fr % 24).padStart(2, "0")}   ${toScreen > 0.5 || portrait() ? "" : aspect > 1.9 ? "2.39 : 1" : "1.43 : 1"}`
       }
       // Grain, barely there.
       fi = (fi + 1) % 3
@@ -422,7 +453,8 @@ export function Intro() {
       musicOut(2)
     }
 
-    CARDS.forEach(([b], i) => later(beat(b), () => { if (!ended.current) setCard(i) }))
+    // Each card arrives slightly soft just before its beat and the focus pulls sharp on the beat.
+    CARDS.forEach(([b], i) => later(beat(b) - 190, () => { if (!ended.current) setCard(i) }))
     later(NAME_AT, () => { if (!ended.current) { setCard(-1); setNameOn(true) } })
 
     let push: Animation | null = null

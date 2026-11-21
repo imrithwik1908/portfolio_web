@@ -321,6 +321,19 @@ function Stars() {
     let warp = 0
     const onWarp = () => { if (!still) warp = 1 }
     window.addEventListener("xp-warp", onWarp)
+    // When the opening hands over, place stars exactly where the intro's last frame had them, so the
+    // dissolve has no seam: the same stars simply carry on, now drifting at the page's own pace.
+    const onIntroStars = (e: Event) => {
+      const pts = (e as CustomEvent<{ x: number; y: number; r: number }[]>).detail || []
+      const ox = (lx - w / 2) / w, oy = (ly - h / 2) / h, sy = window.scrollY
+      pts.slice(0, stars.length).forEach((p, i) => {
+        const s = stars[i]
+        s.x = p.x - (still ? 0 : t * 0.22 * s.z) + ox * 24 * s.z
+        s.y = p.y + sy * 0.05 * s.z + oy * 16 * s.z
+        s.r = Math.max(0.35, Math.min(1.6, p.r))
+      })
+    }
+    window.addEventListener("xp-intro-stars", onIntroStars)
     const draw = () => {
       frame = requestAnimationFrame(draw)
       if (document.hidden) return
@@ -381,7 +394,7 @@ function Stars() {
     window.addEventListener("pointermove", onMove, { passive: true })
     document.documentElement.addEventListener("pointerleave", onLeave)
     return () => {
-      cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("xp-warp", onWarp)
+      cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("xp-warp", onWarp); window.removeEventListener("xp-intro-stars", onIntroStars)
       window.removeEventListener("pointermove", onMove); document.documentElement.removeEventListener("pointerleave", onLeave)
     }
   }, [])

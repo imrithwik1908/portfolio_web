@@ -27,6 +27,11 @@ export function CommandMenu() {
     { group: "Actions", label: "Open my résumé", hint: "Read it here, or print", run: openResume },
     { group: "Actions", label: "Download my résumé", hint: "One-page PDF, ATS-friendly", run: () => { const a = document.createElement("a"); a.href = RESUME_PDF; a.download = ""; a.click() } },
     { group: "Actions", label: "Copy my email", hint: EMAIL, run: () => { navigator.clipboard?.writeText(EMAIL).then(() => toast("Email copied."), () => { window.location.href = `mailto:${EMAIL}` }) } },
+    { group: "Actions", label: "Watch the intro again", hint: "Ten seconds, with sound", run: () => {
+      try { sessionStorage.removeItem("xp-intro") } catch { /* storage blocked: the intro plays anyway */ }
+      window.scrollTo(0, 0)
+      if (window.location.pathname === "/") window.location.reload(); else window.location.href = "/"
+    } },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),
     { group: "Projects", label: "All projects", run: () => router.push("/projects") },

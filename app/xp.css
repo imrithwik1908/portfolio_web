@@ -1952,14 +1952,14 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-opening-skip:hover { color: rgba(226, 230, 238, 0.8); }
 
 /* Title cards on the music's first three beats: in on the note, held, gone before the next. */
-.xp-opening-card { position: absolute; opacity: 1; white-space: nowrap; animation: xp-opening-card 1250ms cubic-bezier(0.4, 0, 0.3, 1) both, xp-opening-sweep 1250ms cubic-bezier(0.4, 0, 0.3, 1) both; color: transparent; background: linear-gradient(100deg, rgba(226,230,238,0.62) 38%, #ffffff 50%, rgba(226,230,238,0.62) 62%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; }
+.xp-opening-card { position: absolute; opacity: 1; white-space: nowrap; animation: xp-opening-card 1440ms linear both, xp-opening-sweep 1440ms cubic-bezier(0.4, 0, 0.3, 1) both; color: transparent; background: linear-gradient(100deg, rgba(226,230,238,0.62) 38%, #ffffff 50%, rgba(226,230,238,0.62) 62%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; }
 @keyframes xp-opening-sweep { from { background-position: 100% 0; } to { background-position: 0% 0; } }
 @keyframes xp-opening-card { 0% { opacity: 0; filter: blur(3px); letter-spacing: 0.5em; } 22% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; } }
 @media (max-width: 560px) { .xp-opening-line { font-size: 0.7rem; letter-spacing: 0.3em; text-indent: 0.3em; } }
 /* Opening: a soft vignette over the whole frame, and title cards that settle in rather than appear. */
 .xp-opening::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 46%, transparent 55%, rgba(0, 0, 0, 0.55) 100%); }
 .xp-opening-card { transform-origin: 50% 50%; }
-@keyframes xp-opening-card { 0% { opacity: 0; filter: blur(4px); letter-spacing: 0.5em; transform: translateX(1.2vw) scale(1.03); } 24% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; transform: translateX(-1.2vw) scale(1); } }
+@keyframes xp-opening-card { 0% { opacity: 0; filter: blur(7px); letter-spacing: 0.44em; transform: translateX(1.2vw) scale(1.02); } 13% { opacity: 0.75; filter: blur(6px); } 22% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; } 80% { opacity: 1; filter: blur(0); } 100% { opacity: 0; filter: blur(1px); letter-spacing: 0.4em; transform: translateX(-1.2vw) scale(1); } }
 .xp-opening-line.is-isolate.is-dawn span.is-r { color: #f7f2ea; text-shadow: 0 0 12px rgba(255, 226, 196, 0.22); transition-duration: 1400ms; }
 .xp-opening-tc { position: absolute; left: 22px; bottom: 22px; color: rgba(226, 230, 238, 0.18); font: 0.62rem var(--xp-mono); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; animation: xp-fade 1200ms 600ms ease both; }
 
