@@ -3,16 +3,19 @@
 import { useEffect, useRef, useState } from "react"
 import { beat, createScore, type Score } from "@/components/xp/score"
 
-// The opening: ten seconds, cut to an original score on one shared clock (96 BPM, a beat = 0.625 s).
+// The opening: about nine seconds, cut to an original score on one shared clock (96 BPM, a beat =
+// 0.625 s). The camera is moving from the first frame: a slow drift through three depths of stars
+// and a faint nebula haze, a planet's dark horizon already low in frame and rising the whole time,
+// and every beat of the pulse breathing a little light into the stars and the horizon's rim.
 //
-//   beat 0–3    pitch black; stars surface one depth at a time; a soft pulse begins
-//   beat 4      "TEMPE, ARIZONA", a light sweeping across it as the piano figure enters
-//   beat 6      "MACHINE LEARNING SYSTEMS", as the figure answers
-//   beat 8      the name decodes as the pad comes in; a planet's dark limb starts to rise, rim-lit
-//   beat 8.5    a slow push-in on the whole name
-//   beat 10     everything but the R of RITHWIK softens away
-//   beat 12     the chord resolves; the R lifts off as sunrise catches the planet's edge
-//   beat 14     the R lands as the R of "Rithwik" in the hero and the name unfolds; the scene
+//   beat 0      the pulse starts with the picture; stars and haze surface within a second
+//   beat 2      "TEMPE, ARIZONA", a light sweeping across it as the piano figure enters
+//   beat 4      "MACHINE LEARNING SYSTEMS", as the figure answers
+//   beat 6      the name decodes as the pad comes in
+//   beat 6.5    a slow push-in on the whole name
+//   beat 8.5    everything but the R of RITHWIK softens away
+//   beat 10     the chord resolves; the R lifts off as sunrise catches the planet's edge
+//   beat 12     the R lands as the R of "Rithwik" in the hero and the name unfolds; the scene
 //               dissolves into the page and the music breathes out
 //
 // Motion after the decode runs on the compositor (Web Animations); the hero is staged and measured
@@ -23,14 +26,15 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 const NAME = "SAI RITHWIK REDDY CHIRRA"
 const R_AT = 4
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const CARDS: [number, string][] = [[4, "Tempe, Arizona"], [6, "Machine learning systems"]]
-const NAME_AT = beat(8), PER_LETTER = 22, SHUFFLE_MS = 90
-const PUSH_AT = beat(8.5), PUSH_MS = 2000
-const ISOLATE_AT = beat(10)
-const READY_AT = beat(11)
-const FLY_AT = beat(12), FLY_MS = beat(2)    // lands on beat 14
-const DISSOLVE_AT = beat(12.4), FADE = 1500
-const RISE_AT = beat(8), RISE_MS = beat(6)   // the planet's limb rises across beats 8–14
+const CARDS: [number, string][] = [[2, "Tempe, Arizona"], [4, "Machine learning systems"]]
+const NAME_AT = beat(6), PER_LETTER = 22, SHUFFLE_MS = 90
+const PUSH_AT = beat(6.5), PUSH_MS = beat(3.6)
+const ISOLATE_AT = beat(8.5)
+const READY_AT = beat(9.2)
+const FLY_AT = beat(10), FLY_MS = beat(2)    // lands on beat 12
+const DISSOLVE_AT = beat(10.4), FADE = 1500
+const RISE_MS = beat(12)                     // the horizon rises across the whole sequence
+const PULSE_UNTIL = beat(12)                 // the picture breathes with the pulse until the landing
 const CINEMA = "cubic-bezier(0.45, 0, 0.2, 1)"
 
 const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
@@ -103,10 +107,23 @@ export function Intro() {
       const t = now - t0
       if (decoding) decode(now)
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H)
-      const f = Math.max(W, H) * 0.42, cx = W / 2, cy = H * 0.46
-      // Stars: the far layer surfaces on beat 0, the middle on beat 1, the near on beat 2.
+      // The camera: a slow drift and the gentlest roll, so the frame is never static.
+      const k = Math.min(1, t / beat(12))
+      const cx = W * (0.54 - 0.05 * ease(k)), cy = H * (0.5 - 0.06 * ease(k))
+      const f = Math.max(W, H) * 0.42
+      // Each pulse beat breathes a little light into the scene, fading before the next.
+      const phase = (t % beat(1)) / beat(1)
+      const breath = t < PULSE_UNTIL ? 1 + 0.14 * Math.exp(-phase * 6) : 1
+      // Nebula haze: two soft, grey-blue clouds drifting across the back of the frame.
+      const haze = ease(t / 1200)
+      for (const [hx, hy, hr, ha] of [[0.3 - 0.06 * k, 0.32, 0.55, 0.05], [0.74 + 0.04 * k, 0.6, 0.45, 0.035]] as const) {
+        const g = ctx.createRadialGradient(W * hx, H * hy, 0, W * hx, H * hy, Math.max(W, H) * hr)
+        g.addColorStop(0, `rgba(120,135,170,${ha * haze * breath})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      }
+      // Stars: all three depths surface within the first second, far to near.
       for (const s of stars) {
-        const show = ease((t - beat(s.layer)) / 900)
+        const show = ease((t - s.layer * 280) / 700)
         if (!show) continue
         s.z -= 0.00038
         if (s.z <= 0.12) { s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; s.z = 1 }
@@ -114,19 +131,21 @@ export function Intro() {
         if (x < -10 || x > W + 10 || y < -10 || y > H + 10) continue
         const near = 1 - s.z
         const tw = 0.85 + 0.15 * Math.sin(now / 900 + s.tw)
-        ctx.fillStyle = `rgba(226,230,238,${(0.12 + 0.7 * near) * tw * show})`
+        ctx.fillStyle = `rgba(226,230,238,${Math.min(1, (0.12 + 0.7 * near) * tw * show * breath)})`
         ctx.beginPath(); ctx.arc(x, y, 0.35 + near * 1.25, 0, 6.283); ctx.fill()
       }
       // The planet: a vast dark disc whose limb rises into frame, rim-lit, catching sunrise at beat 12.
-      const rise = ease((t - RISE_AT) / RISE_MS)
-      if (rise > 0) {
+      // The horizon is there from the first second, low and dim, and rises the whole way through.
+      const rise = ease(t / RISE_MS)
+      const lit = ease(t / 1400) * (0.35 + 0.65 * rise) * breath
+      if (lit > 0) {
         const R = Math.max(W, H) * 1.35
-        const pcx = W / 2, pcy = H + R - H * (0.04 + 0.16 * rise)
+        const pcx = W / 2 + W * 0.03 * (1 - rise), pcy = H + R - H * (0.03 + 0.17 * rise)
         const rim = ctx.createRadialGradient(pcx, pcy, R * 0.985, pcx, pcy, R * 1.05)
-        rim.addColorStop(0, `rgba(170,190,235,${0.55 * rise})`); rim.addColorStop(0.25, `rgba(120,140,200,${0.18 * rise})`); rim.addColorStop(1, "rgba(0,0,0,0)")
+        rim.addColorStop(0, `rgba(170,190,235,${0.55 * lit})`); rim.addColorStop(0.25, `rgba(120,140,200,${0.18 * lit})`); rim.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.05, 0, 6.283); ctx.fill()
         ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.fill()
-        const sun = ease((t - beat(11.5)) / beat(3))
+        const sun = ease((t - beat(9.5)) / beat(3))
         if (sun > 0) {
           const top = pcy - R
           const glow = ctx.createRadialGradient(W / 2, top, 0, W / 2, top, W * 0.55)

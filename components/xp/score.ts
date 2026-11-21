@@ -1,12 +1,12 @@
 // The opening's score: an original ten-second cue, written here note by note and synthesised live
 // with Web Audio, so the picture can be cut to exactly the same clock.
 //
-// 96 BPM, one beat = 0.625 s, 16 beats. A minor.
-//   beats 0–15  a soft low pulse on every beat (A2), slowly gaining weight
-//   beats 4–11  a piano figure in eighths joins, climbing a little each bar
-//   beats 8–11  a warm pad enters underneath (A minor, then F major)
-//   beat 12     everything resolves onto one held C major 9 chord, with two high bell notes
-//   beats 14–16 it breathes out
+// 96 BPM, one beat = 0.625 s, about 15 beats. A minor.
+//   beats 0–11  a soft low pulse on every beat (A2), from the very first moment, slowly gaining weight
+//   beats 2–9   a piano figure in eighths joins, climbing a little each bar
+//   beats 6–9   a warm pad enters underneath (A minor, then F major)
+//   beat 10     everything resolves onto one held C major 9 chord, with two high bell notes
+//   beats 12–15 it breathes out
 // Nothing here is taken from another piece: the figure, chords and timing are written for this.
 
 export const BPM = 96
@@ -20,13 +20,13 @@ const N: Record<string, number> = { A2: 45, C3: 48, F3: 53, G3: 55, A3: 57, C4: 
 
 // The piano figure, one note per eighth (two per beat), beats 4–11.
 const FIGURE = [
-  "E4", "A4", "C5", "A4", "E4", "A4", "D5", "A4", // beats 4–7: the idea, asked twice
-  "E4", "A4", "C5", "E5", "F4", "A4", "C5", "F5", // beats 8–11: it opens upward with the chords
+  "E4", "A4", "C5", "A4", "E4", "A4", "D5", "A4", // beats 2–5: the idea, asked twice
+  "E4", "A4", "C5", "E5", "F4", "A4", "C5", "F5", // beats 6–9: it opens upward with the chords
 ]
 const PAD = [
-  { at: 8, len: 2.2, notes: ["A3", "C4", "E4"] },
-  { at: 10, len: 2.2, notes: ["F3", "A3", "C4"] },
-  { at: 12, len: 4.4, notes: ["C3", "G3", "E4", "B4", "D5"] }, // the resolution
+  { at: 6, len: 2.2, notes: ["A3", "C4", "E4"] },
+  { at: 8, len: 2.2, notes: ["F3", "A3", "C4"] },
+  { at: 10, len: 4.4, notes: ["C3", "G3", "E4", "B4", "D5"] }, // the resolution
 ]
 
 function room(ctx: AudioContext, seconds: number) {
@@ -101,12 +101,12 @@ export function createScore(volume = 0.55): Score | null {
     const t0 = ctx.currentTime + 0.04 - offset
     const at = (b: number) => t0 + (b * BEAT_MS) / 1000
     const live = (b: number) => at(b) >= ctx.currentTime
-    for (let b = 0; b < 14; b++) if (live(b)) pulse(at(b), 0.32 + 0.22 * (b / 13))
-    FIGURE.forEach((n, i) => { const b = 4 + i / 2; if (live(b)) piano(hz(N[n]), at(b), 0.16 + 0.06 * (i / FIGURE.length) + (i % 4 === 0 ? 0.04 : 0)) })
-    PAD.forEach((p) => p.notes.forEach((n) => { if (live(p.at)) pad(hz(N[n]), at(p.at), (p.len * BEAT_MS) / 1000, p.at === 12 ? 0.55 : 0.38) }))
-    if (live(12)) { piano(hz(N.C3), at(12), 0.3, 3.5); piano(hz(N.G4), at(12), 0.18, 3.2); piano(hz(N.E5), at(12), 0.16, 3.2) }
-    if (live(12.5)) bell(hz(N.B5), at(12.5), 0.05)
-    if (live(14)) bell(hz(N.E6), at(14), 0.04)
+    for (let b = 0; b < 12; b++) if (live(b)) pulse(at(b), 0.34 + 0.22 * (b / 11))
+    FIGURE.forEach((n, i) => { const b = 2 + i / 2; if (live(b)) piano(hz(N[n]), at(b), 0.16 + 0.06 * (i / FIGURE.length) + (i % 4 === 0 ? 0.04 : 0)) })
+    PAD.forEach((p) => p.notes.forEach((n) => { if (live(p.at)) pad(hz(N[n]), at(p.at), (p.len * BEAT_MS) / 1000, p.at === 10 ? 0.55 : 0.38) }))
+    if (live(10)) { piano(hz(N.C3), at(10), 0.3, 3.5); piano(hz(N.G4), at(10), 0.18, 3.2); piano(hz(N.E5), at(10), 0.16, 3.2) }
+    if (live(10.5)) bell(hz(N.B5), at(10.5), 0.05)
+    if (live(12)) bell(hz(N.E6), at(12), 0.04)
   }
 
   let started = false, done = false

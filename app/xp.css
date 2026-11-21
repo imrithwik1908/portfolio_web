@@ -1956,3 +1956,7 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 @keyframes xp-opening-sweep { from { background-position: 100% 0; } to { background-position: 0% 0; } }
 @keyframes xp-opening-card { 0% { opacity: 0; filter: blur(3px); letter-spacing: 0.5em; } 22% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; } }
 @media (max-width: 560px) { .xp-opening-line { font-size: 0.7rem; letter-spacing: 0.3em; text-indent: 0.3em; } }
+/* Opening: a soft vignette over the whole frame, and title cards that settle in rather than appear. */
+.xp-opening::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 46%, transparent 55%, rgba(0, 0, 0, 0.55) 100%); }
+.xp-opening-card { transform-origin: 50% 50%; }
+@keyframes xp-opening-card { 0% { opacity: 0; filter: blur(4px); letter-spacing: 0.5em; transform: scale(1.04); } 24% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; transform: scale(1); } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; transform: scale(0.995); } }
