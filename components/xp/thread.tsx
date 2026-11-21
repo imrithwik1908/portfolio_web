@@ -13,7 +13,8 @@ import { currentPalette } from "@/components/xp/palette"
 //   Now (ASU)    the line decides: it splits into the old and the new version, one case breaks
 //                away, and the two meet at a gate that returns its verdict
 // Facts come from the résumé and the AgentGuard / X-MuTeST repositories; every bullet that used to
-// be here is one click away under "The details". The sample sentence is the site's own toy example.
+// be here is one click away under "The details". The reading scene uses a neutral, made-up review so the
+// idea (a label has to point at the words behind it) lands without any offensive example on screen.
 
 type Scene = {
   id: string; when: string; place: string; role: string; question: string; line: string
@@ -61,8 +62,9 @@ const SCENES: Scene[] = [
   },
 ]
 
-const WORDS = ["honestly", "the", "new", "update", "is", "garbage", "and", "so", "are", "you"]
-const RATIONALE: Record<number, number> = { 5: 1, 9: 0.62 } // garbage, you
+const WORDS = ["the", "review", "praised", "the", "battery", "but", "hated", "the", "screen"]
+// How strongly each word supports the label "negative": the line rises under these, with the weight shown.
+const RATIONALE: Record<number, number> = { 6: 1, 8: 0.72, 2: 0.18 } // hated, screen, (praised, weakly)
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v))
@@ -159,6 +161,20 @@ export function Thread() {
       const mid = H * 0.56, amp = Math.min(H * 0.22, 150)
       const left = W * 0.06, right = W * 0.94, wide = right - left
 
+      // Camera: each scene gets a slow push-in that settles as it completes, like a dolly on the line.
+      const sceneK = wA * a + wB * b + wC * c
+      const zoom = 1 + 0.035 * Math.sin(Math.PI * Math.min(1, sceneK))
+      ctx.save(); ctx.translate(W / 2, mid); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -mid)
+      // An instrument floor: a faint perspective grid under the line, like the bench it's measured on.
+      const vpX = W / 2, vpY = mid - amp * 0.25, floorTop = mid + amp * 1.25
+      ctx.strokeStyle = "rgba(226,230,238,0.045)"; ctx.lineWidth = 1
+      for (let k = 0; k < 7; k++) { const y = floorTop + (k * k) * 5.5; if (y > H) break; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke() }
+      for (let k = -8; k <= 8; k++) {
+        const xb = vpX + k * W * 0.09
+        ctx.beginPath(); ctx.moveTo(lerp(vpX, xb, (floorTop - vpY) / (H - vpY)), floorTop); ctx.lineTo(xb, H); ctx.stroke()
+      }
+      ctx.font = "10px ui-monospace, monospace"; ctx.textAlign = "center"
+
       // Word positions for the "reading" shape, measured from the sentence on screen.
       const bumps: [number, number][] = []
       if (sentence.current && wA > 0.01) {
@@ -216,18 +232,51 @@ export function Thread() {
       // The candidate in cool white, so the two versions read apart at a glance.
       if (wC > 0.01) glow(wC * (0.6 + 0.4 * c), shown, (x) => yC(x, true), "196,212,240")
       glow(1, shown, main)
+
+      // Reading: each rise is labelled with how strongly that word supports the label (illustrative).
+      if (wA > 0.05) for (const [bx, h] of bumps) {
+        if (h < 0.08) continue
+        const X = left + bx * wide, Y = mid + yA(bx) * amp - 14
+        ctx.fillStyle = `rgba(226,230,238,${0.6 * wA * Math.min(1, h * 2)})`; ctx.fillText((h * 0.91).toFixed(2), X, Y)
+      }
+      // Predicting: where the data stops, and what the shaded band means.
+      if (wB > 0.05) {
+        ctx.fillStyle = `rgba(226,230,238,${0.45 * wB})`
+        ctx.fillText("t₀", left + reach * wide, mid - amp * 1.18)
+        ctx.textAlign = "right"; ctx.fillText("error band", right, mid + (main(1) + lerp(0.42, 0.12, smooth(b))) * amp + 16); ctx.textAlign = "center"
+      }
+      // Deciding: the same test cases on both versions, paired; one fails in the candidate.
+      if (wC > 0.05) {
+        for (let i = 0; i < 9; i++) {
+          const x = 0.1 + i * 0.09, X = left + x * wide
+          const y1 = mid + main(x) * amp, y2 = mid + yC(x, true) * amp
+          ctx.strokeStyle = `rgba(226,230,238,${0.1 * wC})`; ctx.beginPath(); ctx.moveTo(X, y1); ctx.lineTo(X, y2); ctx.stroke()
+          ctx.fillStyle = `rgba(${lamp},${0.9 * wC})`; ctx.beginPath(); ctx.arc(X, y1, 2.2, 0, 6.283); ctx.fill()
+          const broke = i === 4 && brk > 0.3
+          ctx.fillStyle = broke ? `rgba(255,120,100,${wC})` : `rgba(196,212,240,${0.9 * wC})`; ctx.beginPath(); ctx.arc(X, y2, broke ? 3 : 2.2, 0, 6.283); ctx.fill()
+          if (broke) {
+            ctx.strokeStyle = `rgba(255,120,100,${0.7 * wC * brk})`; ctx.beginPath(); ctx.arc(X, y2, 8 + 2 * Math.sin(now / 300), 0, 6.283); ctx.stroke()
+            ctx.fillStyle = `rgba(255,170,160,${0.8 * wC * brk})`; ctx.fillText("case 5 · pass → fail", X, y2 - 16)
+          }
+        }
+      }
       // The gate: two short posts the paths have to pass between.
       if (wC > 0.01) {
         const X = left + 0.9 * wide, gap = amp * lerp(0.4, 0.13, gate)
         ctx.strokeStyle = `rgba(226,230,238,${0.5 * wC * c})`; ctx.lineWidth = 1.5
         for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(X, mid + s * gap); ctx.lineTo(X, mid + s * (gap + amp * 0.35)); ctx.stroke() }
+        ctx.fillStyle = `rgba(226,230,238,${0.45 * wC * c})`; ctx.fillText("release gate", X, mid - gap - amp * 0.35 - 10)
       }
       // A photon running along the line, so the light is always alive.
       const u = ((now / 3400) % 1) * shown
       const PX = left + u * wide, PY = mid + main(u) * amp
-      const g = ctx.createRadialGradient(PX, PY, 0, PX, PY, 18)
-      g.addColorStop(0, `rgba(255,248,236,0.9)`); g.addColorStop(0.2, `rgba(${lamp},0.35)`); g.addColorStop(1, `rgba(${lamp},0)`)
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(PX, PY, 18, 0, 6.283); ctx.fill()
+      // As the line changes shape, the photon flares, as if the light itself is doing the rewriting.
+      const flare = Math.sin(Math.PI * toB) + Math.sin(Math.PI * toC)
+      const pr = 18 * (1 + 1.4 * flare)
+      const g = ctx.createRadialGradient(PX, PY, 0, PX, PY, pr)
+      g.addColorStop(0, `rgba(255,248,236,0.9)`); g.addColorStop(0.2, `rgba(${lamp},${0.35 + 0.2 * flare})`); g.addColorStop(1, `rgba(${lamp},0)`)
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(PX, PY, pr, 0, 6.283); ctx.fill()
+      ctx.restore()
     }
     frame = requestAnimationFrame(draw)
     return () => { cancelAnimationFrame(frame); ro.disconnect(); io.disconnect() }
@@ -273,8 +322,13 @@ export function Thread() {
         </header>
 
         {idx === 0 && (
-          <p ref={sentence} className="xp-thread-sentence" aria-label="A sample post: honestly the new update is garbage and so are you" style={{ opacity: vis }}>
-            {WORDS.map((w, i) => <span key={w + i} className={i in RATIONALE && local > 0.35 + i * 0.03 ? "is-lit" : undefined}>{w}</span>)}
+          <p ref={sentence} className="xp-thread-sentence" aria-label="A sample review: the review praised the battery but hated the screen. Label: negative, because of hated and screen." style={{ opacity: vis }}>
+            {WORDS.map((w, i) => <span key={w + i} className={RATIONALE[i] >= 0.5 && local > 0.3 + i * 0.03 ? "is-lit" : undefined}>{w}</span>)}
+          </p>
+        )}
+        {idx === 0 && (
+          <p className="xp-thread-chip" style={{ opacity: vis * smooth(span(local, 0.55, 0.8)) }}>
+            label <b>negative</b> <i>because</i> <b>hated</b> · <b>screen</b>
           </p>
         )}
         {idx === 1 && <p className="xp-thread-label is-data" style={{ opacity: vis * 0.7 }}>what happened<span>what will</span></p>}

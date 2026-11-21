@@ -2023,3 +2023,7 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
   .xp-thread-verdict b { font-size: 1.7rem; }
   .xp-thread-verdict small { display: none; }
 }
+.xp-thread-chip { position: absolute; top: calc(56% + 15vh); left: 0; right: 0; margin: 0; color: var(--xp-muted); font: 0.72rem var(--xp-mono); letter-spacing: 0.08em; text-align: center; text-transform: uppercase; pointer-events: none; }
+.xp-thread-chip b { color: var(--xp-ink); font-weight: 500; }
+.xp-thread-chip i { color: var(--xp-lamp); font-style: normal; margin: 0 0.5em; }
+@media (max-width: 760px) { .xp-thread-chip { top: calc(56% + 9vh); font-size: 0.64rem; } }
