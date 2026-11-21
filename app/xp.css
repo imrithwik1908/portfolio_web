@@ -2021,13 +2021,6 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-can-list > li.is-open .xp-can-inner { padding-bottom: clamp(22px, 3vw, 34px); opacity: 1; transform: none; transition-delay: 120ms; }
 .xp-can-proof { max-width: 56ch; margin: 0; color: var(--xp-ink-2); font-size: 1.08rem; line-height: 1.7; }
 .xp-can-proof b { color: var(--xp-ink); font-weight: 500; }
-.xp-can-meta { display: grid; align-content: start; gap: 14px; }
-.xp-can-receipts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
-.xp-can-receipts a { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border: 1px solid var(--xp-line-strong); border-radius: 999px; color: var(--xp-ink); font-size: 0.88rem; transition: border-color 200ms ease; }
-.xp-can-receipts a:hover { border-color: var(--accent, var(--xp-lamp)); }
-.xp-can-receipts i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-.xp-can-tools { margin: 0; color: var(--xp-muted); font: 0.74rem / 1.7 var(--xp-mono); letter-spacing: 0.04em; }
-.xp-can-tools span { margin-right: 4px; color: var(--xp-ink-2); font-style: italic; }
 @media (max-width: 760px) {
   .xp-can-promise { grid-template-columns: 2.2rem minmax(0, 1fr); gap: 6px; }
   .xp-can-text { font-size: 1.5rem; }
@@ -2049,3 +2042,8 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
   .xp-reveal-head { font-size: clamp(2.4rem, 12vw, 3.6rem); }
   .xp-ring small { font-size: 0.42rem; letter-spacing: 0; }
 }
+
+/* How I work: the line I wrote down, set like a margin note beside the moment it mattered. */
+.xp-can-note { position: relative; margin: 0; padding: 2px 0 2px 18px; border-left: 1px solid rgba(var(--xp-lamp-rgb), 0.45); }
+.xp-can-note blockquote { margin: 0; color: var(--xp-ink); font: italic 400 clamp(1.05rem, 1.5vw, 1.25rem) / 1.45 var(--xp-serif); }
+.xp-can-note figcaption { margin-top: 10px; color: var(--xp-muted); font: 0.7rem var(--xp-mono); letter-spacing: 0.08em; text-transform: uppercase; }
