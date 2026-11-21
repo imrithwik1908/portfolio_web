@@ -102,7 +102,7 @@ export const repoDetail: Record<string, RepoDetail> = {
     features: [
       { title: "Role chosen at sign-in", body: "Passport's Google strategy checks the email against the IIIT Dharwad student address pattern, creates a Student or Professor record on first sign-in, and the callback routes each to their own home." },
       { title: "Cart before commitment", body: "Courses are added to a session-backed cart, reviewed at checkout, then confirmed. Confirmation enrolls each course and clears the cart." },
-      { title: "Two-sided references", body: "Course keeps enrolledStudents and Student keeps enrolledCourses, both as ObjectId references, with a duplicate check before enrolling." },
+      { title: "Two-sided references", body: "Course keeps enrolledStudents and Student keeps enrolledCourses, both as ObjectId references, with a duplicate check on the single-course route (the cart route has none)." },
       { title: "Seeded catalog", body: "On start, the server seeds five courses (CS101 to CS105) with codes and credits." },
     ],
     layout: [

@@ -25,8 +25,8 @@ const SCENES: Scene[] = [
     title: "Data Science Associate", org: "Blackcoffer · India",
     stack: ["Python", "Time-series forecasting", "Feature engineering", "Model validation"],
     question: "What can this data actually support?",
-    line: "Two forecasting problems that arrived as business questions, with no clean benchmark to lean on.",
-    stats: [["+18%", "accuracy over the earlier method"], ["$142", "mean daily ad-revenue error"]],
+    line: "Two forecasting problems that arrived as business questions, starting from 40K+ shopper-path records and no clean benchmark to lean on.",
+    stats: [["+18%", "forecast accuracy over the earlier method, 82% overall"], ["$142", "mean daily ad-revenue error"]],
     story: [
       { label: "The problem", body: <>The questions came from the business, not a benchmark: <b>how shoppers move through a mall</b>, and <b>how much ad revenue tomorrow will bring</b>.</> },
       { label: "What I did", body: <>I made the data <b>trustworthy before modelling</b>, cleaning and engineering features from 40K+ shopper-path records, and validated every model against the method already in use, so an improvement meant something. When the ad-revenue error stopped shrinking, I traced what was left to <b>three patterns in user behaviour</b>.</> },

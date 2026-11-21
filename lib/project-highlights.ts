@@ -35,7 +35,7 @@ export const projectMeta: Record<string, { tint: string; accent: string; tagline
   "course-catalog": {
     tint: "#f3e4dd",
     accent: "#bf4f2c",
-    tagline: "One course system for two very different users.",
+    tagline: "A course system for students and professors, and what happens when an enrollment is half written.",
     highlights: [
       { value: "2", label: "role-specific flows, chosen at Google sign-in" },
       { value: "Refs, not copies", label: "students, professors and courses share one MongoDB model" },

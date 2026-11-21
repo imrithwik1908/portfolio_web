@@ -138,7 +138,7 @@ function CourseSchema() {
       <path d="M525 150 H566" stroke={INK} fill="none" markerEnd="url(#ca)" markerStart="url(#ca)" />
       <text x="272" y="140" fontSize="11" fill={AMBER} textAnchor="middle">m : n</text>
       <text x="410" y="300" fontSize="12.5" fill={MUTED} textAnchor="middle">An enrollment is stored on both sides, so confirming one means two writes.</text>
-      <text x="410" y="322" fontSize="12.5" fill={MUTED} textAnchor="middle">The code checks for duplicates first; a transaction would be the stronger fix.</text>
+      <text x="410" y="322" fontSize="12.5" fill={MUTED} textAnchor="middle">The single-course route checks for duplicates; the cart route doesn’t.</text>
     </svg>
   )
 }

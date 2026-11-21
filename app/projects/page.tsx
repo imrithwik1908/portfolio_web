@@ -14,11 +14,13 @@ export default function ProjectsPage() {
   return (
     <main id="main-content" className="xp">
       <section className="xp-section xp-page-top" aria-label="All projects">
+        <h1 className="sr-only">Projects</h1>
         <SectionHead index="01" label="Projects" title="Everything, with the decisions behind it." />
-        <FilmStrip />
         <div className="pc-gallery">
           {projects.map((project, i) => <ProjectCard key={project.slug} project={project} index={i} total={projects.length} variant="grid" />)}
         </div>
+        <p className="xp-head-label xp-strip-label"><span>↳</span>Every figure from the four write-ups. Pick one to jump to it.</p>
+        <FilmStrip />
       </section>
     </main>
   )

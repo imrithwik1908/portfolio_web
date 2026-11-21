@@ -164,9 +164,9 @@ export const projects: Project[] = [
     title: "Tensor Fusion",
     shortTitle: "Tensor Fusion",
     eyebrow: "Multimodal ML study",
-    question: "Can three noisy modalities beat one?",
+    question: "How do you combine three noisy senses so each one still counts?",
     summary:
-      "Can an AI read sentiment better from face, voice and words together than from words alone? A PyTorch implementation of the Tensor Fusion Network on CMU-MOSI video clips, run three ways: positive or negative, five classes, and a score from −3 to +3.",
+      "Reading sentiment from face, voice and words at once, without letting one drown out the others. A PyTorch implementation of the Tensor Fusion Network on CMU-MOSI video clips, run three ways: positive or negative, five classes, and a score from −3 to +3.",
     image: "/tensor_fusion.jpg",
     imageFit: "contain",
     status: "Completed study",
@@ -227,7 +227,7 @@ export const projects: Project[] = [
     title: "Course Catalog",
     shortTitle: "Course Catalog",
     eyebrow: "Role-based web application",
-    question: "One course system, two very different users.",
+    question: "What happens when an enrollment is only half written?",
     summary:
       "A course-registration web app with separate student and professor experiences. Google sign-in works out the role from the email address; students browse, fill a cart and enroll, and professors see what they teach. Node.js, Express and MongoDB.",
     image: "/course_catalog.jpg",

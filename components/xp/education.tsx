@@ -160,8 +160,8 @@ export function Education() {
           <p className="xp-reveal-degree">M.S. in Computer Science</p>
           <div className="xp-reveal-row">
             <p className="xp-reveal-gpa">
-              <b>{(4.22 * ease(span(tempeDraw, 0, 0.5))).toFixed(2)}</b>
-              <small>GPA out of 4 <span className="xp-tip is-text" tabIndex={tempe < 0.5 ? -1 : 0} data-tip="Above 4.0 because ASU counts an A+ as 4.33.">why above 4?</span></small>
+              <b>4.22</b>
+              <small>GPA out of 4 · above 4 because ASU counts an A+ as 4.33</small>
             </p>
             <p className="xp-reveal-course">Data Mining, Data Visualization, Distributed Database Systems</p>
           </div>

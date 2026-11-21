@@ -52,7 +52,7 @@ export default function Home() {
         <SectionHead index="03" label="Experience" title="Where I&apos;ve worked." />
         <Thread />
         <p className="xp-thread-earlier"><span>Earlier · {earlierExperience.period}</span>{earlierExperience.role}, {earlierExperience.company}. {earlierExperience.summary}</p>
-        <Note className="is-path">Latest first. One line of light, reshaped by your scroll: it predicts, then it reads. Results are the numbers I report on my résumé.</Note>
+        <Note className="is-path">Latest first. One line of light, reshaped by your scroll: it predicts, then it reads. The curve and the sample sentence are illustrations, not my data; the results are the numbers I report on my résumé.</Note>
       </section>
 
       <section id="education" className="xp-section xp-section-tight" aria-label="Education">

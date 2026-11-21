@@ -12,7 +12,7 @@ import { RESUME_PDF, openResume } from "@/components/xp/resume"
 const PROOF = [
   { big: "AAAI 2026", line: "Co-authored a paper on hate-speech detection that explains itself, in English, Hindi and Telugu.", href: "/projects/x-mutest", cta: "X-MuTeST" },
   { big: "Shipped", line: "AgentGuard: a release check for AI apps, built end to end and deployed. SDK, API, workers, dashboard.", href: "/projects/agentguard", cta: "AgentGuard" },
-  { big: "4.22", line: "GPA in the M.S. at Arizona State, after 8.94 / 10 in the B.Tech at IIIT Dharwad.", href: "/#education", cta: "Education" },
+  { big: "4.22", line: "GPA in the M.S. at Arizona State (out of 4; ASU counts an A+ as 4.33), after 8.94 / 10 in the B.Tech at IIIT Dharwad.", href: "/#education", cta: "Education" },
 ]
 const PATH = [
   ["Dec 2024 – May 2025", "Data Science Associate, Blackcoffer", "forecasting work that improved on the earlier approach by 18%"],

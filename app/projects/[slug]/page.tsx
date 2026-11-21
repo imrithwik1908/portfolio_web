@@ -132,8 +132,15 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <div className="xp-project-links">
             <a href={project.github} target="_blank" rel="noreferrer" className="xp-button">Source code <Arrow dir="out" /></a>
             {project.paper && <a href={project.paper} target="_blank" rel="noreferrer" className="xp-link">Read the paper <Arrow dir="out" /></a>}
-            {project.live && <a href={project.live} target="_blank" rel="noreferrer" className="xp-link">Live app <Arrow dir="out" /></a>}
+            {project.live && <a href={project.live} target="_blank" rel="noreferrer" className="xp-link">Deployed app · sign-in required <Arrow dir="out" /></a>}
           </div>
+          <nav className="xp-jump" aria-label="Jump to">
+            <span>Jump to</span>
+            {project.slug === "agentguard" && <a href="#try-title">Try the demo</a>}
+            {flows[project.slug] && <a href="#run-title">How it runs</a>}
+            <a href="#ch-debugging">{project.slug === "x-mutest" ? "The hard part" : "What broke"}</a>
+            <a href="#ch-results">Results</a>
+          </nav>
         </div>
         <div className="xp-project-visual pc is-live"><ProjectVisual slug={project.slug} /></div>
       </header>

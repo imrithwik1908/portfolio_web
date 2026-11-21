@@ -124,13 +124,17 @@ export function Hero() {
         <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name">Rithwik</em>.</h1>
         <Roles />
         <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
-        <p className="xp-hero-sub">I&apos;m doing my M.S. in Computer Science at Arizona State, graduating May 2027. Before that, research at IIT Indore that became an <span className="xp-tip is-text" tabIndex={0} data-tip="X-MuTeST: explainable hate-speech detection in English, Hindi and Telugu.">AAAI 2026 paper</span>, and forecasting work at Blackcoffer. I&apos;m looking for ML engineering and data science roles.</p>
-        <Typed />
+        <ul className="xp-hero-proof" aria-label="In short">
+          <li><Link href="/projects/agentguard">Built and deployed AgentGuard</Link>, a release gate for LLM apps</li>
+          <li>Co-authored an <Link href="/#research">AAAI 2026 paper</Link> from research at IIT Indore</li>
+          <li>M.S. Computer Science, Arizona State · May 2027</li>
+        </ul>
         <div className="xp-hero-actions">
           <Link href="/#work" className="xp-button">See what I&apos;ve built <Arrow dir="down" /></Link>
           <ResumeLink>Open my résumé <Arrow /></ResumeLink>
         </div>
         <BriefLink />
+        <Typed />
       </div>
 
       <Portrait />
