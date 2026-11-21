@@ -5,16 +5,14 @@ import { useEffect, useRef, useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
 import { currentPalette } from "@/components/xp/palette"
 
-// "Where I've worked", told by one line of light. The section pins and the scroll reshapes a single
-// glowing thread, the same thin light as the planet's rim in the opening:
-//   IIT Indore   the line reads: it rises under the words that justify a label
+// "Where I've worked", told by one line of light, latest role first. The section pins and the
+// scroll reshapes a single glowing thread, the same thin light as the planet's rim in the opening:
 //   Blackcoffer  the line predicts: it unrolls into a time series, runs past the data, and the
 //                band of uncertainty around the forecast tightens
-//   Now (ASU)    the line decides: it splits into the old and the new version, one case breaks
-//                away, and the two meet at a gate that returns its verdict
-// Facts come from the résumé and the AgentGuard / X-MuTeST repositories; every bullet that used to
-// be here is one click away under "The details". The reading scene uses a neutral, made-up review so the
-// idea (a label has to point at the words behind it) lands without any offensive example on screen.
+//   IIT Indore   the line reads: it rises under the words that justify a label
+// Facts come from the résumé and the X-MuTeST repository. The reading scene uses a neutral,
+// made-up review so the idea (a label has to point at the words behind it) lands without any
+// offensive example on screen. Projects (AgentGuard and the rest) live in the projects section.
 
 type Scene = {
   id: string; when: string; place: string; role: string; title: string; org: string; stack: string[]; question: string; line: string
@@ -22,20 +20,6 @@ type Scene = {
 }
 
 const SCENES: Scene[] = [
-  {
-    id: "indore", when: "Apr – Nov 2024", place: "IIT Indore", role: "Summer Research Intern · AI/ML",
-    title: "Research Intern, AI/ML", org: "IIT Indore",
-    stack: ["PyTorch", "MuRIL", "XLM-R", "LLaMA 3.1", "Attention supervision", "Token-F1 · IOU-F1"],
-    question: "Which words actually support the label?",
-    line: "Hate-speech detection in English, Hindi and Telugu that has to point at the words behind its answer.",
-    stats: [["AAAI", "2026 paper"], ["−20%", "inference latency"]],
-    story: [
-      { label: "The problem", body: <>A hate-speech classifier can be <b>right for the wrong reason</b>, and in Hindi and Telugu there was almost no data showing which words a label actually rests on.</> },
-      { label: "What I did", body: <>I taught the models to <b>look where people look</b>: first by steering their attention toward the words annotators marked, then by refining it with a probe that tests which words really move the prediction. I picked the encoder per language from validation results (MuRIL for English and Telugu, XLM-R for Hindi) and merged the model&apos;s explanations with LLaMA 3.1&apos;s.</> },
-      { label: "What came of it", body: <>We graded the <b>explanations, not just the labels</b>: do they match what people marked, and does the model truly depend on those words. Inference got <b>20% faster</b> across iterations, and the work was <b>published at AAAI 2026</b>.</> },
-    ],
-    link: { href: "/projects/x-mutest", label: "X-MuTeST" },
-  },
   {
     id: "blackcoffer", when: "Dec 2024 – May 2025", place: "Blackcoffer", role: "Data Science Associate · India",
     title: "Data Science Associate", org: "Blackcoffer · India",
@@ -50,18 +34,18 @@ const SCENES: Scene[] = [
     ],
   },
   {
-    id: "now", when: "2025 – present", place: "Arizona State", role: "M.S. Computer Science · building AgentGuard",
-    title: "Building AgentGuard", org: "M.S. Computer Science · Arizona State",
-    stack: ["Python SDK", "FastAPI", "PostgreSQL", "Redis / ARQ", "Next.js", "LLM evaluation"],
-    question: "What changed, and is it safe to release?",
-    line: "A release gate that tells you which cases a new LLM version broke, not just whether the average moved.",
-    stats: [["13", "checks on every run"], ["0", "LLM votes in the final call"]],
+    id: "indore", when: "Apr – Nov 2024", place: "IIT Indore", role: "Summer Research Intern · AI/ML",
+    title: "Research Intern, AI/ML", org: "IIT Indore",
+    stack: ["PyTorch", "MuRIL", "XLM-R", "LLaMA 3.1", "Attention supervision", "Token-F1 · IOU-F1"],
+    question: "Which words actually support the label?",
+    line: "Hate-speech detection in English, Hindi and Telugu that has to point at the words behind its answer.",
+    stats: [["AAAI", "2026 paper"], ["−20%", "inference latency"]],
     story: [
-      { label: "The problem", body: <>When a team changes a prompt or a model, <b>the average score can rise while specific answers break</b>. AgentGuard shows which ones, before the release.</> },
-      { label: "What I did", body: <>A small Python library records every step an AI app takes and <b>can never crash the app it watches</b>. A FastAPI service saves each run in one transaction to PostgreSQL, and background workers grade the answers off the request path. Each test case is then <b>compared with itself across versions</b>, and plain rules, not another AI, return PASS, BLOCK or REVIEW with reasons.</> },
-      { label: "What came of it", body: <>A working, deployed system with integration tests on saving, isolation, pairing and the release rules. The bug I&apos;m gladdest I caught: <b>old results were leaking into new comparisons</b> and flattering them; pairing only the latest finished run fixed it.</> },
+      { label: "The problem", body: <>A hate-speech classifier can be <b>right for the wrong reason</b>, and in Hindi and Telugu there was almost no data showing which words a label actually rests on.</> },
+      { label: "What I did", body: <>I taught the models to <b>look where people look</b>: first by steering their attention toward the words annotators marked, then by refining it with a probe that tests which words really move the prediction. I picked the encoder per language from validation results (MuRIL for English and Telugu, XLM-R for Hindi) and merged the model&apos;s explanations with LLaMA 3.1&apos;s.</> },
+      { label: "What came of it", body: <>We graded the <b>explanations, not just the labels</b>: do they match what people marked, and does the model truly depend on those words. Inference got <b>20% faster</b> across iterations, and the work was <b>published at AAAI 2026</b>.</> },
     ],
-    link: { href: "/projects/agentguard", label: "AgentGuard" },
+    link: { href: "/projects/x-mutest", label: "X-MuTeST" },
   },
 ]
 
@@ -155,9 +139,10 @@ export function Thread() {
       if (!visible) return
       const v = prog.current
       // Scene weights, cross-fading around the boundaries.
-      const toB = smooth(span(v, 0.27, 0.39)), toC = smooth(span(v, 0.6, 0.72))
-      const wA = 1 - toB, wB = toB * (1 - toC), wC = toC
-      const a = span(v, 0.02, 0.27), b = span(v, 0.39, 0.6), c = span(v, 0.72, 0.96)
+      // Scene 1 predicts (Blackcoffer), scene 2 reads (IIT Indore).
+      const toA = smooth(span(v, 0.42, 0.55))
+      const wB = 1 - toA, wA = toA
+      const b = span(v, 0.02, 0.42), a = span(v, 0.55, 0.95)
       shown += (Math.min(1, v / 0.05 + 0.15) - shown) * 0.08
       const lamp = currentPalette().lampRgb
       ctx.clearRect(0, 0, W, H)
@@ -165,7 +150,7 @@ export function Thread() {
       const left = W * 0.06, right = W * 0.94, wide = right - left
 
       // Camera: each scene gets a slow push-in that settles as it completes, like a dolly on the line.
-      const sceneK = wA * a + wB * b + wC * c
+      const sceneK = wA * a + wB * b
       const zoom = 1 + 0.035 * Math.sin(Math.PI * Math.min(1, sceneK))
       ctx.save(); ctx.translate(W / 2, mid); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -mid)
       // An instrument floor: a faint perspective grid under the line, like the bench it's measured on.
@@ -195,15 +180,6 @@ export function Thread() {
       }
       const reach = lerp(0.55, 0.64, b) // where the known data ends and the forecast begins
       const yB = (x: number) => (x <= reach ? hist(x) : hist(reach) + (x - reach) * 0.6 + Math.sin((x - reach) * 9) * 0.05)
-      const brk = smooth(span(c, 0.2, 0.55))   // the case that breaks
-      const gate = smooth(span(c, 0.45, 0.85)) // the two versions converge on the gate
-      const yC = (x: number, second: boolean) => {
-        const sep = second ? 0.2 : -0.2
-        const converge = 1 - smooth(span(x, 0.6, 0.86)) * gate
-        const dip = second ? -0.55 * brk * Math.exp(-((x - 0.48) ** 2) / 0.0016) : 0
-        return sep * converge * (0.4 + 0.6 * c) + dip + Math.sin(x * 11 + (second ? 0.6 : 0)) * 0.05
-      }
-
       const path = (fy: (x: number) => number, upto = 1) => {
         ctx.beginPath()
         for (let i = 0; i < N; i++) {
@@ -218,7 +194,7 @@ export function Thread() {
           path(fy, upto); ctx.strokeStyle = `rgba(${rgb},${al * alpha})`; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke()
         }
       }
-      const main = (x: number) => wA * yA(x) + wB * yB(x) + wC * yC(x, false)
+      const main = (x: number) => wA * yA(x) + wB * yB(x)
 
       // Forecast band: the uncertainty around the prediction, tightening as the scene plays.
       if (wB > 0.01) {
@@ -231,9 +207,6 @@ export function Thread() {
         ctx.strokeStyle = `rgba(226,230,238,${0.18 * wB})`; ctx.lineWidth = 1; ctx.setLineDash([2, 5])
         ctx.beginPath(); ctx.moveTo(X, mid - amp * 1.1); ctx.lineTo(X, mid + amp * 1.1); ctx.stroke(); ctx.setLineDash([])
       }
-      // The second version of the app, appearing beside the first and peeling away where a case breaks.
-      // The candidate in cool white, so the two versions read apart at a glance.
-      if (wC > 0.01) glow(wC * (0.6 + 0.4 * c), shown, (x) => yC(x, true), "196,212,240")
       glow(1, shown, main)
 
       // Reading: each rise is labelled with how strongly that word supports the label (illustrative).
@@ -248,33 +221,11 @@ export function Thread() {
         ctx.fillText("t₀", left + reach * wide, mid - amp * 1.18)
         ctx.textAlign = "right"; ctx.fillText("error band", right, mid + (main(1) + lerp(0.42, 0.12, smooth(b))) * amp + 16); ctx.textAlign = "center"
       }
-      // Deciding: the same test cases on both versions, paired; one fails in the candidate.
-      if (wC > 0.05) {
-        for (let i = 0; i < 9; i++) {
-          const x = 0.1 + i * 0.09, X = left + x * wide
-          const y1 = mid + main(x) * amp, y2 = mid + yC(x, true) * amp
-          ctx.strokeStyle = `rgba(226,230,238,${0.1 * wC})`; ctx.beginPath(); ctx.moveTo(X, y1); ctx.lineTo(X, y2); ctx.stroke()
-          ctx.fillStyle = `rgba(${lamp},${0.9 * wC})`; ctx.beginPath(); ctx.arc(X, y1, 2.2, 0, 6.283); ctx.fill()
-          const broke = i === 4 && brk > 0.3
-          ctx.fillStyle = broke ? `rgba(255,120,100,${wC})` : `rgba(196,212,240,${0.9 * wC})`; ctx.beginPath(); ctx.arc(X, y2, broke ? 3 : 2.2, 0, 6.283); ctx.fill()
-          if (broke) {
-            ctx.strokeStyle = `rgba(255,120,100,${0.7 * wC * brk})`; ctx.beginPath(); ctx.arc(X, y2, 8 + 2 * Math.sin(now / 300), 0, 6.283); ctx.stroke()
-            ctx.fillStyle = `rgba(255,170,160,${0.8 * wC * brk})`; ctx.fillText("case 5 · pass → fail", X, y2 - 16)
-          }
-        }
-      }
-      // The gate: two short posts the paths have to pass between.
-      if (wC > 0.01) {
-        const X = left + 0.9 * wide, gap = amp * lerp(0.4, 0.13, gate)
-        ctx.strokeStyle = `rgba(226,230,238,${0.5 * wC * c})`; ctx.lineWidth = 1.5
-        for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(X, mid + s * gap); ctx.lineTo(X, mid + s * (gap + amp * 0.35)); ctx.stroke() }
-        ctx.fillStyle = `rgba(226,230,238,${0.45 * wC * c})`; ctx.fillText("release gate", X, mid - gap - amp * 0.35 - 10)
-      }
       // A photon running along the line, so the light is always alive.
       const u = ((now / 3400) % 1) * shown
       const PX = left + u * wide, PY = mid + main(u) * amp
       // As the line changes shape, the photon flares, as if the light itself is doing the rewriting.
-      const flare = Math.sin(Math.PI * toB) + Math.sin(Math.PI * toC)
+      const flare = Math.sin(Math.PI * toA)
       const pr = 18 * (1 + 1.4 * flare)
       const g = ctx.createRadialGradient(PX, PY, 0, PX, PY, pr)
       g.addColorStop(0, `rgba(255,248,236,0.9)`); g.addColorStop(0.2, `rgba(${lamp},${0.35 + 0.2 * flare})`); g.addColorStop(1, `rgba(${lamp},0)`)
@@ -285,7 +236,7 @@ export function Thread() {
     return () => { cancelAnimationFrame(frame); ro.disconnect(); io.disconnect() }
   }, [still])
 
-  useEffect(() => { setDetails(false) }, [Math.min(2, Math.floor(p * 3))]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setDetails(false) }, [p < 0.5]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (still) {
     return (
@@ -304,13 +255,13 @@ export function Thread() {
     )
   }
 
-  const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2
+  const idx = p < 0.5 ? 0 : 1
   const s = SCENES[idx]
-  const local = idx === 0 ? span(p, 0.02, 0.27) : idx === 1 ? span(p, 0.39, 0.6) : span(p, 0.72, 0.96)
-  const enter = idx === 0 ? 1 : idx === 1 ? smooth(span(p, 0.33, 0.4)) : smooth(span(p, 0.66, 0.73))
-  const leave = idx === 2 ? 0 : smooth(span(p, idx === 0 ? 0.27 : 0.6, idx === 0 ? 0.33 : 0.66))
+  const reading = s.id === "indore"
+  const local = idx === 0 ? span(p, 0.02, 0.42) : span(p, 0.55, 0.95)
+  const enter = idx === 0 ? 1 : smooth(span(p, 0.5, 0.57))
+  const leave = idx === 0 ? smooth(span(p, 0.42, 0.5)) : 0
   const vis = enter * (1 - leave)
-  const verdict = idx === 2 ? smooth(span(local, 0.7, 0.95)) : 0
 
   return (
     <div ref={root} className="xp-thread">
@@ -323,25 +274,16 @@ export function Thread() {
           <p className="xp-thread-q">“<Decoded text={s.question} />”</p>
         </header>
 
-        {idx === 0 && (
+        {reading && (
           <p ref={sentence} className="xp-thread-sentence" aria-label="A sample review: the review praised the battery but hated the screen. Label: negative, because of hated and screen." style={{ opacity: vis }}>
             {WORDS.map((w, i) => <span key={w + i} className={RATIONALE[i] >= 0.5 && local > 0.3 + i * 0.03 ? "is-lit" : undefined}>{w}</span>)}
           </p>
         )}
-        {idx === 0 && (
+        {reading && (
           <p className="xp-thread-chip" style={{ opacity: vis * smooth(span(local, 0.55, 0.8)) }}>
             label <b>negative</b> <i>because</i> <b>hated</b> · <b>screen</b>
           </p>
         )}
-        {idx === 2 && (
-          <>
-            <p className="xp-thread-label is-versions" style={{ opacity: vis * 0.75 }}><span className="is-base">baseline</span><span className="is-cand">candidate</span></p>
-            <p className="xp-thread-verdict" style={{ opacity: verdict, transform: `scale(${lerp(1.08, 1, verdict)})`, filter: `blur(${(1 - verdict) * 5}px)` }}>
-              <b>BLOCK</b><small>1 case broke · policy allows 0</small>
-            </p>
-          </>
-        )}
-
         <footer className="xp-thread-foot" key={`f${s.id}`} style={{ opacity: vis }}>
           <div className="xp-thread-text">
             <p className="xp-thread-line">{s.line}</p>

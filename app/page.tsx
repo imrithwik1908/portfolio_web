@@ -11,7 +11,7 @@ import { ProjectDeck } from "@/components/xp/project-deck"
 import { Publication } from "@/components/xp/publication"
 import { SectionHead } from "@/components/xp/section-head"
 import { Skills } from "@/components/xp/skills"
-import { projects } from "@/lib/portfolio-data"
+import { earlierExperience, projects } from "@/lib/portfolio-data"
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -51,7 +51,8 @@ export default function Home() {
       <section id="path" className="xp-section" aria-label="Path">
         <SectionHead index="03" label="Experience" title="Where I&apos;ve worked." />
         <Thread />
-        <Note className="is-path">One line of light, reshaped by your scroll: it reads, it predicts, it decides. Results are the numbers I report on my résumé.</Note>
+        <p className="xp-thread-earlier"><span>Earlier · {earlierExperience.period}</span>{earlierExperience.role}, {earlierExperience.company}. {earlierExperience.summary}</p>
+        <Note className="is-path">Latest first. One line of light, reshaped by your scroll: it predicts, then it reads. Results are the numbers I report on my résumé.</Note>
       </section>
 
       <section id="education" className="xp-section xp-section-tight" aria-label="Education">

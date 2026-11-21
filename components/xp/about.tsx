@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Arrow } from "@/components/xp/arrow"
+import { FogView } from "@/components/xp/fog-view"
 import { Note } from "@/components/xp/note"
 
 // Written from Rithwik's own earlier writing and his description of himself.
@@ -8,6 +9,7 @@ export function About() {
     <div className="xp-about">
       <div className="xp-about-side">
         <p className="xp-about-lede">I got into computer science through machine learning. What kept me there was everything around the model.</p>
+        <FogView />
       </div>
 
       <div className="xp-about-text">
