@@ -128,6 +128,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <h1>{project.title}</h1>
           <p className="xp-project-question">{project.question}</p>
           <p className="xp-project-summary">{project.summary}</p>
+          {project.contribution && <p className="xp-project-mine"><span>My part</span>{project.contribution}</p>}
           <div className="xp-project-links">
             <a href={project.github} target="_blank" rel="noreferrer" className="xp-button">Source code <Arrow dir="out" /></a>
             {project.paper && <a href={project.paper} target="_blank" rel="noreferrer" className="xp-link">Read the paper <Arrow dir="out" /></a>}

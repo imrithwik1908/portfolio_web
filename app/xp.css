@@ -443,6 +443,9 @@ a:hover > .xp-arrow.is-left { transform: translateX(-4px); }
 .xp-project-hero h1 { margin: 18px 0 16px; font: 400 var(--t-display) / 0.95 var(--xp-serif); letter-spacing: -0.022em; }
 .xp-project-question { color: var(--accent); font-size: var(--t-lead); font-weight: 500; }
 .xp-project-summary { max-width: 52ch; margin-top: 16px !important; color: var(--xp-ink-2); }
+.xp-project-mine, .xp-paper-mine { max-width: 60ch; margin-top: 14px !important; padding-left: 14px; border-left: 2px solid rgba(var(--xp-lamp-rgb), 0.7); color: var(--xp-ink); line-height: 1.55; }
+.xp-project-mine span, .xp-paper-mine span { display: block; margin-bottom: 4px; color: rgba(var(--xp-lamp-rgb), 0.95); font: 0.66rem var(--xp-mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.xp-project-mine { max-width: 52ch; }
 .xp-project-links { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 34px; }
 .xp-project-visual { aspect-ratio: 4 / 3; place-items: center; padding: 20px; animation: xp-rise 1000ms 200ms var(--xp-spring) both; }
 .xp-project-visual svg { width: 100%; }

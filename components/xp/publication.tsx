@@ -42,6 +42,7 @@ export function Publication() {
           {authors.map((a, i) => <span key={a}>{i > 0 && ", "}{a === ME ? <strong>{a}</strong> : a}</span>)}
         </p>
         <p className="xp-paper-abstract">Benchmark datasets with human-annotated, token-level rationales for hate-speech detection in Hindi, Telugu and English, and a framework that combines n-gram explainability with LLM-generated explanations, evaluated for plausibility and faithfulness.</p>
+        <p className="xp-paper-mine"><span>My part</span>I was responsible for collecting the data and for the human, word-level annotation that every explanation in the benchmark is scored against. I also worked with my teammates on the n-gram probe and the LLM-judge evaluation.</p>
         <div className="xp-paper-actions">
           <a className="xp-button" href="https://doi.org/10.1609/aaai.v40i46.41261" target="_blank" rel="noreferrer">Read the paper <Arrow dir="out" /></a>
           <button type="button" className={`xp-chip-button ${copied ? "is-copied" : ""}`} onClick={copy}>{copied ? "BibTeX copied" : "Copy BibTeX"}</button>

@@ -7,6 +7,7 @@ export type Project = {
   eyebrow: string
   question: string
   summary: string
+  contribution?: string
   image: string
   imageFit: "cover" | "contain"
   status: ProjectStatus
@@ -101,6 +102,8 @@ export const projects: Project[] = [
     question: "A correct label is not the same as a useful explanation.",
     summary:
       "An AAAI 2026 paper I co-authored on hate-speech detection that shows its work, in English, Hindi and Telugu: a benchmark of about 16,800 posts with the offending words marked by native speakers, and a training method that makes models point to the right words.",
+    contribution:
+      "I was responsible for collecting the data and for the human, word-level annotation that every explanation in the benchmark is scored against. I also worked with my teammates on the n-gram probe and the LLM-judge evaluation.",
     image: "/xmutest-architecture.png",
     imageFit: "contain",
     status: "Published research",
