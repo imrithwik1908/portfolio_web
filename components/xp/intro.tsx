@@ -21,6 +21,11 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 //   beat 14.5   it lands as the R of "Rithwik" in the hero and the name unfolds; the scene
 //               dissolves into the page and the music breathes out
 //
+// Camera language throughout: a dolly forward, a sideways truck with parallax and foreground bokeh,
+// a gentle dolly-zoom and rack focus onto the name, a tilt-down reveal during which the widescreen
+// letterbox retracts so the frame opens up, and a slow pan along the limb while sunrise light runs
+// along the rim. Small things for whoever notices: a satellite crossing high in frame, lens ghosts
+// opposite the sun, colour fringing on bright edge stars, handheld float, a film timecode.
 // Motion after the decode runs on the compositor (Web Animations); the hero is staged and measured
 // a beat before the glide, and the page under the intro stays still until the landing.
 // Sound starts on its own where the browser allows, otherwise on the first click or key, joining in
@@ -53,6 +58,7 @@ export function Intro() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const line = useRef<HTMLParagraphElement>(null)
   const rSpan = useRef<HTMLSpanElement>(null)
+  const tc = useRef<HTMLSpanElement>(null)
   const ended = useRef(false)
   const score = useRef<Score | null>(null)
 
@@ -137,7 +143,15 @@ export function Intro() {
       // Vanishing point: trucks right-to-left, then rises as the camera tilts down.
       const cx = W * lerp(0.42, 0.56, truck) - W * 0.03 * pan
       const cy = H * lerp(0.5, 0.28, tilt)
-      const f = Math.max(W, H) * 0.42
+      // A gentle dolly-zoom: the lens widens as the camera settles, so depth shifts under the name.
+      const f = Math.max(W, H) * lerp(0.42, 0.5, settle)
+
+      // Framing: the shot opens in a widescreen letterbox that retracts as the planet is revealed,
+      // so the frame itself grows for the big shot.
+      const lb = H * 0.12 * (1 - ease((t - beat(8.2)) / beat(2.2)))
+      ctx.save(); ctx.beginPath(); ctx.rect(0, lb, W, H - 2 * lb); ctx.clip()
+      // A whisper of handheld float, so the frame always feels filmed rather than rendered.
+      ctx.translate(Math.sin(t / 1700) * 1.6 + Math.sin(t / 2900) * 1.1, Math.sin(t / 2100) * 1.2 + Math.cos(t / 3300) * 0.9)
 
       // Faint nebula haze, far away, so it barely moves.
       const haze = ease(t / 1200) * (1 - 0.4 * tilt)
@@ -161,8 +175,26 @@ export function Intro() {
         const tw = 0.85 + 0.15 * Math.sin(now / 900 + s.tw)
         const soft = 1 + 1.2 * focus * (0.4 + close)                     // defocused stars grow and fade
         const a = Math.min(1, (0.12 + 0.7 * close) * tw * show * breath * dim / (1 + 0.9 * focus))
+        const rad = (0.35 + close * 1.25) * soft
+        // Lens fringing: the brightest stars near the frame's edge split very slightly into colour.
+        const edge = Math.hypot(x - W / 2, y - H / 2) / Math.hypot(W / 2, H / 2)
+        if (close > 0.55 && edge > 0.55) {
+          const o = (edge - 0.55) * 3
+          ctx.fillStyle = `rgba(255,120,120,${a * 0.35})`; ctx.beginPath(); ctx.arc(x - o, y, rad, 0, 6.283); ctx.fill()
+          ctx.fillStyle = `rgba(120,160,255,${a * 0.35})`; ctx.beginPath(); ctx.arc(x + o, y, rad, 0, 6.283); ctx.fill()
+        }
         ctx.fillStyle = `rgba(226,230,238,${a})`
-        ctx.beginPath(); ctx.arc(x, y, (0.35 + close * 1.25) * soft, 0, 6.283); ctx.fill()
+        ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill()
+      }
+
+      // A single satellite crossing high in the frame, its light blinking every two beats.
+      const sat = (t - beat(3)) / beat(7)
+      if (sat > 0 && sat < 1) {
+        const x = W * lerp(0.14, 0.86, sat) + (cx - W / 2) * 0.05, y = H * lerp(0.2, 0.31, sat) - (H * 0.22) * tilt
+        const fade = Math.min(1, sat * 6, (1 - sat) * 6)
+        ctx.fillStyle = `rgba(220,226,238,${0.55 * fade})`; ctx.fillRect(x, y, 1.4, 1.4)
+        const blink = ((t - beat(3)) % beat(2)) / beat(2)
+        if (blink < 0.08) { ctx.fillStyle = `rgba(255,170,150,${0.7 * fade})`; ctx.beginPath(); ctx.arc(x + 0.7, y + 0.7, 1.6, 0, 6.283); ctx.fill() }
       }
 
       // Foreground bokeh: a few large soft discs sliding past the lens with the truck and dolly.
@@ -179,7 +211,6 @@ export function Intro() {
       if (tilt > 0) {
         const R = Math.max(W, H) * 1.4
         const pcx = W * 0.5 - W * 0.06 * pan, pcy = H * lerp(1.12, 0.8, tilt) + R
-        const top = pcy - R
         const rim = ctx.createRadialGradient(pcx, pcy, R * 0.988, pcx, pcy, R * 1.04)
         const warm = 0.35 * glint
         rim.addColorStop(0, `rgba(${150 + 90 * warm},${172 + 30 * warm},${222 - 50 * warm},${0.5 * tilt * breath})`)
@@ -187,21 +218,49 @@ export function Intro() {
         ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.04, 0, 6.283); ctx.fill()
         ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.fill()
 
-        // A sun just beyond the limb: a small, soft glint, nothing more.
+        // Sunrise from orbit: a small glint just beyond the limb, then the light runs along the rim in
+        // both directions, a thin warm inner band under a soft blue outer one.
         if (glint > 0) {
-          const sx = pcx + W * 0.08, sy = top + (sx - pcx) ** 2 / (2 * R)
-          ctx.save(); ctx.globalCompositeOperation = "lighter"
-          const r0 = W * (0.012 + 0.008 * flash)
+          const off = W * 0.08
+          const sAng = -Math.PI / 2 + Math.asin(Math.min(0.99, off / R))
+          const sx = pcx + Math.cos(sAng) * R, sy = pcy + Math.sin(sAng) * R
+          const run = ease((t - CREST_AT) / beat(3))
+          ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round"
+          const spread = 0.04 + 0.32 * run
+          for (let k = 0; k < 28; k++) {
+            const u = k / 27, fall = Math.pow(1 - u, 1.6)
+            for (const dir of [-1, 1]) {
+              const a0 = sAng + dir * spread * u, a1 = sAng + dir * spread * (u + 1 / 27)
+              ctx.strokeStyle = `rgba(255,226,190,${0.5 * fall * glint})`; ctx.lineWidth = 1.2
+              ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.0004, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke()
+              ctx.strokeStyle = `rgba(140,175,255,${0.14 * fall * glint})`; ctx.lineWidth = 6
+              ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.006, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke()
+            }
+          }
+          const r0 = W * (0.011 + 0.007 * flash)
           const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r0 * 4)
-          g.addColorStop(0, `rgba(255,246,232,${0.6 * glint})`); g.addColorStop(0.18, `rgba(255,226,196,${0.2 * glint})`); g.addColorStop(1, "rgba(0,0,0,0)")
+          g.addColorStop(0, `rgba(255,246,232,${0.6 * glint})`); g.addColorStop(0.18, `rgba(255,226,196,${0.18 * glint})`); g.addColorStop(1, "rgba(0,0,0,0)")
           ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, r0 * 4, 0, 6.283); ctx.fill()
-          const streak = ctx.createLinearGradient(sx - W * 0.22, 0, sx + W * 0.22, 0)
-          streak.addColorStop(0, "rgba(0,0,0,0)"); streak.addColorStop(0.5, `rgba(200,218,255,${0.12 * glint * (1 + flash)})`); streak.addColorStop(1, "rgba(0,0,0,0)")
-          ctx.fillStyle = streak; ctx.fillRect(sx - W * 0.22, sy - 0.75, W * 0.44, 1.5)
+          const streak = ctx.createLinearGradient(sx - W * 0.2, 0, sx + W * 0.2, 0)
+          streak.addColorStop(0, "rgba(0,0,0,0)"); streak.addColorStop(0.5, `rgba(200,218,255,${0.1 * glint * (1 + flash)})`); streak.addColorStop(1, "rgba(0,0,0,0)")
+          ctx.fillStyle = streak; ctx.fillRect(sx - W * 0.2, sy - 0.75, W * 0.4, 1.5)
+          // Lens ghosts: faint reflections on the line through the frame's centre, opposite the sun.
+          for (const [kk, rr, col] of [[0.55, 10, "160,200,255"], [1.15, 22, "255,210,170"], [1.6, 6, "190,255,220"]] as const) {
+            const gx = sx + (W / 2 - sx) * 2 * kk / 1.6, gy = sy + (H / 2 - sy) * 2 * kk / 1.6
+            const gg = ctx.createRadialGradient(gx, gy, 0, gx, gy, rr)
+            gg.addColorStop(0, `rgba(${col},${0.035 * glint})`); gg.addColorStop(0.8, `rgba(${col},${0.02 * glint})`); gg.addColorStop(1, "rgba(0,0,0,0)")
+            ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(gx, gy, rr, 0, 6.283); ctx.fill()
+          }
           ctx.restore()
         }
       }
+      ctx.restore() // end of the letterboxed, hand-held frame
 
+      // A film timecode in the corner, at 24 frames a second, for anyone who looks.
+      if (tc.current) {
+        const fr = Math.floor(t / (1000 / 24)), sec = Math.floor(fr / 24)
+        tc.current.textContent = `00:00:${String(sec).padStart(2, "0")}:${String(fr % 24).padStart(2, "0")}`
+      }
       // Grain, barely there.
       fi = (fi + 1) % 3
       ctx.globalAlpha = 0.035; ctx.fillStyle = grains[fi]; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1
@@ -324,6 +383,7 @@ export function Intro() {
           <span key={i} ref={i === R_AT ? rSpan : undefined} className={[c === NAME[i] ? "" : "is-noise", i === R_AT ? "is-r" : ""].join(" ").trim() || undefined}>{c}</span>
         ))}
       </p>
+      <span ref={tc} className="xp-opening-tc" aria-hidden="true">00:00:00:00</span>
       <button type="button" className="xp-opening-skip" tabIndex={-1} onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))}>Skip</button>
     </div>
   )
