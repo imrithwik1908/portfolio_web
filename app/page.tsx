@@ -61,7 +61,7 @@ export default function Home() {
       </section>
 
       <section id="toolkit" className="xp-section xp-section-tight" aria-label="Toolkit">
-        <SectionHead index="05" label="Toolkit" title="What I reach for, and why." />
+        <SectionHead index="05" label="What I do" title="What you can hand me." />
         <Skills />
       </section>
 

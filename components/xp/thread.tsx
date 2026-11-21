@@ -146,7 +146,9 @@ export function Thread() {
       shown += (Math.min(1, v / 0.05 + 0.15) - shown) * 0.08
       const lamp = currentPalette().lampRgb
       ctx.clearRect(0, 0, W, H)
-      const mid = H * 0.56, amp = Math.min(H * 0.22, 150)
+      // Phones: the line sits higher and flatter, in the gap between the title and the text below.
+      const narrow = W < 761
+      const mid = H * (narrow ? 0.45 : 0.56), amp = narrow ? Math.min(H * 0.1, 84) : Math.min(H * 0.22, 150)
       const left = W * 0.06, right = W * 0.94, wide = right - left
 
       // Camera: each scene gets a slow push-in that settles as it completes, like a dolly on the line.

@@ -35,7 +35,7 @@ export function CommandMenu() {
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),
     { group: "Projects", label: "All projects", run: () => router.push("/projects") },
-    ...([["work", "Projects on the home page"], ["research", "Research"], ["path", "Experience"], ["education", "Education"], ["toolkit", "Toolkit"], ["about", "About"], ["contact", "Contact"]] as const)
+    ...([["work", "Projects on the home page"], ["research", "Research"], ["path", "Experience"], ["education", "Education"], ["toolkit", "What I do"], ["about", "About"], ["contact", "Contact"]] as const)
       .map(([id, label]) => ({ group: "Go to", label, run: go(id) })),
     { group: "Elsewhere", label: "GitHub", hint: "imrithwik1908", run: () => window.open("https://github.com/imrithwik1908", "_blank", "noopener") },
     { group: "Elsewhere", label: "LinkedIn", hint: "sairithwikreddy", run: () => window.open("https://www.linkedin.com/in/sairithwikreddy", "_blank", "noopener") },

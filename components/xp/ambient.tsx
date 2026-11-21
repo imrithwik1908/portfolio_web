@@ -151,7 +151,7 @@ export function Ambient() {
     try {
       if (!sessionStorage.getItem("whispered")) {
         sessionStorage.setItem("whispered", "1")
-        whisper = window.setTimeout(() => toast("Press ? at any time. Not everything here is on the surface."), 7000)
+        if (!window.matchMedia("(max-width: 760px), (pointer: coarse)").matches) whisper = window.setTimeout(() => toast("Press ? at any time. Not everything here is on the surface."), 7000)
       }
     } catch { /* no storage, no whisper */ }
     window.addEventListener("scroll", onBottom, { passive: true })

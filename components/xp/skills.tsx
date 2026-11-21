@@ -1,75 +1,93 @@
 "use client"
 
 import Link from "next/link"
-import { Fragment, useState } from "react"
+import { useState } from "react"
+import { Arrow } from "@/components/xp/arrow"
 import { Note } from "@/components/xp/note"
-import { projects } from "@/lib/portfolio-data"
 import { projectMeta } from "@/lib/project-highlights"
 
-// The toolkit told as a few true sentences about why each tool was picked. A tool links to a
-// project only when that project's repository uses it; otherwise the panel says where it came from.
-type Tool = { name: string; in: string[]; where?: string }
-type Segment = string | Tool
-const t = (name: string, used: string[] = [], where?: string): Tool => ({ name, in: used, where })
+// Skills as things you can hand me, not keywords. Each one is a promise, a short first-person
+// account of where I've already done it, and the work you can open to check. The tools come last
+// and quietly: they're how, not what. Every fact here is from the résumé or a project page.
+type Strength = {
+  id: string
+  promise: React.ReactNode
+  proof: React.ReactNode
+  receipts: { label: string; href: string; accent?: string }[]
+  tools: string
+}
 
-const story: Segment[][] = [
-  [t("Python", ["agentguard", "x-mutest", "tensor-fusion"]), " is home. Almost everything I've built starts there, from the X-MuTeST training runs to AgentGuard's API, with ", t("TypeScript", ["agentguard"]), " and ", t("JavaScript", ["course-catalog"]), " when the work needs a front end."],
-  ["For AgentGuard, the app being tested should never wait on the tester, so evaluations run on a ", t("Redis / ARQ", ["agentguard"]), " queue behind ", t("FastAPI", ["agentguard"]), ", ", t("PostgreSQL", ["agentguard"]), " keeps every trace and verdict, and ", t("Next.js", ["agentguard"]), " shows the result."],
-  ["In research I trained and compared ", t("MuRIL", ["x-mutest"]), ", ", t("XLM-R", ["x-mutest"]), " and ", t("LLaMA 3.1", ["x-mutest"]), " with ", t("PyTorch", ["x-mutest", "tensor-fusion"]), " and ", t("Hugging Face", ["x-mutest"]), ", and fused text, voice and video with ", t("scikit-learn", ["tensor-fusion"]), " alongside it."],
-  ["At Blackcoffer it was ", t("time-series forecasting", [], "Blackcoffer forecasting work"), " on messy business data. On the web side I've used ", t("Node.js", ["course-catalog"]), ", ", t("Express", ["course-catalog"]), " and ", t("MongoDB", ["course-catalog"]), " behind Google sign-in, plus ", t("Flask", [], "a Flask practice repo on GitHub"), " and ", t("Neo4j", [], "a Python + Cypher notebook on GitHub"), " when a problem looked like a graph."],
+const STRENGTHS: Strength[] = [
+  {
+    id: "why",
+    promise: <>Ask a model <em>why</em>, and check its answer.</>,
+    proof: <>At IIT Indore our classifier could get the label right for the wrong reason. I trained it to point at the words people had marked, then graded that explanation on its own instead of trusting the label. It became an <b>AAAI 2026</b> paper.</>,
+    receipts: [{ label: "X-MuTeST", href: "/projects/x-mutest", accent: projectMeta["x-mutest"].accent }],
+    tools: "PyTorch · Hugging Face · MuRIL · XLM-R · LLaMA 3.1",
+  },
+  {
+    id: "ship",
+    promise: <>Tell you whether a change is <em>safe to ship</em>.</>,
+    proof: <>An average score can rise while the answers you care about break. AgentGuard compares each test case with itself across versions, and plain rules, not another model, decide <b>PASS, BLOCK or REVIEW</b>, with the reasons attached.</>,
+    receipts: [{ label: "AgentGuard", href: "/projects/agentguard", accent: projectMeta.agentguard.accent }],
+    tools: "Python · LLM evaluation · rule-based release gates",
+  },
+  {
+    id: "data",
+    promise: <>Find out what the data can <em>actually</em> support.</>,
+    proof: <>At Blackcoffer the data came messy and the question came from the business. I checked every model against the method already in use, and the ad-revenue forecast landed at <b>$142</b> mean daily error, enough to move about 15% of a marketing budget. In Tensor Fusion I tested whether face and voice add anything beyond the words.</>,
+    receipts: [
+      { label: "Blackcoffer", href: "#path" },
+      { label: "Tensor Fusion", href: "/projects/tensor-fusion", accent: projectMeta["tensor-fusion"].accent },
+    ],
+    tools: "Python · Pandas · time-series forecasting · scikit-learn",
+  },
+  {
+    id: "build",
+    promise: <>Build the software <em>around</em> the model.</>,
+    proof: <>A model is rarely the whole job. For AgentGuard I built the Python SDK that records an AI app without ever crashing it, the API that saves each run in one transaction, the background workers that grade it, and the dashboard that shows the verdict.</>,
+    receipts: [
+      { label: "AgentGuard", href: "/projects/agentguard", accent: projectMeta.agentguard.accent },
+      { label: "Course Catalog", href: "/projects/course-catalog", accent: projectMeta["course-catalog"].accent },
+    ],
+    tools: "FastAPI · PostgreSQL · Redis / ARQ · Next.js · TypeScript · Node.js · MongoDB",
+  },
 ]
 
-const titleOf = Object.fromEntries(projects.map((p) => [p.slug, p.title]))
-
 export function Skills() {
-  const [active, setActive] = useState<Tool | null>(null)
+  const [open, setOpen] = useState(0)
 
   return (
-    <div className="xp-kit">
-      <div className={`xp-kit-text ${active ? "has-active" : ""}`} onMouseLeave={() => setActive(null)}>
-        {story.map((line, li) => (
-          <p key={li}>
-            {line.map((seg, si) => {
-              if (typeof seg === "string") {
-                // Punctuation that follows a tool is rendered with the tool, so it never starts a line.
-                const prev = line[si - 1]
-                return <Fragment key={si}>{prev && typeof prev !== "string" ? seg.replace(/^[,.;:]+/, "") : seg}</Fragment>
-              }
-              const next = line[si + 1]
-              const punct = typeof next === "string" ? next.match(/^[,.;:]+/)?.[0] ?? "" : ""
-              return (
-                <span key={si} className="xp-kit-chunk">
-                  <button
-                    type="button"
-                    className={`xp-kit-tool ${active?.name === seg.name ? "is-active" : ""} ${seg.in.length ? "" : "is-plain"}`}
-                    onMouseEnter={() => setActive(seg)}
-                    onFocus={() => setActive(seg)}
-                    onClick={() => setActive(seg)}
-                  >
-                    {seg.name}
-                  </button>{punct}
-                </span>
-              )
-            })}
-          </p>
-        ))}
-      </div>
-
-      <aside className={`xp-kit-panel ${active ? "is-active" : ""}`} aria-live="polite">
-        <p className="xp-kit-label" key={active?.name ?? "none"}>{active ? active.name : "Where it was used"}</p>
-        <ul>
-          {projects.map((p) => {
-            const on = !!active && active.in.includes(p.slug)
-            return (
-              <li key={p.slug} className={on ? "is-on" : active ? "is-off" : ""} style={{ "--accent": projectMeta[p.slug].accent } as React.CSSProperties}>
-                <i aria-hidden="true" /><Link href={`/projects/${p.slug}`}>{titleOf[p.slug]}</Link>
-              </li>
-            )
-          })}
-        </ul>
-        <p className="xp-kit-hint">{!active ? "Point at, or tap, any tool." : active.in.length ? `Used in ${active.in.length} of ${projects.length} projects.` : active.where ?? "Not in a project shown here."}</p>
-      </aside>
-      <Note className="is-kit">A tool lights a project only if that project&apos;s repository lists it, so every claim here has code behind it.</Note>
+    <div className="xp-can">
+      <ol className="xp-can-list">
+        {STRENGTHS.map((s, i) => {
+          const on = open === i
+          return (
+            <li key={s.id} className={on ? "is-open" : undefined}>
+              <button type="button" className="xp-can-promise" aria-expanded={on} aria-controls={`can-${s.id}`} onClick={() => setOpen(i)}>
+                <span className="xp-can-n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <span className="xp-can-text">{s.promise}</span>
+              </button>
+              <div className="xp-can-body" id={`can-${s.id}`} role="region" aria-hidden={!on}>
+                <div className="xp-can-inner">
+                  <p className="xp-can-proof">{s.proof}</p>
+                  <div className="xp-can-meta">
+                    <p className="xp-can-receipts">
+                      {s.receipts.map((r) => (
+                        <Link key={r.label} href={r.href} tabIndex={on ? 0 : -1} style={r.accent ? ({ "--accent": r.accent } as React.CSSProperties) : undefined}>
+                          {r.accent && <i aria-hidden="true" />}{r.label} <Arrow />
+                        </Link>
+                      ))}
+                    </p>
+                    <p className="xp-can-tools"><span>with</span> {s.tools}</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          )
+        })}
+      </ol>
+      <Note className="is-kit">Each one points at work you can open. The tools come last on purpose: they&apos;re how, not what.</Note>
     </div>
   )
 }
