@@ -40,8 +40,7 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 const NAME = "SAI RITHWIK REDDY CHIRRA"
 const R_AT = 4
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-// Opening credits, film-style: a small line above a main line. Original wording, true to the person.
-const CARDS: [number, string, string][] = [[2, "presented from", "Tempe, Arizona"], [4, "in association with", "Machine learning systems"]]
+const CARDS: [number, string][] = [[2, "Tempe, Arizona"], [4, "Machine learning systems"]]
 const NAME_AT = beat(6), PER_LETTER = 22, SHUFFLE_MS = 90
 const PUSH_AT = beat(6.5), PUSH_MS = beat(3.6)
 const ISOLATE_AT = beat(8.5)
@@ -72,13 +71,13 @@ const morseOn = (ms: number) => MORSE[Math.floor(ms / MORSE_UNIT)] === 1
 // the way cities are. The visible strip faces northern India and its neighbours.
 const LAND = feature(land110 as unknown as Topology, (land110 as unknown as Topology).objects.land as GeometryCollection)
 const DHARWAD: [number, number] = [75.0, 15.39]
-type Light = { lon: number; lat: number; b: number; big: boolean }
+type Light = { lon: number; lat: number; b: number; big: boolean; w: number }
 // Generated in small slices while the intro plays (each land test is ~0.2 ms), so nothing stalls.
 function growLights(out: Light[], timers: number[]) {
   const onLand = (lon: number, lat: number) => geoContains(LAND, [lon, lat])
   const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5
   // A quiet hello from home: a small, slightly warmer cluster at Dharwad.
-  for (let i = 0; i < 9; i++) out.push({ lon: DHARWAD[0] + gauss() * 0.18, lat: DHARWAD[1] + gauss() * 0.14, b: 0.9, big: i === 0 })
+  for (let i = 0; i < 9; i++) out.push({ lon: DHARWAD[0] + gauss() * 0.18, lat: DHARWAD[1] + gauss() * 0.14, b: 0.9, big: i === 0, w: 1 })
   let centres = 0, rural = 0
   const slice = () => {
     const until = performance.now() + 6
@@ -90,11 +89,11 @@ function growLights(out: Light[], timers: number[]) {
         const size = Math.random() < 0.15 ? 26 : 6 + Math.random() * 12, spread = 0.25 + Math.random() * 0.9
         for (let i = 0; i < size; i++) {
           const p: [number, number] = [lon + gauss() * spread, lat + gauss() * spread * 0.8]
-          if (onLand(p[0], p[1])) out.push({ lon: p[0], lat: p[1], b: 0.35 + Math.random() * 0.65, big: i === 0 })
+          if (onLand(p[0], p[1])) out.push({ lon: p[0], lat: p[1], b: 0.35 + Math.random() * 0.65, big: i === 0, w: Math.random() < 0.7 ? 1 : 0 })
         }
       } else if (rural < 700) {
         rural++
-        if (onLand(lon, lat)) out.push({ lon, lat, b: 0.12 + Math.random() * 0.25, big: false })
+        if (onLand(lon, lat)) out.push({ lon, lat, b: 0.12 + Math.random() * 0.25, big: false, w: 1 })
       } else return
     }
     timers.push(window.setTimeout(slice, 30))
@@ -320,15 +319,27 @@ export function Intro() {
         // The night side: faint land, then city lights, foreshortened toward the horizon.
         const proj = geoOrthographic().scale(R).translate([pcx, pcy]).rotate([-78 - 5 * pan, 60]).clipAngle(90)
         ctx.save(); ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.clip()
-        ctx.beginPath(); geoPath(proj, ctx)(LAND); ctx.fillStyle = `rgba(28,34,52,${0.35 * tilt})`; ctx.fill()
+        ctx.beginPath(); geoPath(proj, ctx)(LAND); ctx.fillStyle = `rgba(22,27,40,${0.16 * tilt})`; ctx.fill()
+        ctx.globalCompositeOperation = "lighter"
         const sunX = pcx + W * 0.08
         for (const l of lights) {
           const pt = proj([l.lon, l.lat])
           if (!pt || pt[1] > H + 4 || pt[0] < -4 || pt[0] > W + 4) continue
           const dawnFade = 1 - 0.85 * glint * Math.max(0, 1 - Math.abs(pt[0] - sunX) / (W * 0.18))
           const a = l.b * tilt * dawnFade * (0.85 + 0.15 * Math.sin(now / 600 + l.lon * 9))
-          if (l.big) { ctx.fillStyle = `rgba(255,186,110,${0.18 * a})`; ctx.fillRect(pt[0] - 3, pt[1] - 1.4, 6, 2.8) }
-          ctx.fillStyle = `rgba(255,${200 + 30 * l.b},${130 + 40 * l.b},${Math.min(1, 1.05 * a)})`; ctx.fillRect(pt[0] - 0.7, pt[1] - 0.45, 1.4, 0.9)
+          // City glow: the soft orange haze of light pollution around each city's centre, flattened
+          // by the angle we see it at.
+          if (l.big) {
+            const gr = 7 + 9 * l.b
+            const g = ctx.createRadialGradient(pt[0], pt[1], 0, pt[0], pt[1], gr)
+            g.addColorStop(0, `rgba(255,170,90,${0.22 * a})`); g.addColorStop(1, "rgba(255,150,70,0)")
+            ctx.save(); ctx.translate(pt[0], pt[1]); ctx.scale(1, 0.45); ctx.translate(-pt[0], -pt[1])
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(pt[0], pt[1], gr, 0, 6.283); ctx.fill(); ctx.restore()
+          }
+          // The light itself: sodium orange for most, whiter for some, bigger when brighter.
+          const sz = 0.7 + 0.9 * l.b
+          ctx.fillStyle = l.w ? `rgba(255,${176 + 40 * l.b},${96 + 50 * l.b},${Math.min(1, 1.1 * a)})` : `rgba(250,236,214,${Math.min(1, a)})`
+          ctx.fillRect(pt[0] - sz / 2, pt[1] - sz * 0.32, sz, sz * 0.64)
         }
         ctx.restore()
         // Airglow: the thin, faintly green layer that hangs just above the night-side horizon.
@@ -342,21 +353,23 @@ export function Intro() {
           const sAng = -Math.PI / 2 + Math.asin(Math.min(0.99, off / R))
           const sx = pcx + Math.cos(sAng) * R, sy = pcy + Math.sin(sAng) * R
           const run = ease((t - CREST_AT) / beat(3))
-          ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round"
-          const spread = 0.04 + 0.32 * run
-          for (let k = 0; k < 28; k++) {
-            const u = k / 27, fall = Math.pow(1 - u, 1.6)
-            for (const dir of [-1, 1]) {
-              const a0 = sAng + dir * spread * u, a1 = sAng + dir * spread * (u + 1 / 27)
-              ctx.strokeStyle = `rgba(255,226,190,${0.5 * fall * glint})`; ctx.lineWidth = 1.2
-              ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.0004, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke()
-              ctx.strokeStyle = `rgba(140,175,255,${0.14 * fall * glint})`; ctx.lineWidth = 6
-              ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.006, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke()
-            }
+          ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "butt"
+          // One continuous arc each, fading smoothly away from the sun: no segments, no beads.
+          const spread = 0.025 + 0.15 * run
+          const reach = Math.sin(spread) * R
+          const band = (alpha: number, rgb: string) => {
+            const g = ctx.createLinearGradient(sx - reach, 0, sx + reach, 0)
+            g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(0.35, `rgba(${rgb},${alpha * 0.35})`); g.addColorStop(0.5, `rgba(${rgb},${alpha})`)
+            g.addColorStop(0.65, `rgba(${rgb},${alpha * 0.35})`); g.addColorStop(1, `rgba(${rgb},0)`)
+            return g
           }
-          const r0 = W * (0.011 + 0.007 * flash)
+          ctx.strokeStyle = band(0.55 * glint, "255,228,196"); ctx.lineWidth = 1.1
+          ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.0004, sAng - spread, sAng + spread); ctx.stroke()
+          ctx.strokeStyle = band(0.1 * glint, "150,182,255"); ctx.lineWidth = 4
+          ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.004, sAng - spread * 1.2, sAng + spread * 1.2); ctx.stroke()
+          const r0 = W * (0.006 + 0.004 * flash)
           const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r0 * 4)
-          g.addColorStop(0, `rgba(255,246,232,${0.6 * glint})`); g.addColorStop(0.18, `rgba(255,226,196,${0.18 * glint})`); g.addColorStop(1, "rgba(0,0,0,0)")
+          g.addColorStop(0, `rgba(255,248,238,${0.85 * glint})`); g.addColorStop(0.12, `rgba(255,232,204,${0.35 * glint})`); g.addColorStop(0.4, `rgba(255,214,176,${0.06 * glint})`); g.addColorStop(1, "rgba(0,0,0,0)")
           ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, r0 * 4, 0, 6.283); ctx.fill()
           const streak = ctx.createLinearGradient(sx - W * 0.2, 0, sx + W * 0.2, 0)
           streak.addColorStop(0, "rgba(0,0,0,0)"); streak.addColorStop(0.5, `rgba(200,218,255,${0.1 * glint * (1 + flash)})`); streak.addColorStop(1, "rgba(0,0,0,0)")
@@ -504,13 +517,7 @@ export function Intro() {
   return (
     <div className={`xp-opening ${phase === "leave" ? "is-leaving" : ""}`} aria-hidden="true">
       <canvas ref={canvas} />
-      {card >= 0 && (
-        <p key={card} className="xp-opening-line xp-opening-card">
-          <small>{CARDS[card][1]}</small>
-          <span>{CARDS[card][2]}</span>
-        </p>
-      )}
-      <p className={`xp-opening-starring ${nameOn && !isolate ? "is-on" : ""}`} aria-hidden="true">starring</p>
+      {card >= 0 && <p key={card} className="xp-opening-line xp-opening-card">{CARDS[card][1]}</p>}
       <p ref={line} className={`xp-opening-line ${isolate ? "is-isolate" : ""} ${dawn ? "is-dawn" : ""} ${nameOn ? "is-on" : ""}`}>
         {Array.from(name, (c, i) => (
           <span key={i} ref={i === R_AT ? rSpan : undefined} className={[c === NAME[i] ? "" : "is-noise", i === R_AT ? "is-r" : ""].join(" ").trim() || undefined}>{c}</span>

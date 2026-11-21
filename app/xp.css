@@ -1964,9 +1964,3 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-opening-tc { position: absolute; left: 22px; bottom: 22px; color: rgba(226, 230, 238, 0.18); font: 0.62rem var(--xp-mono); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; animation: xp-fade 1200ms 600ms ease both; }
 
 
-/* Credits: a small italic-free kicker above each main line, like the opening titles of a film. */
-.xp-opening-card { display: grid; justify-items: center; gap: 0.9em; }
-.xp-opening-card small { font-size: 0.62rem; letter-spacing: 0.5em; text-indent: 0.5em; opacity: 0.55; }
-.xp-opening-card span { display: block; }
-.xp-opening-starring { position: absolute; top: calc(50% - 3.2em); left: 0; right: 0; margin: 0; color: rgba(226, 230, 238, 0.42); font: 400 0.6rem var(--xp-sans); letter-spacing: 0.5em; text-indent: 0.5em; text-align: center; text-transform: uppercase; opacity: 0; transition: opacity 700ms ease; pointer-events: none; }
-.xp-opening-starring.is-on { opacity: 1; }
