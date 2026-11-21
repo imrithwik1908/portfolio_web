@@ -14,9 +14,9 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 //   beat 6      the name decodes as the pad comes in
 //   beat 6.5    a slow push-in on the whole name
 //   beat 8.5    everything but the R of RITHWIK softens away
-//   beat 9–10   dawn: stars dim, the rim warms, and the sun breaks the horizon on the resolving chord
-//               with a bloom, a lens streak, slow rays and dust drifting through the light
-//   beat 10–12.5 the shot holds: the lone R glows warm above the sunrise
+//   beat 8–10.5 the camera tilts down: the stars rise out of frame and the planet's dark limb rises in
+//   beat 10     on the resolving chord, a small soft glint of sun at the limb, nothing more
+//   beat 10–12.5 the shot holds with a slow pan along the limb; the lone R catches the light
 //   beat 12.5   the R lifts off through the light (a high bell marks it)
 //   beat 14.5   it lands as the R of "Rithwik" in the hero and the name unfolds; the scene
 //               dissolves into the page and the music breathes out
@@ -33,12 +33,10 @@ const CARDS: [number, string][] = [[2, "Tempe, Arizona"], [4, "Machine learning 
 const NAME_AT = beat(6), PER_LETTER = 22, SHUFFLE_MS = 90
 const PUSH_AT = beat(6.5), PUSH_MS = beat(3.6)
 const ISOLATE_AT = beat(8.5)
-const DAWN_AT = beat(9)                      // the sun begins to crest…
-const CREST_AT = beat(10)                    // …and breaks the horizon on the resolving chord
+const CREST_AT = beat(10)                    // the resolving chord: a glint of sun at the limb
 const READY_AT = beat(12)
 const FLY_AT = beat(12.5), FLY_MS = beat(2)  // after a held sunrise shot; lands on beat 14.5
 const DISSOLVE_AT = beat(13), FADE = 1500
-const RISE_MS = beat(10)                     // the horizon rises until the sun crests, then holds
 const PULSE_UNTIL = beat(12)                 // the picture breathes with the pulse until lift-off
 const CINEMA = "cubic-bezier(0.45, 0, 0.2, 1)"
 
@@ -99,9 +97,9 @@ export function Intro() {
     const fit = () => { W = window.innerWidth; H = window.innerHeight; el.width = W * dpr; el.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0) }
     fit()
     window.addEventListener("resize", fit)
-    const stars = Array.from({ length: 360 }, (_, i) => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 0.85 + 0.15, tw: Math.random() * 6.28, layer: i % 3 }))
-    const cities = Array.from({ length: 70 }, () => ({ a: (Math.random() - 0.5) * 0.5, d: 0.001 + Math.pow(Math.random(), 2) * 0.03, b: 0.25 + Math.random() * 0.75 }))
-    const motes = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random() * 0.45, vx: 0.004 + Math.random() * 0.01, vy: 0.002 + Math.random() * 0.006, r: 0.5 + Math.random() * 1.2 }))
+    const stars = Array.from({ length: 380 }, (_, i) => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 0.85 + 0.15, tw: Math.random() * 6.28, layer: i % 3 }))
+    // Out-of-focus particles very close to the lens: they slide past faster than the stars.
+    const near = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random(), r: 6 + Math.random() * 18, v: 0.6 + Math.random() * 0.8 }))
     const grains = Array.from({ length: 3 }, () => {
       const g = document.createElement("canvas"); g.width = g.height = 160
       const gx = g.getContext("2d")!, img = gx.createImageData(160, 160)
@@ -110,106 +108,100 @@ export function Intro() {
       return ctx.createPattern(g, "repeat")!
     })
 
+    // ── The camera, as a shot list ──
+    //   dolly:  forward through space from the first frame, settling as the name arrives
+    //   truck:  a slow sideways slide across beats 2–6 (parallax between depths)
+    //   focus:  a rack focus onto the name (background softens), released by the reveal
+    //   tilt:   beats 8–10.5 the camera tilts down; stars rise out of frame, the planet's limb rises in
+    //   pan:    during the hold, a slow pan along the limb
+    const lerp = (a: number, b: number, k: number) => a + (b - a) * k
+    let lastT = 0
     let frame = 0, fi = 0
     const draw = (now: number) => {
       const t = now - t0
+      const dt = Math.min(48, t - lastT); lastT = t
       if (decoding) decode(now)
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H)
-      // The camera: a slow drift and the gentlest roll, so the frame is never static.
-      const k = Math.min(1, t / beat(12))
-      const cx = W * (0.54 - 0.05 * ease(k)), cy = H * (0.5 - 0.06 * ease(k))
-      const f = Math.max(W, H) * 0.42
-      // Each pulse beat breathes a little light into the scene, fading before the next.
+
+      const truck = ease((t - beat(1.5)) / beat(5))
+      const tilt = ease((t - beat(8)) / beat(2.5))
+      const settle = ease((t - beat(5)) / beat(3))
+      const speed = lerp(0.0016, 0.00028, settle)                       // dolly speed per ms-ish frame
+      const focus = ease((t - beat(6)) / beat(1.2)) * (1 - tilt)          // rack focus onto the name
+      const pan = ease((t - beat(10)) / beat(4.5))
       const phase = (t % beat(1)) / beat(1)
-      const breath = t < PULSE_UNTIL ? 1 + 0.14 * Math.exp(-phase * 6) : 1
-      // Nebula haze: two soft, grey-blue clouds drifting across the back of the frame.
-      const haze = ease(t / 1200)
-      for (const [hx, hy, hr, ha] of [[0.3 - 0.06 * k, 0.32, 0.55, 0.05], [0.74 + 0.04 * k, 0.6, 0.45, 0.035]] as const) {
-        const g = ctx.createRadialGradient(W * hx, H * hy, 0, W * hx, H * hy, Math.max(W, H) * hr)
-        g.addColorStop(0, `rgba(120,135,170,${ha * haze * breath})`); g.addColorStop(1, "rgba(0,0,0,0)")
+      const breath = t < PULSE_UNTIL ? 1 + 0.1 * Math.exp(-phase * 6) : 1
+      const glint = ease((t - beat(9.6)) / beat(0.8))
+      const flash = t > CREST_AT ? Math.exp(-(t - CREST_AT) / 900) : 0
+
+      // Vanishing point: trucks right-to-left, then rises as the camera tilts down.
+      const cx = W * lerp(0.42, 0.56, truck) - W * 0.03 * pan
+      const cy = H * lerp(0.5, 0.28, tilt)
+      const f = Math.max(W, H) * 0.42
+
+      // Faint nebula haze, far away, so it barely moves.
+      const haze = ease(t / 1200) * (1 - 0.4 * tilt)
+      for (const [hx, hy, hr, ha] of [[0.32, 0.34, 0.55, 0.045], [0.72, 0.58, 0.45, 0.03]] as const) {
+        const x = W * hx + (cx - W / 2) * 0.15, y = H * hy + (cy - H / 2) * 0.15
+        const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(W, H) * hr)
+        g.addColorStop(0, `rgba(118,132,168,${ha * haze * breath})`); g.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
       }
-      // Stars: all three depths surface within the first second, far to near; they dim as the sun rises.
-      const starsDim = 1 - 0.55 * ease((t - DAWN_AT) / beat(2))
+
+      // Stars: three depths surfacing within the first second; the dolly carries them past.
+      const dim = 1 - 0.25 * glint
       for (const s of stars) {
         const show = ease((t - s.layer * 280) / 700)
         if (!show) continue
-        s.z -= 0.00038
-        if (s.z <= 0.12) { s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; s.z = 1 }
+        s.z -= speed * dt / 16
+        if (s.z <= 0.1) { s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; s.z = 1 }
         const x = cx + (s.x / s.z) * f, y = cy + (s.y / s.z) * f
-        if (x < -10 || x > W + 10 || y < -10 || y > H + 10) continue
-        const near = 1 - s.z
+        if (x < -20 || x > W + 20 || y < -20 || y > H + 20) continue
+        const close = 1 - s.z
         const tw = 0.85 + 0.15 * Math.sin(now / 900 + s.tw)
-        ctx.fillStyle = `rgba(226,230,238,${Math.min(1, (0.12 + 0.7 * near) * tw * show * breath * starsDim)})`
-        ctx.beginPath(); ctx.arc(x, y, 0.35 + near * 1.25, 0, 6.283); ctx.fill()
+        const soft = 1 + 1.2 * focus * (0.4 + close)                     // defocused stars grow and fade
+        const a = Math.min(1, (0.12 + 0.7 * close) * tw * show * breath * dim / (1 + 0.9 * focus))
+        ctx.fillStyle = `rgba(226,230,238,${a})`
+        ctx.beginPath(); ctx.arc(x, y, (0.35 + close * 1.25) * soft, 0, 6.283); ctx.fill()
       }
-      // The planet: a vast dark disc whose limb rises into frame, rim-lit, catching sunrise at beat 12.
-      // The horizon is there from the first second, low and dim, and rises until the sun crests.
-      const rise = ease(t / RISE_MS)
-      const lit = ease(t / 1400) * (0.35 + 0.65 * rise) * breath
-      const dawn = ease((t - DAWN_AT) / (CREST_AT - DAWN_AT))          // 0 → 1 as the sun crests
-      const flash = t > CREST_AT ? Math.exp(-(t - CREST_AT) / 700) : 0  // a soft bloom on the chord
-      if (lit > 0) {
-        const R = Math.max(W, H) * 1.35
-        const settle = ease((t - CREST_AT) / beat(4)) * H * 0.012       // a breath of camera rise after the crest
-        const pcx = W / 2 + W * 0.03 * (1 - rise), pcy = H + R - H * (0.03 + 0.17 * rise) - settle
+
+      // Foreground bokeh: a few large soft discs sliding past the lens with the truck and dolly.
+      const nearA = ease(t / 900) * (1 - ease((t - beat(8)) / beat(2)))
+      if (nearA > 0) for (const p of near) {
+        const x = ((p.x + truck * 0.5 * p.v + t * 0.00002 * p.v) % 1.2) * W - W * 0.1
+        const y = (p.y + (cy / H - 0.5) * 0.6 * p.v) * H
+        const g = ctx.createRadialGradient(x, y, 0, x, y, p.r)
+        g.addColorStop(0, `rgba(210,218,236,${0.05 * nearA})`); g.addColorStop(0.7, `rgba(210,218,236,${0.035 * nearA})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, p.r, 0, 6.283); ctx.fill()
+      }
+
+      // The planet: revealed by the tilt, then panned along during the hold.
+      if (tilt > 0) {
+        const R = Math.max(W, H) * 1.4
+        const pcx = W * 0.5 - W * 0.06 * pan, pcy = H * lerp(1.12, 0.8, tilt) + R
         const top = pcy - R
-        const sx = W / 2 + W * 0.02, sy = top                            // where the sun breaks
-        // The rim: cool blue in the dark, warming toward the sun as it crests.
-        const rim = ctx.createRadialGradient(pcx, pcy, R * 0.985, pcx, pcy, R * 1.05)
-        const warm = dawn
-        rim.addColorStop(0, `rgba(${170 + 85 * warm},${190 + 30 * warm},${235 - 45 * warm},${(0.55 + 0.25 * warm) * lit})`)
-        rim.addColorStop(0.25, `rgba(120,140,200,${0.18 * lit * (1 + warm)})`); rim.addColorStop(1, "rgba(0,0,0,0)")
-        ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.05, 0, 6.283); ctx.fill()
+        const rim = ctx.createRadialGradient(pcx, pcy, R * 0.988, pcx, pcy, R * 1.04)
+        const warm = 0.35 * glint
+        rim.addColorStop(0, `rgba(${150 + 90 * warm},${172 + 30 * warm},${222 - 50 * warm},${0.5 * tilt * breath})`)
+        rim.addColorStop(0.3, `rgba(100,118,170,${0.12 * tilt})`); rim.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(pcx, pcy, R * 1.04, 0, 6.283); ctx.fill()
         ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(pcx, pcy, R, 0, 6.283); ctx.fill()
-        // Night side: a sparse scatter of warm city lights near the horizon, fading as day arrives.
-        const night = ease(t / 1600) * (1 - dawn) * 0.9
-        if (night > 0.01) for (const c of cities) {
-          const a = -Math.PI / 2 + c.a, rr = R * (1 - c.d)
-          const x = pcx + Math.cos(a) * rr, y = pcy + Math.sin(a) * rr
-          if (y > H + 4) continue
-          ctx.fillStyle = `rgba(255,196,130,${night * c.b * (0.8 + 0.2 * Math.sin(now / 700 + c.a * 40))})`
-          ctx.fillRect(x, y, 1.2, 1.2)
-        }
-        if (dawn > 0) {
+
+        // A sun just beyond the limb: a small, soft glint, nothing more.
+        if (glint > 0) {
+          const sx = pcx + W * 0.08, sy = top + (sx - pcx) ** 2 / (2 * R)
           ctx.save(); ctx.globalCompositeOperation = "lighter"
-          // A wide atmospheric glow hugging the limb.
-          const band = ctx.createRadialGradient(sx, sy, 0, sx, sy, W * 0.6)
-          band.addColorStop(0, `rgba(255,226,190,${0.42 * dawn})`); band.addColorStop(0.12, `rgba(255,190,140,${0.16 * dawn})`); band.addColorStop(1, "rgba(0,0,0,0)")
-          ctx.save(); ctx.translate(sx, sy); ctx.scale(1, 0.12); ctx.translate(-sx, -sy)
-          ctx.fillStyle = band; ctx.fillRect(0, sy - W * 0.6, W, W * 1.2); ctx.restore()
-          // Light rays fanning up from the sun, turning very slowly.
-          const rays = 0.026 * dawn
-          for (let i = 0; i < 9; i++) {
-            const ang = -Math.PI / 2 + (i - 4) * 0.2 + Math.sin(now / 4000 + i) * 0.03
-            const len = H * (0.45 + 0.2 * Math.sin(i * 1.7))
-            const g = ctx.createLinearGradient(sx, sy, sx + Math.cos(ang) * len, sy + Math.sin(ang) * len)
-            g.addColorStop(0, `rgba(255,228,196,${rays})`); g.addColorStop(1, "rgba(0,0,0,0)")
-            ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(sx, sy)
-            ctx.lineTo(sx + Math.cos(ang - 0.06) * len, sy + Math.sin(ang - 0.06) * len)
-            ctx.lineTo(sx + Math.cos(ang + 0.06) * len, sy + Math.sin(ang + 0.06) * len); ctx.closePath(); ctx.fill()
-          }
-          // The sun itself, with bloom that swells on the chord and settles.
-          const bloomR = W * (0.04 + 0.05 * flash) * dawn
-          const bloom = ctx.createRadialGradient(sx, sy, 0, sx, sy, bloomR * 3)
-          bloom.addColorStop(0, `rgba(255,250,240,${0.95 * dawn})`); bloom.addColorStop(0.08, `rgba(255,236,205,${0.6 * dawn})`); bloom.addColorStop(0.35, `rgba(255,200,150,${0.12 * dawn})`); bloom.addColorStop(1, "rgba(0,0,0,0)")
-          ctx.fillStyle = bloom; ctx.beginPath(); ctx.arc(sx, sy, bloomR * 3, 0, 6.283); ctx.fill()
-          // An anamorphic streak across the frame, the way a lens catches a bright point.
-          const streak = ctx.createLinearGradient(0, 0, W, 0)
-          streak.addColorStop(0, "rgba(0,0,0,0)"); streak.addColorStop(0.5, `rgba(200,220,255,${(0.32 + 0.3 * flash) * dawn})`); streak.addColorStop(1, "rgba(0,0,0,0)")
-          ctx.fillStyle = streak; ctx.fillRect(0, sy - 1, W, 2)
-          ctx.globalAlpha = 0.35; ctx.fillRect(0, sy - 6, W, 12); ctx.globalAlpha = 1
-          // Dust drifting through the light, lit warm when it passes near the sun.
-          for (const m of motes) {
-            const mx = (m.x * W + now * m.vx) % W, my = sy - H * m.y - ((now * m.vy) % (H * 0.4))
-            const near = Math.max(0, 1 - Math.hypot(mx - sx, (my - sy) * 1.8) / (W * 0.35))
-            if (near <= 0) continue
-            ctx.fillStyle = `rgba(255,226,190,${0.5 * near * dawn})`
-            ctx.beginPath(); ctx.arc(mx, my, m.r, 0, 6.283); ctx.fill()
-          }
+          const r0 = W * (0.012 + 0.008 * flash)
+          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r0 * 4)
+          g.addColorStop(0, `rgba(255,246,232,${0.6 * glint})`); g.addColorStop(0.18, `rgba(255,226,196,${0.2 * glint})`); g.addColorStop(1, "rgba(0,0,0,0)")
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, r0 * 4, 0, 6.283); ctx.fill()
+          const streak = ctx.createLinearGradient(sx - W * 0.22, 0, sx + W * 0.22, 0)
+          streak.addColorStop(0, "rgba(0,0,0,0)"); streak.addColorStop(0.5, `rgba(200,218,255,${0.12 * glint * (1 + flash)})`); streak.addColorStop(1, "rgba(0,0,0,0)")
+          ctx.fillStyle = streak; ctx.fillRect(sx - W * 0.22, sy - 0.75, W * 0.44, 1.5)
           ctx.restore()
         }
       }
+
       // Grain, barely there.
       fi = (fi + 1) % 3
       ctx.globalAlpha = 0.035; ctx.fillStyle = grains[fi]; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1
