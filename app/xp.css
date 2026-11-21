@@ -2027,3 +2027,15 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-thread-chip b { color: var(--xp-ink); font-weight: 500; }
 .xp-thread-chip i { color: var(--xp-lamp); font-style: normal; margin: 0 0.5em; }
 @media (max-width: 760px) { .xp-thread-chip { top: calc(56% + 9vh); font-size: 0.64rem; } }
+/* Role first: the job title is the headline; the place sits quietly beside the dates. */
+.xp-thread-when span { margin-left: 1.2em; padding-left: 1.2em; border-left: 1px solid var(--xp-line-strong); color: var(--xp-ink-2); }
+.xp-thread-head h3 { font-size: clamp(2.1rem, 4.4vw, 3.9rem); line-height: 1; }
+.xp-thread-q { margin-top: 14px; font-size: clamp(1.05rem, 1.5vw, 1.3rem); color: var(--xp-ink-2); }
+.xp-thread-text { display: grid; gap: 12px; }
+.xp-thread-stack { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.xp-thread-stack li { padding: 3px 9px; border: 1px solid var(--xp-line); border-radius: 999px; color: var(--xp-ink-2); font: 0.7rem var(--xp-mono); letter-spacing: 0.02em; }
+@media (max-width: 760px) {
+  .xp-thread-when span { display: block; margin: 6px 0 0; padding: 0; border: 0; }
+  .xp-thread-head h3 { font-size: 1.9rem; }
+  .xp-thread-stack li { font-size: 0.62rem; }
+}

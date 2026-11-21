@@ -17,13 +17,15 @@ import { currentPalette } from "@/components/xp/palette"
 // idea (a label has to point at the words behind it) lands without any offensive example on screen.
 
 type Scene = {
-  id: string; when: string; place: string; role: string; question: string; line: string
+  id: string; when: string; place: string; role: string; title: string; org: string; stack: string[]; question: string; line: string
   stats: [string, string][]; did: string[]; results: string[]; link?: { href: string; label: string }
 }
 
 const SCENES: Scene[] = [
   {
     id: "indore", when: "Apr – Nov 2024", place: "IIT Indore", role: "Summer Research Intern · AI/ML",
+    title: "Research Intern, AI/ML", org: "IIT Indore",
+    stack: ["PyTorch", "MuRIL", "XLM-R", "LLaMA 3.1", "Attention supervision", "Token-F1 · IOU-F1"],
     question: "Which words actually support the label?",
     line: "Hate-speech detection in English, Hindi and Telugu that has to point at the words behind its answer.",
     stats: [["AAAI", "2026 paper"], ["−20%", "inference latency"]],
@@ -37,6 +39,8 @@ const SCENES: Scene[] = [
   },
   {
     id: "blackcoffer", when: "Dec 2024 – May 2025", place: "Blackcoffer", role: "Data Science Associate · India",
+    title: "Data Science Associate", org: "Blackcoffer · India",
+    stack: ["Python", "Time-series forecasting", "Feature engineering", "Model validation"],
     question: "What can this data actually support?",
     line: "Two forecasting problems that arrived as business questions, with no clean benchmark to lean on.",
     stats: [["+18%", "accuracy over the earlier method"], ["$142", "mean daily ad-revenue error"]],
@@ -49,6 +53,8 @@ const SCENES: Scene[] = [
   },
   {
     id: "now", when: "2025 – present", place: "Arizona State", role: "M.S. Computer Science · building AgentGuard",
+    title: "Building AgentGuard", org: "M.S. Computer Science · Arizona State",
+    stack: ["Python SDK", "FastAPI", "PostgreSQL", "Redis / ARQ", "Next.js", "LLM evaluation"],
     question: "What changed, and is it safe to release?",
     line: "A release gate that tells you which cases a new LLM version broke, not just whether the average moved.",
     stats: [["13", "checks on every run"], ["0", "LLM votes in the final call"]],
@@ -290,8 +296,8 @@ export function Thread() {
         {SCENES.map((s) => (
           <article key={s.id}>
             <p className="xp-thread-when">{s.when}</p>
-            <h3>{s.place}</h3>
-            <p className="xp-thread-role">{s.role}</p>
+            <h3>{s.title}</h3>
+            <p className="xp-thread-role">{s.org}</p>
             <p className="xp-thread-q">“{s.question}”</p>
             <p className="xp-thread-line">{s.line}</p>
             <ul>{[...s.did, ...s.results].map((d) => <li key={d}>{d}</li>)}</ul>
@@ -315,9 +321,8 @@ export function Thread() {
         <canvas ref={canvas} className="xp-thread-canvas" aria-hidden="true" />
 
         <header className="xp-thread-head" key={s.id} style={{ opacity: vis, transform: `translateY(${(1 - vis) * 14}px)`, filter: `blur(${(1 - vis) * 6}px)` }}>
-          <p className="xp-thread-when">{s.when}</p>
-          <h3>{s.place}</h3>
-          <p className="xp-thread-role">{s.role}</p>
+          <p className="xp-thread-when">{s.when}<span>{s.org}</span></p>
+          <h3>{s.title}</h3>
           <p className="xp-thread-q">“<Decoded text={s.question} />”</p>
         </header>
 
@@ -331,7 +336,6 @@ export function Thread() {
             label <b>negative</b> <i>because</i> <b>hated</b> · <b>screen</b>
           </p>
         )}
-        {idx === 1 && <p className="xp-thread-label is-data" style={{ opacity: vis * 0.7 }}>what happened<span>what will</span></p>}
         {idx === 2 && (
           <>
             <p className="xp-thread-label is-versions" style={{ opacity: vis * 0.75 }}><span className="is-base">baseline</span><span className="is-cand">candidate</span></p>
@@ -342,12 +346,15 @@ export function Thread() {
         )}
 
         <footer className="xp-thread-foot" key={`f${s.id}`} style={{ opacity: vis }}>
-          <p className="xp-thread-line">{s.line}</p>
+          <div className="xp-thread-text">
+            <p className="xp-thread-line">{s.line}</p>
+            <ul className="xp-thread-stack" aria-label="Tools">{s.stack.map((t) => <li key={t}>{t}</li>)}</ul>
+          </div>
           <dl className="xp-thread-stats">
             {s.stats.map(([n, l]) => <div key={l}><dt><Count value={n} k={smooth(clamp(local * 1.6))} /></dt><dd>{l}</dd></div>)}
           </dl>
           <div className="xp-thread-actions">
-            <button type="button" className="xp-thread-more" aria-expanded={details} onClick={() => setDetails((d) => !d)}>{details ? "Close the details" : "The details"}</button>
+            <button type="button" className="xp-thread-more" aria-expanded={details} onClick={() => setDetails((d) => !d)}>{details ? "Close" : "How I did it"}</button>
             {s.link && <Link href={s.link.href} className="xp-link">{s.link.label} <Arrow /></Link>}
           </div>
         </footer>
