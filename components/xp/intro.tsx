@@ -1,26 +1,31 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { createScore, trackAvailable, TRACK_CREDIT, type Score } from "@/components/xp/score"
+import { createScore, trackAvailable, type Score } from "@/components/xp/score"
 
-// The opening, six seconds cut to the music's pulse (a note lands every second, from 0.06 s):
-//   beat 1–3: three short title cards → beat 4: the name decodes as the camera pushes in and the
-//   other letters soften away → beat 5: the R lifts off → beat 6: it lands as the R of "Rithwik" in
-//   the hero and the name unfolds as the page fades up. The music fades out as the page arrives.
-// Every movement after the decode runs on the browser's compositor (Web Animations), not on React
-// renders, so nothing waits on JavaScript mid-motion. Esc, scrolling or Skip skip it; a click or key
-// press turns the sound on. Once per visit; never shown to visitors who prefer reduced motion.
+// The opening, about twelve seconds cut to the music's pulse (a note every second, from 0.06 s,
+// with swells at 8 s and 12 s):
+//   beats 1, 3, 5: three title cards, two beats each → beat 7: the name decodes, settling into the
+//   8 s swell → beat 8: a slow push-in on the whole name → beat 9.5: the other letters soften away,
+//   leaving the R → beat 10.5: the R glides to the hero → beat 12: it lands on the second swell as
+//   the R of "Rithwik", the name unfolds, and the intro dissolves into the page.
+// Motion after the decode runs on the browser's compositor (Web Animations), and the page under the
+// intro stays still until the R lands, so the hand-off is a slow dissolve rather than a cut.
+// Sound starts on its own wherever the browser allows it; otherwise on the first click or key.
+// Esc, scrolling or Skip skip. Once per visit; never shown to visitors who prefer reduced motion.
 
 const NAME = "SAI RITHWIK REDDY CHIRRA"
 const R_AT = 4 // the R of RITHWIK
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const BEAT = (n: number) => 60 + n * 1000  // the track's pulse, in ms from the start
-const CARDS = ["Tempe, Arizona", "Machine learning systems", "and the software around them"] // beats 1–3
-const NAME_AT = BEAT(4), PER_LETTER = 16, SHUFFLE_MS = 70
-const PUSH_AT = BEAT(4), PUSH_MS = 1700    // push-in on the whole name
-const ISOLATE_AT = BEAT(4) + 480           // other letters soften (CSS, 0.55 s)
-const FLY_AT = BEAT(5), FLY_MS = 1000      // the R lifts off on beat 5 and lands on beat 6
-const FADE = 1000                          // the intro fading away under the glide
+const CARDS = ["Tempe, Arizona", "Machine learning systems", "and the software around them"]
+const CARD_BEATS = [1, 3, 5]               // each card holds for two beats
+const NAME_AT = BEAT(7), PER_LETTER = 45, SHUFFLE_MS = 110
+const PUSH_AT = BEAT(8), PUSH_MS = 3400    // slow push-in on the whole name
+const ISOLATE_AT = BEAT(9) + 500           // other letters soften (CSS, 1.3 s)
+const READY_AT = BEAT(10)                  // measure and stage the hero, quietly, before the glide
+const FLY_AT = BEAT(10) + 500, FLY_MS = 1500 // the R lands on the 12 s swell
+const FADE = 2200                          // the intro dissolving into the page
 const CINEMA = "cubic-bezier(0.45, 0, 0.2, 1)"
 
 const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
@@ -31,8 +36,6 @@ export function Intro() {
   const [card, setCard] = useState(-1)
   const [nameOn, setNameOn] = useState(false)
   const [name, setName] = useState(NAME)
-  const [hasTrack, setHasTrack] = useState(false)
-  const [sound, setSound] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
   const line = useRef<HTMLParagraphElement>(null)
   const rSpan = useRef<HTMLSpanElement>(null)
@@ -53,11 +56,10 @@ export function Intro() {
     const startSound = () => {
       const at = (performance.now() - t0) / 1000
       if (at * 1000 > FLY_AT + FLY_MS) return
-      score.current?.start(Math.max(0, at)).then((ok) => setSound(ok))
+      score.current?.start(Math.max(0, at))
     }
     trackAvailable().then((ok) => {
       if (!ok || ended.current) return
-      setHasTrack(true)
       score.current = createScore()
       startSound()
     })
@@ -86,8 +88,8 @@ export function Intro() {
       if (next === NAME) decoding = false
     }
 
-    const leave = () => {
-      html.classList.remove("is-intro")
+    const leave = (keepPageStill = false) => {
+      if (!keepPageStill) html.classList.remove("is-intro")
       setPhase("leave")
       later(FADE, () => setPhase("gone"))
     }
@@ -95,6 +97,7 @@ export function Intro() {
       if (ended.current) return
       ended.current = true
       html.classList.add("intro-done")
+      html.classList.remove("is-handoff")
       leave()
       musicOut(2.5)
     }
@@ -107,26 +110,36 @@ export function Intro() {
       if (!p || !r) return
       const pr = p.getBoundingClientRect(), rr = r.getBoundingClientRect()
       p.style.transformOrigin = `${rr.left - pr.left + rr.width / 2}px ${rr.top - pr.top + rr.height / 2}px`
-      push = p.animate([{ transform: "scale(1)" }, { transform: "scale(1.45)" }], { duration: PUSH_MS, easing: CINEMA, fill: "forwards" })
+      push = p.animate([{ transform: "scale(1)" }, { transform: "scale(1.5)" }], { duration: PUSH_MS, easing: "cubic-bezier(0.35, 0, 0.25, 1)", fill: "forwards" })
     })
     later(ISOLATE_AT, () => { if (!ended.current) setIsolate(true) })
-    CARDS.forEach((_, i) => later(BEAT(i + 1), () => { if (!ended.current) setCard(i) }))
+    CARDS.forEach((_, i) => later(BEAT(CARD_BEATS[i]), () => { if (!ended.current) setCard(i) }))
     later(NAME_AT, () => { if (!ended.current) { setCard(-1); setNameOn(true) } })
+
+    // Half a beat early, stage the hero under the intro (heading visible, name clipped to its R) and
+    // measure where the R must land, so the glide itself starts with no layout work at all.
+    let dst: DOMRect | null = null
+    let target: HTMLElement | null = null
+    later(READY_AT, () => {
+      if (ended.current) return
+      target = document.querySelector<HTMLElement>(".xp-hero h1 .xp-name")
+      const text = target?.firstChild
+      if (!target || !text || text.nodeType !== Node.TEXT_NODE) return
+      html.classList.add("is-handoff", "intro-done")
+      const range = document.createRange(); range.setStart(text, 0); range.setEnd(text, 1)
+      const box = range.getBoundingClientRect()
+      if (!box.width || box.bottom < 0 || box.top > window.innerHeight) { html.classList.remove("is-handoff"); return }
+      dst = box
+      target.style.setProperty("--r-w", `${box.width + 2}px`)
+    })
 
     // The R glides to the hero's R and becomes it.
     later(FLY_AT, () => {
       if (ended.current) return
-      const target = document.querySelector<HTMLElement>(".xp-hero h1 .xp-name")
-      const text = target?.firstChild
       const r = rSpan.current
-      if (!target || !text || text.nodeType !== Node.TEXT_NODE || !r) return skip()
+      if (!dst || !target || !r) return skip()
       ended.current = true
-      html.classList.add("is-handoff", "intro-done")
-      const range = document.createRange(); range.setStart(text, 0); range.setEnd(text, 1)
-      const dst = range.getBoundingClientRect()
       const src = r.getBoundingClientRect()
-      if (!dst.width || dst.bottom < 0 || dst.top > window.innerHeight) { html.classList.remove("is-handoff"); leave(); musicOut(); return }
-      target.style.setProperty("--r-w", `${dst.width + 2}px`)
 
       const cs = getComputedStyle(target)
       const ghost = document.createElement("span")
@@ -141,22 +154,24 @@ export function Intro() {
       const dx = src.left + src.width / 2 - (dst.left + dst.width / 2)
       const dy = src.top + src.height / 2 - (dst.top + dst.height / 2)
       const k = src.height / dst.height
-      const lift = Math.min(60, Math.hypot(dx, dy) * 0.06)
-      const mk = k + (1 - k) * 0.55
+      const lift = Math.min(70, Math.hypot(dx, dy) * 0.07)
+      const mk = k + (1 - k) * 0.5
       ghost.animate([
-        { transform: `translate(${dx}px, ${dy}px) scale(${k})`, filter: "blur(0px)" },
-        { transform: `translate(${dx * 0.42}px, ${dy * 0.42 - lift}px) scale(${mk})`, filter: "blur(0.6px)", offset: 0.55 },
-        { transform: "translate(0px, 0px) scale(1)", filter: "blur(0px)" },
+        { transform: `translate(${dx}px, ${dy}px) scale(${k})` },
+        { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - lift}px) scale(${mk})`, offset: 0.55 },
+        { transform: "translate(0px, 0px) scale(1)" },
       ], { duration: FLY_MS, easing: CINEMA, fill: "forwards" })
       ghost.querySelector("b")!.animate([{ opacity: 1 }, { opacity: 1, offset: 0.2 }, { opacity: 0, offset: 0.7 }, { opacity: 0 }], { duration: FLY_MS, fill: "forwards" })
       ghost.querySelector("em")!.animate([{ opacity: 0 }, { opacity: 0, offset: 0.25 }, { opacity: 1, offset: 0.8 }, { opacity: 1 }], { duration: FLY_MS, fill: "forwards" })
-      later(120, leave)
+      // The intro dissolves slowly under the glide; the page beneath stays still until the landing.
+      later(250, () => leave(true))
 
       later(FLY_MS, () => {
         html.classList.add("is-landed")
-        musicOut(3) // the page has arrived: let the music go, slowly
-        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: "ease-out", fill: "forwards" }).onfinish = () => ghost.remove()
-        later(1500, () => html.classList.remove("is-handoff", "is-landed"))
+        html.classList.remove("is-intro") // now the rest of the hero comes in
+        musicOut(3.5) // the page has arrived: let the music go, slowly
+        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: "ease-out", fill: "forwards" }).onfinish = () => ghost.remove()
+        later(1800, () => html.classList.remove("is-handoff", "is-landed"))
       })
     })
 
@@ -212,11 +227,6 @@ export function Intro() {
           <span key={i} ref={i === R_AT ? rSpan : undefined} className={[c === NAME[i] ? "" : "is-noise", i === R_AT ? "is-r" : ""].join(" ").trim() || undefined}>{c}</span>
         ))}
       </p>
-      {hasTrack && (
-        <p className={`xp-opening-sound ${sound ? "is-on" : ""}`}>
-          <span aria-hidden="true"><i /><i /><i /></span>{sound ? (TRACK_CREDIT || "Sound on") : "Click anywhere for sound"}
-        </p>
-      )}
       <button type="button" className="xp-opening-skip" tabIndex={-1} onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))}>Skip</button>
     </div>
   )
