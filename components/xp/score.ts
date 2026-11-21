@@ -97,11 +97,31 @@ export function createScore(volume = 0.55): Score | null {
   }
 
   // Schedule everything from `offset` seconds into the cue (a late start joins in time).
+  // Soft percussion: a felt-mallet low drum (a pitched sine thump) and a brushed tick (filtered
+  // noise), quiet enough to be felt more than heard.
+  const noiseBuf = (() => { const b = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b })()
+  const drum = (t: number, vel: number) => {
+    const o = ctx.createOscillator(); o.type = "sine"
+    o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(52, t + 0.18)
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7)
+    o.connect(g).connect(bus); o.start(t); o.stop(t + 0.75)
+  }
+  const brush = (t: number, vel: number) => {
+    const n = ctx.createBufferSource(); n.buffer = noiseBuf
+    const f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 3200; f.Q.value = 0.7
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28)
+    n.connect(f).connect(g).connect(bus); n.start(t); n.stop(t + 0.3)
+  }
   const schedule = (offset: number) => {
     const t0 = ctx.currentTime + 0.04 - offset
     const at = (b: number) => t0 + (b * BEAT_MS) / 1000
     const live = (b: number) => at(b) >= ctx.currentTime
     for (let b = 0; b < 12; b++) if (live(b)) pulse(at(b), 0.34 + 0.22 * (b / 11))
+    // Drums join on beat 2 with the first title, land on every beat to the resolution, and the
+    // brush ticks on the off-beats once the name arrives (beat 6); one bigger hit marks beat 10.
+    for (let b = 2; b < 10; b++) if (live(b)) drum(at(b), 0.16 + 0.1 * ((b - 2) / 7))
+    for (let b = 6; b < 10; b++) if (live(b + 0.5)) brush(at(b + 0.5), 0.05)
+    if (live(10)) drum(at(10), 0.34)
     FIGURE.forEach((n, i) => { const b = 2 + i / 2; if (live(b)) piano(hz(N[n]), at(b), 0.16 + 0.06 * (i / FIGURE.length) + (i % 4 === 0 ? 0.04 : 0)) })
     PAD.forEach((p) => p.notes.forEach((n) => { if (live(p.at)) pad(hz(N[n]), at(p.at), (p.len * BEAT_MS) / 1000, p.at === 10 ? 0.55 : 0.38) }))
     if (live(10)) { piano(hz(N.C3), at(10), 0.3, 3.5); piano(hz(N.G4), at(10), 0.18, 3.2); piano(hz(N.E5), at(10), 0.16, 3.2) }
