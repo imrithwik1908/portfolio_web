@@ -11,7 +11,8 @@ import { beat, createScore, type Score } from "@/components/xp/score"
 //   beat 0      the pulse starts with the picture; stars and haze surface within a second
 //   beat 2      "TEMPE, ARIZONA", a light sweeping across it as the piano figure enters
 //   beat 4      "MACHINE LEARNING SYSTEMS", as the figure answers
-//   beat 6      the name decodes as the pad comes in
+//   beat 6      the name is revealed as the pad comes in: by default a transit (a band of light drifts
+//               behind it and the letters catch the light in turn), or the letter-by-letter decode
 //   beat 6.5    a slow push-in on the whole name
 //   beat 8.5    everything but the R of RITHWIK softens away
 //   beat 8–10.5 the camera tilts down: the stars rise out of frame and the planet's dark limb rises in
@@ -65,6 +66,14 @@ const MORSE_UNIT = 110
 const morseOn = (ms: number) => MORSE[Math.floor(ms / MORSE_UNIT)] === 1
 const noise = () => Array.from(NAME, (c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("")
 const ease = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t))
+// Smootherstep: zero velocity and zero acceleration at both ends, for moves that must never feel cut.
+const glide = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10))
+
+// How the name is revealed. "transit": the name waits in black and a band of light drifts behind it,
+// so it appears in silhouette and each letter catches the light as it passes. "decode": the earlier
+// letter-by-letter decode. Switch the default here, or compare with ?reveal=decode / ?reveal=transit.
+const DEFAULT_REVEAL: "transit" | "decode" = "transit"
+const TRANSIT_AT = beat(6.1), TRANSIT_MS = beat(2.3)
 
 export function Intro() {
   const [phase, setPhase] = useState<"play" | "leave" | "gone">("play")
@@ -73,6 +82,7 @@ export function Intro() {
   const [card, setCard] = useState(-1)
   const [nameOn, setNameOn] = useState(false)
   const [name, setName] = useState(NAME)
+  const [reveal, setReveal] = useState<"transit" | "decode">(DEFAULT_REVEAL)
   const canvas = useRef<HTMLCanvasElement>(null)
   const line = useRef<HTMLParagraphElement>(null)
   const rSpan = useRef<HTMLSpanElement>(null)
@@ -100,9 +110,12 @@ export function Intro() {
     const musicOut = (s = 2.5) => score.current?.fadeOut(s)
 
     // The name decode, driven by the scene's frame loop.
+    const param = new URLSearchParams(window.location.search).get("reveal")
+    const mode: "transit" | "decode" = param === "decode" || param === "transit" ? param : DEFAULT_REVEAL
+    setReveal(mode)
     const settleAt = Array.from(NAME, (_, i) => NAME_AT + 40 + i * PER_LETTER + Math.random() * 60)
-    let lastShuffle = 0, decoding = true
-    setName(noise())
+    let lastShuffle = 0, decoding = mode === "decode"
+    if (decoding) setName(noise())
     const decode = (now: number) => {
       if (now - lastShuffle < SHUFFLE_MS) return
       lastShuffle = now
@@ -145,6 +158,7 @@ export function Intro() {
       const t = now - t0
       const dt = Math.min(48, t - lastT); lastT = t
       if (decoding) decode(now)
+      const transit = mode === "transit" ? (t - TRANSIT_AT) / TRANSIT_MS : -1
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H)
 
       const truck = ease((t - beat(1.5)) / beat(5))
@@ -168,9 +182,14 @@ export function Intro() {
       // The gate: a 2.39:1 scope frame that grows into a tall 1.43:1 large-format frame for the reveal,
       // then opens all the way to the screen as the page arrives. The picture inside is a lifted,
       // projector-lit black and the matte outside is true black, so the frame reads without any line.
-      const aspect = lerp(2.39, 1.43, ease((t - beat(8.2)) / beat(2.2)))
-      const toScreen = ease((t - beat(12.4)) / beat(1.8))
-      const fw = lerp(Math.min(W, H * aspect), W, toScreen), fh = lerp(Math.min(H, W / aspect), H, toScreen)
+      // Width and height glide together between the two frames (interpolating the ratio itself would
+      // make one side stop while the other starts, which reads as a cut). Same for the final opening.
+      const open = glide((t - beat(8)) / beat(3))
+      const toScreen = glide((t - beat(12.3)) / beat(2.2))
+      const scopeW = W, scopeH = Math.min(H, W / 2.39)
+      const largeW = Math.min(W, H * 1.43), largeH = Math.min(H, W / 1.43)
+      const fw = lerp(lerp(scopeW, largeW, open), W, toScreen), fh = lerp(lerp(scopeH, largeH, open), H, toScreen)
+      const aspect = fw / fh
       const fx = (W - fw) / 2, fy = (H - fh) / 2
       const lamp = ease(t / 900) * (1 - 0.6 * toScreen)               // the projector lamp warming up
       const base = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(fw, fh) / 2)
@@ -222,6 +241,25 @@ export function Intro() {
         }
         ctx.fillStyle = `rgba(226,230,238,${a})`
         ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill()
+      }
+
+      // Transit reveal: a soft band of distant light drifts behind the name, left to right. The letters,
+      // still black, show as silhouettes against it, and each catches the light as the band passes.
+      if (transit > -0.2 && transit < 1.3 && line.current) {
+        const box = line.current.getBoundingClientRect()
+        const p = glide(transit)
+        const bx = lerp(box.left - box.width * 0.3, box.right + box.width * 0.2, p)
+        const env = Math.min(1, Math.max(0, (transit + 0.2) / 0.35), Math.max(0, (1.3 - transit) / 0.45))
+        const bw = Math.max(box.width * 0.3, 140), by = box.top + box.height / 2
+        const g = ctx.createRadialGradient(bx, by, 0, bx, by, bw)
+        g.addColorStop(0, `rgba(205,216,238,${0.3 * env})`); g.addColorStop(0.35, `rgba(150,168,205,${0.12 * env})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.18); ctx.scale(0.55, 2.4); ctx.translate(-bx, -by)
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, bw, 0, 6.283); ctx.fill(); ctx.restore()
+        for (const sp of Array.from(line.current.children) as HTMLElement[]) {
+          if (sp.classList.contains("is-lit")) continue
+          const r = sp.getBoundingClientRect()
+          if (r.left + r.width / 2 < bx - 6 || transit >= 1.05) sp.classList.add("is-lit")
+        }
       }
 
       // A satellite crossing high in the frame, its light blinking "HIRE ME" in Morse as it goes.
@@ -439,7 +477,7 @@ export function Intro() {
     <div className={`xp-opening ${phase === "leave" ? "is-leaving" : ""}`} aria-hidden="true">
       <canvas ref={canvas} />
       {card >= 0 && <p key={card} className="xp-opening-line xp-opening-card">{CARDS[card][1]}</p>}
-      <p ref={line} className={`xp-opening-line ${isolate ? "is-isolate" : ""} ${dawn ? "is-dawn" : ""} ${nameOn ? "is-on" : ""}`}>
+      <p ref={line} className={`xp-opening-line ${reveal === "transit" ? "is-transit" : ""} ${isolate ? "is-isolate" : ""} ${dawn ? "is-dawn" : ""} ${nameOn ? "is-on" : ""}`}>
         {Array.from(name, (c, i) => (
           <span key={i} ref={i === R_AT ? rSpan : undefined} className={[c === NAME[i] ? "" : "is-noise", i === R_AT ? "is-r" : ""].join(" ").trim() || undefined}>{c}</span>
         ))}

@@ -1962,3 +1962,10 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 @keyframes xp-opening-card { 0% { opacity: 0; filter: blur(4px); letter-spacing: 0.5em; transform: translateX(1.2vw) scale(1.03); } 24% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; transform: translateX(-1.2vw) scale(1); } }
 .xp-opening-line.is-isolate.is-dawn span.is-r { color: #f7f2ea; text-shadow: 0 0 12px rgba(255, 226, 196, 0.22); transition-duration: 1400ms; }
 .xp-opening-tc { position: absolute; left: 22px; bottom: 22px; color: rgba(226, 230, 238, 0.18); font: 0.62rem var(--xp-mono); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; animation: xp-fade 1200ms 600ms ease both; }
+
+/* Transit reveal: the name waits in black, a band of light passes behind it, and each letter catches
+   the light in turn (a faint rim on the side the light came from). */
+.xp-opening-line.is-transit span { color: #000; transition: color 900ms cubic-bezier(0.4, 0, 0.25, 1), text-shadow 900ms ease, opacity 800ms cubic-bezier(0.4, 0, 0.25, 1), filter 800ms cubic-bezier(0.4, 0, 0.25, 1); }
+.xp-opening-line.is-transit span.is-lit { color: rgba(226, 230, 238, 0.8); text-shadow: -1px 0 5px rgba(200, 212, 235, 0.35); }
+.xp-opening-line.is-transit.is-isolate span.is-r { color: #f4f6fa; text-shadow: 0 0 16px rgba(226, 230, 238, 0.3); }
+.xp-opening-line.is-transit.is-isolate.is-dawn span.is-r { color: #f7f2ea; text-shadow: 0 0 12px rgba(255, 226, 196, 0.22); }
