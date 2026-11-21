@@ -5,7 +5,7 @@ import { Contact } from "@/components/xp/contact"
 import { EMAIL } from "@/components/xp/copy-email"
 import { Hero } from "@/components/xp/hero"
 import { Note } from "@/components/xp/note"
-import { Chapters } from "@/components/xp/chapters"
+import { Thread } from "@/components/xp/thread"
 import { Education } from "@/components/xp/education"
 import { ProjectDeck } from "@/components/xp/project-deck"
 import { Publication } from "@/components/xp/publication"
@@ -50,8 +50,8 @@ export default function Home() {
 
       <section id="path" className="xp-section" aria-label="Path">
         <SectionHead index="03" label="Experience" title="Where I&apos;ve worked." />
-        <Chapters />
-        <Note className="is-path">Entries advance on their own only while on screen and stop for good once you pick one. Results are the numbers I report on my résumé.</Note>
+        <Thread />
+        <Note className="is-path">One line of light, reshaped by your scroll: it reads, it predicts, it decides. Results are the numbers I report on my résumé.</Note>
       </section>
 
       <section id="education" className="xp-section xp-section-tight" aria-label="Education">
