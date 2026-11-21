@@ -5,15 +5,15 @@
 // its license asks for attribution.
 
 export const TRACK_SRC = "/audio/intro.mp3"
-export const TRACK_CREDIT = "" // e.g. "Music: “Title” by Author, CC BY 4.0"
+export const TRACK_CREDIT = "" // Pixabay Content License: no credit required ("Interstellar Piano" by Ivan_Luzan, trimmed to 12 s)
 
-export type Score = { start: () => Promise<boolean>; fadeOut: (seconds?: number) => void; running: () => boolean }
+export type Score = { start: (at?: number) => Promise<boolean>; fadeOut: (seconds?: number) => void; running: () => boolean }
 
 export async function trackAvailable() {
   try { return (await fetch(TRACK_SRC, { method: "HEAD", cache: "force-cache" })).ok } catch { return false }
 }
 
-export function createScore(volume = 0.32): Score | null {
+export function createScore(volume = 0.4): Score | null {
   const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!AC) return null
   const audio = new Audio(TRACK_SRC)
@@ -25,15 +25,19 @@ export function createScore(volume = 0.32): Score | null {
   let started = false, done = false
 
   return {
-    async start() {
+    // `at` (seconds) lets a late start join the intro in time, so the beats still land on the text.
+    async start(at = 0) {
       if (done) return false
-      try { await ctx.resume(); if (!started) await audio.play() } catch { return false }
+      try {
+        await ctx.resume()
+        if (!started) { if (at > 0) audio.currentTime = at; await audio.play() }
+      } catch { return false }
       if (ctx.state !== "running") return false
       if (!started) {
         started = true
         const t = ctx.currentTime
         gain.gain.setValueAtTime(0, t)
-        gain.gain.linearRampToValueAtTime(volume, t + 2.5) // a slow swell in, never a jolt
+        gain.gain.linearRampToValueAtTime(volume, t + (at > 0.3 ? 0.6 : 1.2)) // a soft swell in, never a jolt
       }
       return true
     },
