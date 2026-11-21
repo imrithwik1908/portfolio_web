@@ -556,7 +556,7 @@ export function Intro() {
         ))}
       </p>
       <span ref={tc} className="xp-opening-tc" aria-hidden="true">00:00:00:00</span>
-      <button type="button" className="xp-opening-skip" tabIndex={-1} onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))}>Skip</button>
+      <button type="button" className="xp-opening-skip" onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))}>Skip intro</button>
     </div>
   )
 }

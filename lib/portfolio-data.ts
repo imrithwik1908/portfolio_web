@@ -171,7 +171,7 @@ export const projects: Project[] = [
     stack: ["PyTorch", "MultiBench", "CMU-MOSI", "scikit-learn"],
     capabilities: ["data", "intelligence"],
     github: "https://github.com/imrithwik1908/Tensor-Fusion-Network",
-    outcome: "70.4% binary test accuracy",
+    outcome: "70.4% binary test accuracy (likely a little optimistic)",
     outcomeLabel: "Verified notebook output",
     problem: [
       "Sentiment isn't carried by words alone. Tone and expression can reinforce what is said, contradict it, or just add noise. The interesting part is how to combine the three so that each one's signal survives.",
@@ -198,7 +198,7 @@ export const projects: Project[] = [
     debugging:
       "Shapes and labels were the fragile parts: a model trains happily while samples, senses or targets are slightly out of step, so the notebooks reshape and convert explicitly. Re-reading the code for this page, I also found that the training loop checks its progress on the test set rather than the validation set. The test set influenced which model was kept, so the numbers below are likely a little optimistic.",
     results: [
-      "Positive or negative: 70.4% accuracy and 0.709 F1 on a balanced test set, where guessing gets 50%.",
+      "Positive or negative: 70.4% accuracy and 0.709 F1 on a balanced test set, where guessing gets 50%. Because the test set influenced which model was kept, read all three numbers as a little optimistic.",
       "Score from −3 to +3: off by 1.10 on average, with a 0.53 correlation to the true score.",
       "Five classes: 31.9% accuracy, a much harder version of the same question.",
     ],

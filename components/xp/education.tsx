@@ -54,7 +54,7 @@ function Ring({ value, max, fill, label }: { value: number; max: number; fill: n
         <circle cx="36" cy="36" r="30" className="xp-ring-track" />
         <circle cx="36" cy="36" r="30" className="xp-ring-fill" strokeDasharray={C} strokeDashoffset={C * (1 - (value / max) * fill)} />
       </svg>
-      <b>{(value * fill).toFixed(2)}</b>
+      <b>{value.toFixed(2)}</b>
       <small>{label}</small>
     </div>
   )

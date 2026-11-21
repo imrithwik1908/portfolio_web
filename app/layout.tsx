@@ -71,7 +71,7 @@ export default function RootLayout({
             <CommandMenu />
             <PageTransitions />
             <Brief />
-            <a href="#work" className="xp-skip">Skip to the work</a>
+            <a href="#main-content" className="xp-skip">Skip to content</a>
         <XpNav />
             <div className="flex-1">{children}</div>
             <ResumeDossier />

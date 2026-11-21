@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Arrow } from "@/components/xp/arrow"
-import { CountUp } from "@/components/xp/count-up"
 import { ProjectVisual } from "@/components/xp/project-visual"
 import { useInView } from "@/components/xp/use-in-view"
 import type { Project } from "@/lib/portfolio-data"
@@ -50,7 +49,7 @@ export function ProjectCard({ project, index, total, variant }: { project: Proje
           <dl className="pc-highlights">
             {meta.highlights.map((h) => (
               <div key={h.label}>
-                <dt>{h.count ? <CountUp value={h.count.to} run={inView} decimals={h.count.decimals} suffix={h.count.suffix} /> : h.value}</dt>
+                <dt>{h.value}</dt>
                 <dd>{h.label}</dd>
               </div>
             ))}

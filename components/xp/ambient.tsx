@@ -431,7 +431,10 @@ function Cursor() {
       x = e.clientX; y = e.clientY
       const t = e.target as Element | null
       let mode = "", text = ""
-      for (const [sel, name] of CURSOR_RULES) {
+      // A button inside a card (Back, How it works, a tab) gets the plain ring, never the card's badge.
+      const ctl = t?.closest?.("button, [role=button], summary, input, select")
+      if (ctl && !ctl.matches("[data-cursor], .xp-copy, .xp-nav-copy")) mode = "link"
+      if (!mode) for (const [sel, name] of CURSOR_RULES) {
         const hit = t?.closest?.(sel)
         if (hit) { mode = "label"; text = name || hit.getAttribute("data-cursor") || ""; break }
       }

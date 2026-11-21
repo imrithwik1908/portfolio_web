@@ -130,7 +130,7 @@ export function FusionExplorable() {
     {
       title: <>The real cube holds <em>140,481</em> numbers per clip.</>,
       body: "In the notebook the vectors are 32, 32 and 128 long, plus their 1s. Two layers squeeze that cube down to 128 numbers, and a last one predicts the clip's sentiment.",
-      note: "Asked positive or negative on a balanced test set, the notebook gets 70.4% right (guessing gets 50%), with an F1 of 0.709.",
+      note: "Asked positive or negative on a balanced test set, the notebook gets 70.4% right (guessing gets 50%), with an F1 of 0.709. The test set also influenced which model was kept, so that is likely a little optimistic.",
     },
   ]
 

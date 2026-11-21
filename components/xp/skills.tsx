@@ -11,21 +11,21 @@ type Rule = { id: string; rule: React.ReactNode; note?: { from: string; quote: s
 
 const RULES: Rule[] = [
   {
-    id: "measured",
-    rule: <>Say what I <em>haven&apos;t</em> measured yet.</>,
-    note: { from: "my chess project plan · Oct 2026", quote: "I have not run these matches yet, so I am not reporting the example scores in the starter README as my own results." },
-    moment: <>The starter code came with example scores. They stayed out of my plan until I had played the games myself.</>,
+    id: "failures",
+    rule: <>Write the failure down <em>next to</em> the wins.</>,
+    moment: <>When I retrained my chess model from scratch, it passed every check and then lost <b>all 200 games</b> to the original. That&apos;s in my journal, in the same place as the good results. Then I shipped the version an independent rerun could rebuild <b>byte for byte</b>.</>,
   },
   {
     id: "one-thing",
     rule: <>Change <em>one</em> thing at a time.</>,
-    note: { from: "the same plan", quote: "Change one component at a time." },
+    note: { from: "my chess project plan · Oct 2026", quote: "Change one component at a time." },
     moment: <>My first experiment changed only the network&apos;s width: same data, same seed, same schedule. The wider model reached a lower training loss and scored higher against the reference bots, but the two split their direct games <b>25–25</b> and the uncertainty overlapped. So I didn&apos;t call it a win.</>,
   },
   {
-    id: "failures",
-    rule: <>Write the failure down <em>next to</em> the wins.</>,
-    moment: <>When I retrained my chess model from scratch, it passed every check and then lost <b>all 200 games</b> to the original. That&apos;s in my journal, in the same place as the good results. Then I shipped the version an independent rerun could rebuild <b>byte for byte</b>.</>,
+    id: "measured",
+    rule: <>Say what I <em>haven&apos;t</em> measured yet.</>,
+    note: { from: "the same plan", quote: "I have not run these matches yet, so I am not reporting the example scores in the starter README as my own results." },
+    moment: <>The starter code came with example scores. They stayed out of my plan until I had played the games myself.</>,
   },
   {
     id: "leftovers",

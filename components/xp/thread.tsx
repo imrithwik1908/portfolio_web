@@ -80,12 +80,6 @@ function Decoded({ text }: { text: string }) {
   return <>{shown}</>
 }
 
-function Count({ value, k }: { value: string; k: number }) {
-  const m = value.match(/^([^0-9]*)([0-9]+)(.*)$/)
-  if (!m) return <>{value}</>
-  return <>{m[1]}{Math.round(Number(m[2]) * k)}{m[3]}</>
-}
-
 export function Thread() {
   const root = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -292,7 +286,7 @@ export function Thread() {
             <ul className="xp-thread-stack" aria-label="Tools">{s.stack.map((t) => <li key={t}>{t}</li>)}</ul>
           </div>
           <dl className="xp-thread-stats">
-            {s.stats.map(([n, l]) => <div key={l}><dt><Count value={n} k={smooth(clamp(local * 1.6))} /></dt><dd>{l}</dd></div>)}
+            {s.stats.map(([n, l]) => <div key={l}><dt>{n}</dt><dd>{l}</dd></div>)}
           </dl>
           <div className="xp-thread-actions">
             <button type="button" className="xp-thread-more" aria-expanded={details} onClick={() => setDetails((d) => !d)}>{details ? "Close" : "How I did it"}</button>
