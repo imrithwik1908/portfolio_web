@@ -26,7 +26,7 @@ const FIGURE = [
 const PAD = [
   { at: 6, len: 2.2, notes: ["A3", "C4", "E4"] },
   { at: 8, len: 2.2, notes: ["F3", "A3", "C4"] },
-  { at: 10, len: 4.4, notes: ["C3", "G3", "E4", "B4", "D5"] }, // the resolution
+  { at: 10, len: 5, notes: ["C3", "G3", "E4", "B4", "D5"] }, // the resolution, held under the sunrise
 ]
 
 function room(ctx: AudioContext, seconds: number) {
@@ -106,7 +106,7 @@ export function createScore(volume = 0.55): Score | null {
     PAD.forEach((p) => p.notes.forEach((n) => { if (live(p.at)) pad(hz(N[n]), at(p.at), (p.len * BEAT_MS) / 1000, p.at === 10 ? 0.55 : 0.38) }))
     if (live(10)) { piano(hz(N.C3), at(10), 0.3, 3.5); piano(hz(N.G4), at(10), 0.18, 3.2); piano(hz(N.E5), at(10), 0.16, 3.2) }
     if (live(10.5)) bell(hz(N.B5), at(10.5), 0.05)
-    if (live(12)) bell(hz(N.E6), at(12), 0.04)
+    if (live(12.5)) bell(hz(N.E6), at(12.5), 0.045) // marks the R lifting off
   }
 
   let started = false, done = false

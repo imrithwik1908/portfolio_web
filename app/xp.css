@@ -1960,3 +1960,4 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-opening::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 46%, transparent 55%, rgba(0, 0, 0, 0.55) 100%); }
 .xp-opening-card { transform-origin: 50% 50%; }
 @keyframes xp-opening-card { 0% { opacity: 0; filter: blur(4px); letter-spacing: 0.5em; transform: scale(1.04); } 24% { opacity: 1; filter: blur(0); letter-spacing: 0.43em; transform: scale(1); } 78% { opacity: 1; } 100% { opacity: 0; letter-spacing: 0.4em; transform: scale(0.995); } }
+.xp-opening-line.is-isolate.is-dawn span.is-r { color: #fff3e2; text-shadow: 0 0 18px rgba(255, 214, 170, 0.45), 0 0 2px rgba(255, 240, 220, 0.6); transition-duration: 1200ms; }
