@@ -165,10 +165,27 @@ export function Intro() {
       const f = Math.max(W, H) * lerp(0.42, 0.5, settle)
 
       // Framing: a widescreen letterbox that, as the planet is revealed, grows into a tall large-format frame.
-      // The gate opens from a 2.39:1 scope frame to a tall 1.43:1 large-format frame for the reveal.
+      // The gate: a 2.39:1 scope frame that grows into a tall 1.43:1 large-format frame for the reveal,
+      // then opens all the way to the screen as the page arrives. The picture inside is a lifted,
+      // projector-lit black and the matte outside is true black, so the frame reads without any line.
       const aspect = lerp(2.39, 1.43, ease((t - beat(8.2)) / beat(2.2)))
-      const fw = Math.min(W, H * aspect), fh = Math.min(H, W / aspect)
+      const toScreen = ease((t - beat(12.4)) / beat(1.8))
+      const fw = lerp(Math.min(W, H * aspect), W, toScreen), fh = lerp(Math.min(H, W / aspect), H, toScreen)
       const fx = (W - fw) / 2, fy = (H - fh) / 2
+      const lamp = ease(t / 900) * (1 - 0.6 * toScreen)               // the projector lamp warming up
+      const base = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(fw, fh) / 2)
+      base.addColorStop(0, `rgba(12,13,18,${lamp})`); base.addColorStop(0.7, `rgba(8,9,13,${lamp})`); base.addColorStop(1, `rgba(5,6,8,${lamp})`)
+      ctx.fillStyle = base; ctx.fillRect(fx, fy, fw, fh)
+      // A soft feather at the gate's edges, so it reads as light falling off, not a drawn border.
+      const feather = Math.max(6, Math.min(fw, fh) * 0.02)
+      for (const [x0, y0, x1, y1, rx, ry, rw, rh] of [
+        [fx, 0, fx + feather, 0, fx, fy, feather, fh], [fx + fw, 0, fx + fw - feather, 0, fx + fw - feather, fy, feather, fh],
+        [0, fy, 0, fy + feather, fx, fy, fw, feather], [0, fy + fh, 0, fy + fh - feather, fx, fy + fh - feather, fw, feather],
+      ] as const) {
+        const g = ctx.createLinearGradient(x0, y0, x1, y1)
+        g.addColorStop(0, `rgba(0,0,0,${0.85 * (1 - toScreen)})`); g.addColorStop(1, "rgba(0,0,0,0)")
+        ctx.fillStyle = g; ctx.fillRect(rx, ry, rw, rh)
+      }
       ctx.save(); ctx.beginPath(); ctx.rect(fx, fy, fw, fh); ctx.clip()
       // A whisper of handheld float, so the frame always feels filmed rather than rendered.
       ctx.translate(Math.sin(t / 1700) * 1.6 + Math.sin(t / 2900) * 1.1, Math.sin(t / 2100) * 1.2 + Math.cos(t / 3300) * 0.9)
@@ -303,7 +320,7 @@ export function Intro() {
       // A film timecode in the corner, at 24 frames a second, for anyone who looks.
       if (tc.current) {
         const fr = Math.floor(t / (1000 / 24)), sec = Math.floor(fr / 24)
-        tc.current.textContent = `00:00:${String(sec).padStart(2, "0")}:${String(fr % 24).padStart(2, "0")}   ${aspect > 1.9 ? "2.39 : 1" : "1.43 : 1"}`
+        tc.current.textContent = `00:00:${String(sec).padStart(2, "0")}:${String(fr % 24).padStart(2, "0")}   ${toScreen > 0.5 ? "" : aspect > 1.9 ? "2.39 : 1" : "1.43 : 1"}`
       }
       // Grain, barely there.
       fi = (fi + 1) % 3
