@@ -10,6 +10,7 @@ import { CommandMenu } from '@/components/xp/command'
 import { PageTransitions } from '@/components/xp/transitions'
 import { Brief } from '@/components/xp/brief'
 import { Intro } from '@/components/xp/intro'
+import { Flipbook } from '@/components/xp/flipbook'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
 
 const geistSans = localFont({
@@ -69,6 +70,7 @@ export default function RootLayout({
             <Intro />
             <Ambient />
             <CommandMenu />
+            <Flipbook />
             <PageTransitions />
             <Brief />
             <a href="#main-content" className="xp-skip">Skip to content</a>

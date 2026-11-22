@@ -32,6 +32,7 @@ export function CommandMenu() {
       window.scrollTo(0, 0)
       if (window.location.pathname === "/") window.location.reload(); else window.location.href = "/"
     } },
+    { group: "Actions", label: "Play the flipbook intro", hint: "Seven seconds of my work, with sound", run: () => window.dispatchEvent(new Event("xp:flipbook")) },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),
     { group: "Projects", label: "All projects", run: () => router.push("/projects") },
