@@ -6,80 +6,115 @@ import { FIGURE_DRAWINGS } from "@/components/xp/figures"
 import { ProjectVisual } from "@/components/xp/project-visual"
 import { projectMeta } from "@/lib/project-highlights"
 
-// The flipbook: a second, optional opening, played only from the command menu. It tells the work
-// in chapters: release checks, language, three senses, systems, data, chess, research. Inside a
-// chapter the camera pushes into the same drawing (a cut); between chapters a page turns. The last
-// second is a blur of everything before the name lands. The drawings are this site's own; the three
-// photographs are openly licensed and credited on /credits; every number is one the site reports.
+// The flipbook: a second, optional opening, played only from the command menu.
+//
+// Act one tells the work in chapters (release checks, language, three senses, systems, data, chess,
+// research), one card each, and every chapter gets its own camera move. Act two is the title: the
+// camera starts deep inside the R with the pages still flipping through it, pulls back until the
+// whole name is on screen with the work playing inside every letter, then the letters set solid.
+//
+// The drawings are this site's own; three photographs are openly licensed and credited on /credits;
+// every number is one the site already reports. The music is an original cue (flip-score.ts).
 
-type Cam = { z?: number; at?: string }
-type Panel = Cam & { cut?: boolean } & (
+type Panel = { z?: number; at?: string; cut?: boolean; chapter?: string } & (
   | { kind: "vis"; slug: string }
   | { kind: "fig"; draw: keyof typeof FIGURE_DRAWINGS }
   | { kind: "img"; src: string; paper?: boolean }
   | { kind: "type"; big: string; small: string; tone: "ink" | "paper" | "lamp" }
   | { kind: "fog"; clear: number }
+  | { kind: "sentence" }
+  | { kind: "paper" }
 )
 
 const PANELS: Panel[] = [
-  // Release: what changed, and is it safe to ship?
-  { kind: "vis", slug: "agentguard" },
+  { kind: "vis", slug: "agentguard", chapter: "release" },
   { kind: "fig", draw: "trace" },
-  { kind: "fig", draw: "trace", z: 1.9, at: "72% 55%", cut: true },
   { kind: "fig", draw: "release" },
-  { kind: "fig", draw: "release", z: 1.8, at: "60% 60%", cut: true },
   { kind: "type", big: "PASS · BLOCK · REVIEW", small: "one release decision", tone: "lamp" },
-  { kind: "img", src: "/agentguard.png", z: 1.3, at: "20% 30%" },
-  // Language: which words actually carry the label?
-  { kind: "vis", slug: "x-mutest" },
-  { kind: "vis", slug: "x-mutest", z: 1.9, at: "50% 50%", cut: true },
+  { kind: "img", src: "/agentguard.png", z: 1.25, at: "20% 30%" },
+
+  { kind: "vis", slug: "x-mutest", chapter: "language" },
+  { kind: "sentence" },
   { kind: "img", src: "/xmutest-annotation.png", paper: true },
   { kind: "fig", draw: "agreement" },
   { kind: "type", big: "16,830", small: "posts, marked word by word", tone: "ink" },
-  { kind: "img", src: "/xmutest-architecture.png", paper: true, z: 1.15 },
-  { kind: "type", big: "EN · HI · TE", small: "three languages", tone: "paper", cut: true },
-  // Three senses: face, voice and words.
-  { kind: "vis", slug: "tensor-fusion" },
-  { kind: "img", src: "/flipbook/neuron.jpg", z: 1.1, cut: true },
+  { kind: "img", src: "/xmutest-architecture.png", paper: true, z: 1.1 },
+  { kind: "type", big: "EN · HI · TE", small: "three languages", tone: "paper" },
+
+  { kind: "vis", slug: "tensor-fusion", chapter: "senses" },
+  { kind: "img", src: "/flipbook/neuron.jpg", cut: true },
   { kind: "fig", draw: "tensor" },
   { kind: "img", src: "/tensor_fusion.jpg", paper: true },
-  // Systems: two writes that have to agree.
-  { kind: "vis", slug: "course-catalog" },
+
+  { kind: "vis", slug: "course-catalog", chapter: "systems" },
   { kind: "fig", draw: "schema" },
   { kind: "fig", draw: "enroll", cut: true },
-  { kind: "img", src: "/course_catalog.jpg", z: 1.2, at: "70% 40%" },
-  // Data: shoppers and ad revenue.
-  { kind: "img", src: "/flipbook/atrium.jpg" },
+  { kind: "img", src: "/course_catalog.jpg", z: 1.15, at: "70% 40%" },
+
+  { kind: "img", src: "/flipbook/atrium.jpg", chapter: "data" },
   { kind: "img", src: "/flipbook/fiber.jpg", cut: true },
   { kind: "type", big: "$142", small: "mean daily ad-revenue error", tone: "lamp" },
-  // Chess in the fog.
-  { kind: "fog", clear: 0.18 },
+
+  { kind: "fog", clear: 0.18, chapter: "chess" },
   { kind: "fog", clear: 0.5, cut: true },
   { kind: "fog", clear: 0.85, cut: true },
   { kind: "type", big: "25–25", small: "a draw I didn’t call a win", tone: "paper" },
   { kind: "type", big: "200 / 200", small: "games my retrain lost", tone: "ink", cut: true },
-  // Research.
-  { kind: "type", big: "AAAI 2026", small: "a paper with my name on it", tone: "ink" },
+
+  { kind: "paper", chapter: "research" },
   { kind: "type", big: "4.22", small: "GPA at Arizona State", tone: "paper" },
 ]
-// Pages stacked behind the one in front, seen only while the camera is at an angle.
-const GHOSTS = [3, 10, 16, 19, 25]
 const IMAGES = Array.from(new Set(PANELS.flatMap((p) => (p.kind === "img" ? [p.src] : []))))
 
-// Timing: one pass through the story, each cut a little quicker than the last; at HIT the camera
-// pulls back and the pages keep flipping inside a closing title box; then the name.
-const HIT = 6400
-const BOX = HIT + 700 // the pages have closed into the title box
-const GOLD = HIT + 1100 // the name arrives
-const END = HIT + 3400
+// Act one: one pass through the cards, each a little quicker than the last.
+// Act two: the title, with the pages still flipping (steadier now) inside the letters.
+const HIT = 6000 // the camera is inside the R
+const REVEAL = HIT + 1500 // the whole name is on screen
+const SOLID = HIT + 2400 // the letters set
+const END = HIT + 3900
 const CUTS: { t: number; i: number }[] = (() => {
   const out: { t: number; i: number }[] = []
-  let t = 380, gap = 600
-  PANELS.forEach((_, i) => { out.push({ t: Math.round(t), i }); t += gap; gap = Math.max(40, gap * 0.9) })
+  let t = 140, gap = 560
+  PANELS.forEach((_, i) => { out.push({ t: Math.round(t), i }); t += gap; gap = Math.max(48, gap * 0.9) })
   let k = 0
-  while (t < BOX - 60) { out.push({ t: Math.round(t), i: (k * 7 + 3) % PANELS.length }); t += 42; k++ }
+  while (t < HIT - 40) { out.push({ t: Math.round(t), i: (k * 7 + 3) % PANELS.length }); t += 46; k++ }
+  // Inside the letters, the boldest pages: photographs, the board, the tinted project drawings.
+  const bold = [13, 23, 0, 20, 5, 25, 21, 12, 3, 16, 4, 28, 19, 22, 24]
+  t = HIT; k = 0
+  while (t < SOLID + 300) { out.push({ t: Math.round(t), i: bold[k % bold.length] }); t += 120; k++ }
   return out
 })()
+
+// The camera: one move per chapter, eased from each to the next so it never jumps. Scale stays
+// above 1.12 so the edges of the page never show. rx/ry/rz in degrees, s = scale, x/y = drift in %.
+type Shot = { rx: number; ry: number; rz: number; s: number; x: number; y: number }
+const MOVES: Record<string, Shot> = {
+  open: { rx: 7, ry: -9, rz: -1.5, s: 1.42, x: -4, y: 3 }, // low and to the left, close in
+  release: { rx: 0, ry: 0, rz: 0, s: 1.14, x: 0, y: 0 }, // settles square
+  language: { rx: -7, ry: 3, rz: 1, s: 1.26, x: 2, y: -3 }, // craning down
+  senses: { rx: 2, ry: 8, rz: 0, s: 1.24, x: -3, y: 0 }, // orbiting right
+  systems: { rx: 4, ry: -5, rz: 2.5, s: 1.3, x: 3, y: 2 }, // a slow roll
+  data: { rx: -6, ry: 0, rz: 0, s: 1.2, x: 0, y: 3 }, // tilting up
+  chess: { rx: 22, ry: 0, rz: -3, s: 1.38, x: 0, y: -4 }, // looking down at the board
+  research: { rx: 0, ry: -5, rz: 1, s: 1.2, x: 1, y: 0 }, // a gentle pan
+  end: { rx: 0, ry: 0, rz: 0, s: 1.12, x: 0, y: 0 },
+}
+const KEYS: { t: number; shot: Shot }[] = (() => {
+  const keys = [{ t: 0, shot: MOVES.open }]
+  CUTS.slice(0, PANELS.length).forEach(({ t, i }) => { const c = PANELS[i].chapter; if (c) keys.push({ t: t + 700, shot: MOVES[c] }) })
+  keys.push({ t: HIT - 500, shot: MOVES.end })
+  return keys
+})()
+const smooth = (x: number) => { const c = Math.min(1, Math.max(0, x)); return c * c * c * (c * (c * 6 - 15) + 10) }
+function shotAt(t: number): Shot {
+  let a = KEYS[0], b = KEYS[KEYS.length - 1]
+  for (let k = 0; k < KEYS.length - 1; k++) if (t >= KEYS[k].t && t < KEYS[k + 1].t) { a = KEYS[k]; b = KEYS[k + 1]; break }
+  if (t >= b.t) return b.shot
+  const e = smooth((t - a.t) / (b.t - a.t))
+  const m = (k: keyof Shot) => a.shot[k] + (b.shot[k] - a.shot[k]) * e
+  return { rx: m("rx"), ry: m("ry"), rz: m("rz"), s: m("s"), x: m("x"), y: m("y") }
+}
+
 const NAME = "RITHWIK"
 
 // A chessboard in fog: squares clear outward from the white king as `clear` grows.
@@ -103,25 +138,50 @@ function Fog({ clear }: { clear: number }) {
   )
 }
 
+// The sample sentence from "Where I've worked", with the words that carry the label lit.
+const WORDS = ["the", "review", "praised", "the", "battery", "but", "hated", "the", "screen"]
+const LIT: Record<number, number> = { 6: 1, 8: 0.72, 2: 0.2 }
+const AUTHORS = ["Mohammad Zia Ur Rehman", "Sai Kartheek Reddy Kasu", "Shashivardhan Reddy Koppula", "Sai Rithwik Reddy Chirra", "Shwetank Shekhar Singh", "Nagendra Kumar"]
+
 function Content({ p }: { p: Panel }) {
-  if (p.kind === "vis") return <span className="xp-flip-vis pc is-live" style={{ "--tint": projectMeta[p.slug].tint, "--accent": projectMeta[p.slug].accent } as React.CSSProperties}><ProjectVisual slug={p.slug} /></span>
-  if (p.kind === "fig") { const D = FIGURE_DRAWINGS[p.draw]; return <span className="xp-flip-fig"><D /></span> }
-  if (p.kind === "img") return <span className="xp-flip-img" style={{ backgroundImage: `url(${p.src})`, backgroundSize: p.paper ? "contain" : "cover" }} />
-  if (p.kind === "fog") return <Fog clear={p.clear} />
-  return <span className="xp-flip-type"><b>{p.big}</b><small>{p.small}</small></span>
+  switch (p.kind) {
+    case "vis": return <span className="xp-flip-vis pc is-live" style={{ "--tint": projectMeta[p.slug].tint, "--accent": projectMeta[p.slug].accent } as React.CSSProperties}><ProjectVisual slug={p.slug} /></span>
+    case "fig": { const D = FIGURE_DRAWINGS[p.draw]; return <span className="xp-flip-fig"><D /></span> }
+    case "img": return <span className="xp-flip-img" style={{ backgroundImage: `url(${p.src})`, backgroundSize: p.paper ? "contain" : "cover" }} />
+    case "fog": return <Fog clear={p.clear} />
+    case "sentence": return (
+      <span className="xp-flip-sentence">
+        <span>{WORDS.map((w, i) => <i key={i} style={{ "--lit": LIT[i] ?? 0, "--n": i } as React.CSSProperties}>{w}</i>)}</span>
+        <small>label <b>negative</b> · because <b>hated</b>, <b>screen</b></small>
+      </span>
+    )
+    case "paper": return (
+      <span className="xp-flip-paper">
+        <span className="xp-flip-sheet">
+          <em>AAAI-26</em>
+          <strong>X-MuTeST: A Multilingual Benchmark for Explainable Hate Speech Detection and a Novel LLM-Consulted Explanation Framework</strong>
+          <span>{AUTHORS.map((a, i) => <span key={a}>{i > 0 && ", "}{a.startsWith("Sai Rithwik") ? <b>{a}</b> : a}</span>)}</span>
+          <i aria-hidden="true">{Array.from({ length: 9 }, (_, k) => <u key={k} style={{ width: `${70 + ((k * 37) % 28)}%` }} />)}</i>
+        </span>
+      </span>
+    )
+    default: return <span className="xp-flip-type"><b>{p.big}</b><small>{p.small}</small></span>
+  }
 }
 
-const tone = (p: Panel) => (p.kind === "type" ? p.tone : p.kind === "fig" || (p.kind === "img" && p.paper) ? "paper" : p.kind === "vis" ? "tint" : p.kind === "fog" ? "board" : "photo")
+const tone = (p: Panel) =>
+  p.kind === "type" ? p.tone : p.kind === "fig" || p.kind === "sentence" || (p.kind === "img" && p.paper) ? "paper" : p.kind === "vis" ? "tint" : p.kind === "fog" ? "board" : p.kind === "paper" ? "desk" : "photo"
 
 export function Flipbook() {
   const [on, setOn] = useState(false)
   const [ready, setReady] = useState(false)
+  const [geo, setGeo] = useState<{ w: number; h: number; size: number } | null>(null)
   const root = useRef<HTMLDivElement>(null)
   const pages = useRef<(HTMLDivElement | null)[]>([])
-  const stage = useRef<HTMLDivElement>(null)
   const rig = useRef<HTMLDivElement>(null)
-  const ghosts = useRef<(HTMLDivElement | null)[]>([])
-  const box = useRef<HTMLDivElement>(null)
+  const stage = useRef<HTMLDivElement>(null)
+  const clip = useRef<SVGTextElement>(null)
+  const word = useRef<SVGGElement>(null)
   const score = useRef<FlipScore | null>(null)
   const frame = useRef(0)
   const closing = useRef(false)
@@ -140,11 +200,18 @@ export function Flipbook() {
     return () => window.removeEventListener("xp:flipbook", open)
   }, [])
 
-  // Load every picture before the first cut, so nothing flips onto a blank page (at most ~3 s).
+  // Load every picture and the title's font before the first cut (at most ~3 s), and size the
+  // name to the screen.
   useEffect(() => {
     if (!on) return
     let alive = true
-    const all = IMAGES.map((src) => new Promise<void>((res) => { const i = new Image(); i.onload = i.onerror = () => res(); i.src = src }))
+    const w = window.innerWidth, h = window.innerHeight
+    setGeo({ w, h, size: Math.min(w * 0.2, h * 0.46) })
+    const family = getComputedStyle(document.body).getPropertyValue("--font-oswald").trim() || "sans-serif"
+    const all = [
+      ...IMAGES.map((src) => new Promise<void>((res) => { const i = new Image(); i.onload = i.onerror = () => res(); i.src = src })),
+      document.fonts?.load(`600 100px ${family}`).catch(() => undefined),
+    ]
     Promise.race([Promise.all(all), new Promise((r) => window.setTimeout(r, 3000))]).then(() => { if (alive) setReady(true) })
     return () => { alive = false }
   }, [on])
@@ -158,15 +225,22 @@ export function Flipbook() {
   }, [on, close])
 
   useEffect(() => {
-    if (!on || !ready) return
+    if (!on || !ready || !geo) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      root.current?.classList.add("is-still")
+      root.current?.classList.add("is-still", "is-solid")
       const id = window.setTimeout(() => close(false), 2600)
       return () => window.clearTimeout(id)
     }
 
-    score.current = createFlipScore(CUTS.map((c) => c.t), HIT)
+    score.current = createFlipScore(CUTS.filter((c) => c.t < HIT).map((c) => c.t), HIT)
     score.current?.start()
+
+    // Where to start inside the R: a point in its upright stroke.
+    let ox = geo.w * 0.2, oy = geo.h / 2
+    try {
+      const r = clip.current?.getExtentOfChar(0)
+      if (r) { ox = r.x + r.width * 0.2; oy = r.y + r.height * 0.55 }
+    } catch { /* keep the estimate */ }
 
     let cut = -1, start = 0, prev = -1
     const show = (k: number) => {
@@ -176,7 +250,7 @@ export function Flipbook() {
       if (back && back !== front) { back.classList.remove("is-front"); back.classList.add("is-back") }
       if (front) {
         front.classList.remove("is-back", "is-front")
-        const gap = (CUTS[k + 1]?.t ?? CUTS[k].t + 42) - CUTS[k].t
+        const gap = (CUTS[k + 1]?.t ?? CUTS[k].t + 46) - CUTS[k].t
         front.style.setProperty("--d", `${Math.max(60, Math.min(520, gap * 0.95))}ms`)
         front.classList.toggle("is-cut", !!PANELS[i].cut && k < PANELS.length)
         void front.offsetWidth
@@ -184,64 +258,57 @@ export function Flipbook() {
       }
       prev = i
     }
-    const ease = (x: number) => { const c = Math.min(1, Math.max(0, x)); return c * c * (3 - 2 * c) }
-    const W = window.innerWidth, H = window.innerHeight
-    const bx = box.current?.getBoundingClientRect()
     const tick = (now: number) => {
       frame.current = requestAnimationFrame(tick)
       if (!start) start = now
       const t = now - start
       while (cut + 1 < CUTS.length && CUTS[cut + 1].t <= t) { cut++; show(cut) }
-      const gap = cut >= 0 && cut + 1 < CUTS.length ? CUTS[cut + 1].t - CUTS[cut].t : 42
+      const gap = cut >= 0 && cut + 1 < CUTS.length ? CUTS[cut + 1].t - CUTS[cut].t : 46
 
-      // The camera: it starts low and to one side of a stack of pages, dollies in while it swings
-      // round, keeps a slow handheld sway through the middle, and squares up before the pull-back.
-      const settle = 1 - ease((t - (HIT - 1100)) / 1000)
-      const rotY = -26 * (1 - ease(t / 2800)) + 5 * Math.sin(t / 820) * settle * ease(t / 1400)
-      const rotX = 14 * (1 - ease(t / 3200)) + 2.5 * Math.sin(t / 1150 + 1) * settle * ease(t / 1400)
-      const dolly = -760 * (1 - ease(t / 2800))
-      const swing = Math.min(1, (Math.abs(rotY) + Math.abs(rotX)) / 14)
-      if (rig.current) rig.current.style.transform = t < HIT ? `translateZ(${dolly}px) rotateX(${rotX}deg) rotateY(${rotY}deg)` : "none"
-      ghosts.current.forEach((g, k) => { if (g) g.style.opacity = String(t < HIT ? Math.max(0.12, swing) * (1 - k * 0.12) : 0) })
-
-      // The pages: motion blur and a shake as the cutting speeds up.
-      const blur = t < HIT ? Math.max(0, Math.min(5, 130 / gap - 1.6)) : 0
-      const shake = t > HIT - 900 && t < HIT ? (Math.random() - 0.5) * 5 : 0
-      const zoom = 1 + 0.1 * Math.min(1, t / HIT)
-      if (stage.current) {
-        if (t < HIT) {
-          stage.current.style.transform = `translate(${shake}px, ${shake * 0.6}px) scale(${zoom})`
-          stage.current.style.filter = `blur(${blur}px)`
-          stage.current.style.clipPath = ""
-        } else if (bx) {
-          // The pull-back: the pages keep flipping while the frame closes into the title box.
-          const p = ease((t - HIT) / (BOX - HIT))
-          stage.current.style.transform = `scale(${zoom - (zoom - 1) * p})`
-          stage.current.style.filter = `blur(${2 * (1 - p)}px) brightness(${1 - 0.25 * p})`
-          stage.current.style.clipPath = `inset(${bx.top * p}px ${(W - bx.right) * p}px ${(H - bx.bottom) * p}px ${bx.left * p}px)`
-          stage.current.style.opacity = String(t < BOX ? 1 : Math.max(0, 1 - (t - BOX) / 450))
-        }
+      if (t < HIT) {
+        // Act one: the chapter camera, a breath of handheld on top, blur once the cutting races.
+        const c = shotAt(t)
+        const hand = (Math.sin(t / 610) + Math.sin(t / 1730 + 2)) * 0.35
+        if (rig.current) rig.current.style.transform = `translate(${c.x}%, ${c.y}%) scale(${c.s}) rotateX(${c.rx + hand * 0.6}deg) rotateY(${c.ry + hand}deg) rotateZ(${c.rz}deg)`
+        if (stage.current) stage.current.style.filter = `blur(${Math.max(0, Math.min(4, 120 / gap - 1.7))}px)`
+      } else {
+        // Act two: from deep inside the R out to the whole name.
+        root.current?.classList.add("is-title")
+        if (rig.current) rig.current.style.transform = "none"
+        if (stage.current) stage.current.style.filter = "none"
+        const p = Math.min(1, (t - HIT) / (REVEAL - HIT))
+        const s = Math.exp(Math.log(26) * Math.pow(1 - p, 3)) // 26 → 1, fast then gentle
+        const tf = `translate(${ox} ${oy}) scale(${s}) translate(${-ox} ${-oy})`
+        clip.current?.setAttribute("transform", tf)
+        word.current?.setAttribute("transform", tf)
+        if (t >= SOLID) root.current?.classList.add("is-solid")
       }
-      if (t >= HIT) root.current?.classList.add("is-plate")
-      if (t >= BOX - 250) root.current?.classList.add("is-box")
-      if (t >= GOLD) root.current?.classList.add("is-name")
       if (t >= END) close(false)
     }
     frame.current = requestAnimationFrame(tick)
     return () => { cancelAnimationFrame(frame.current); score.current?.stop(0.3) }
-  }, [on, ready, close])
+  }, [on, ready, geo, close])
 
   if (!on) return null
+  const text = geo && {
+    x: geo.w / 2, y: geo.h / 2, fontSize: geo.size, textAnchor: "middle" as const, dominantBaseline: "central" as const,
+    letterSpacing: geo.size * 0.05, style: { fontFamily: "var(--font-oswald), 'Arial Narrow', sans-serif", fontWeight: 600 },
+  }
   return (
-    <div ref={root} className="xp-flip" role="dialog" aria-modal="true" aria-label="The flipbook intro: my work, chapter by chapter, flipping into my name" onClick={() => close()}>
+    <div ref={root} className="xp-flip" role="dialog" aria-modal="true" aria-label={`The flipbook intro: my work, chapter by chapter, flipping into the name ${NAME}`} onClick={() => close()}>
       {!ready && <p className="xp-flip-loading" aria-live="polite">Loading the pages…</p>}
+      {geo && text && (
+        <svg className="xp-flip-defs" width="0" height="0" aria-hidden="true">
+          <defs>
+            <clipPath id="xp-flip-letters" clipPathUnits="userSpaceOnUse"><text ref={clip} {...text}>{NAME}</text></clipPath>
+            <linearGradient id="xp-flip-silver" x1="0" y1="0" x2="1" y2="0.35">
+              <stop offset="0" stopColor="#8a8d95" /><stop offset="0.42" stopColor="#e6e8ec" /><stop offset="0.5" stopColor="#ffffff" /><stop offset="0.58" stopColor="#e6e8ec" /><stop offset="1" stopColor="#7c7f87" />
+            </linearGradient>
+          </defs>
+        </svg>
+      )}
       <div className="xp-flip-world" aria-hidden="true">
         <div className="xp-flip-rig" ref={rig}>
-          {GHOSTS.map((i, k) => (
-            <div key={i} ref={(el) => { ghosts.current[k] = el }} className={`xp-flip-ghost is-${tone(PANELS[i])}`} style={{ "--k": k } as React.CSSProperties}>
-              <span className="xp-flip-cam"><Content p={PANELS[i]} /></span>
-            </div>
-          ))}
           <div className="xp-flip-stage" ref={stage}>
             {PANELS.map((p, i) => (
               <div key={i} ref={(el) => { pages.current[i] = el }} className={`xp-flip-page is-${tone(p)}`}>
@@ -252,10 +319,14 @@ export function Flipbook() {
           </div>
         </div>
       </div>
-      <div className="xp-flip-flash" aria-hidden="true" />
-      <div className="xp-flip-box" ref={box}>
-        <p className="xp-flip-name" aria-label={NAME}><span aria-hidden="true">{NAME}</span></p>
-      </div>
+      {geo && text && (
+        <svg className="xp-flip-word" viewBox={`0 0 ${geo.w} ${geo.h}`} aria-hidden="true">
+          <g ref={word}>
+            <text {...text} className="xp-flip-edge">{NAME}</text>
+            <text {...text} className="xp-flip-solid" fill="url(#xp-flip-silver)">{NAME}</text>
+          </g>
+        </svg>
+      )}
       <i className="xp-flip-grain" aria-hidden="true" />
       <button type="button" className="xp-opening-skip xp-flip-skip" onClick={(e) => { e.stopPropagation(); close() }}>Skip</button>
     </div>
