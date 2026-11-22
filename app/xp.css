@@ -2142,32 +2142,26 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip-sentence small { font: 0.85rem var(--xp-mono); letter-spacing: 0.18em; text-transform: uppercase; color: #6b6358; }
 .xp-flip-sentence small b { color: #b45d16; }
 
-/* The flipbook's last frame: haze, slow rays, a horizon flare, drifting dust, a reflection. */
+/* The flipbook's last frame: deep black and a quiet field of stars; the name in 3D. */
 .xp-flip-bg { position: absolute; inset: 0; z-index: 0; opacity: 0; overflow: hidden; transition: opacity 1800ms ease; pointer-events: none; }
 .xp-flip.is-dawn .xp-flip-bg { opacity: 1; }
-.xp-flip-world { z-index: 1; }
-.xp-flip-haze { position: absolute; inset: 0; background: radial-gradient(ellipse 55% 38% at 50% 50%, rgba(244, 183, 106, 0.2), rgba(150, 80, 30, 0.08) 48%, transparent 72%), linear-gradient(180deg, transparent 55%, rgba(244, 183, 106, 0.06) 62%, transparent 80%); }
-.xp-flip-rays { position: absolute; inset: -60%; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 222, 176, 0.09) 0deg 1.1deg, transparent 1.1deg 7.5deg); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, rgba(0, 0, 0, 0.5) 18%, transparent 42%); mask-image: radial-gradient(circle at 50% 50%, #000 0%, rgba(0, 0, 0, 0.5) 18%, transparent 42%); animation: xp-flip-turnrays 70s linear infinite; }
-@keyframes xp-flip-turnrays { to { transform: rotate(360deg); } }
-.xp-flip-flare { position: absolute; left: -10%; right: -10%; top: 50%; height: 2px; margin-top: -1px; background: linear-gradient(90deg, transparent, rgba(255, 214, 160, 0.15) 18%, rgba(255, 238, 210, 0.95) 50%, rgba(255, 214, 160, 0.15) 82%, transparent); box-shadow: 0 0 22px 4px rgba(244, 183, 106, 0.3); transform: scaleX(0); opacity: 0; transition: transform 2200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 900ms ease; }
-.xp-flip.is-solid .xp-flip-flare { transform: scaleX(1); opacity: 0.75; }
-.xp-flip-bg b { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: rgba(255, 226, 184, 0.75); box-shadow: 0 0 6px rgba(255, 210, 150, 0.6); opacity: 0; animation: xp-flip-dust var(--d) linear var(--delay) infinite; }
-@keyframes xp-flip-dust { 0% { transform: translate(0, 20px); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.5; } 100% { transform: translate(14px, -60px); opacity: 0; } }
-.xp-flip-reflect { opacity: 0; transition: opacity 1800ms 500ms ease; }
-.xp-flip.is-solid .xp-flip-reflect { opacity: 1; }
 .xp-flip-sheen { opacity: 0; mix-blend-mode: screen; }
 .xp-flip.is-solid .xp-flip-sheen { opacity: 1; }
 
 /* The handoff to the homepage. */
 .xp-flip.is-leaving { background-color: rgba(5, 4, 4, 0); pointer-events: none; }
 .xp-flip.is-leaving .xp-flip-bg, .xp-flip.is-leaving .xp-flip-grain, .xp-flip.is-leaving .xp-flip-skip { opacity: 0; transition: opacity 1100ms ease; }
-.xp-flip.is-leaving .xp-flip-edge, .xp-flip.is-leaving .xp-flip-reflect, .xp-flip.is-leaving .xp-flip-sheen { opacity: 0; transition: opacity 500ms ease; }
+.xp-flip.is-leaving .xp-flip-edge, .xp-flip.is-leaving .xp-flip-sheen, .xp-flip.is-leaving .xp-flip-depth { opacity: 0; transition: opacity 600ms ease; }
 .xp-flip-solid tspan { transition: fill-opacity 800ms ease; }
 .xp-flip.is-leaving .xp-flip-solid tspan { fill-opacity: 0; transition-delay: calc(var(--i) * 70ms); }
 .xp-flip.is-leaving .xp-flip-solid tspan:first-child { transition: none; }
-.xp-flip.is-leaving .xp-flip-word { filter: blur(4px); transform: translateY(-1.2%); transition: filter 1000ms ease, transform 1400ms cubic-bezier(0.2, 0.7, 0.1, 1); }
+.xp-flip.is-leaving .xp-flip-word { transform: translateZ(1px) translateY(-1%); transition: transform 1400ms cubic-bezier(0.2, 0.7, 0.1, 1); }
 .xp-opening-flight.is-flip { z-index: 220; }
 .xp-opening-flight.is-flip b { color: #eceef2; font: 600 0.86em var(--font-oswald), "Arial Narrow", sans-serif; text-shadow: 0 0 24px rgba(244, 183, 106, 0.35); }
-html.is-flip-arrive main { animation: xp-flip-arrive 1700ms cubic-bezier(0.2, 0.7, 0.1, 1) both; }
-html.is-flip-arrive .xp-nav { animation: xp-fade 1200ms 500ms ease both; }
-@keyframes xp-flip-arrive { from { filter: blur(14px) brightness(0.5); transform: scale(1.025); } to { filter: none; transform: none; } }
+.xp-flip-stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+.xp-flip-view { position: absolute; inset: 0; z-index: 1; perspective: 1400px; perspective-origin: 50% 50%; }
+.xp-flip-title3d { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.xp-flip-word { transform: translateZ(1px); }
+.xp-flip-depth { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 1200ms ease; }
+.xp-flip.is-title .xp-flip-depth { opacity: 1; }
+.xp-flip.is-title.is-leaving .xp-flip-depth { opacity: 0; transition: opacity 500ms ease; }

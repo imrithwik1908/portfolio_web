@@ -118,6 +118,7 @@ function shotAt(t: number): Shot {
 }
 
 const NAME = "RITHWIK"
+const DEPTH = 14 // layers of extrusion behind the letters
 
 // A chessboard in fog: squares clear outward from the white king as `clear` grows.
 const PIECES: Record<number, string> = { 60: "♔", 51: "♙", 52: "♙", 53: "♙", 45: "♘", 61: "♗", 4: "♚", 12: "♟", 11: "♟", 21: "♞", 27: "♟", 36: "♙", 2: "♝", 0: "♜", 63: "♖" }
@@ -186,6 +187,9 @@ export function Flipbook() {
   const word = useRef<SVGGElement>(null)
   const sheen = useRef<SVGLinearGradientElement>(null)
   const rLetter = useRef<SVGTSpanElement>(null)
+  const titleCam = useRef<HTMLDivElement>(null)
+  const depth = useRef<(SVGGElement | null)[]>([])
+  const stars = useRef<HTMLCanvasElement>(null)
   const score = useRef<FlipScore | null>(null)
   const frame = useRef(0)
   const closing = useRef(false)
@@ -246,24 +250,22 @@ export function Flipbook() {
       if (r) { ox = r.x + r.width * 0.2; oy = r.y + r.height * 0.55 }
     } catch { /* keep the estimate */ }
 
-    let cut = -1, start = 0, prev = -1, left = false
+    let cut = -1, start = 0, prev = -1, left = false, prepped = false
 
     // The handoff: the R lifts off the title and glides onto the R of the name on the homepage,
-    // turning into it on the way; the other letters dissolve and the page pulls into focus.
+    // turning into it on the way, along one continuous curve; the rest of the name fades away and
+    // the black opens onto the page. The page is scrolled and staged under the black beforehand.
+    const html = document.documentElement
+    const target = document.querySelector<HTMLElement>(".xp-hero h1 .xp-name")
+    const prep = () => {
+      if (!target) return
+      window.scrollTo(0, 0)
+      html.classList.add("is-handoff")
+    }
     const handoff = () => {
-      const html = document.documentElement
-      const finish = () => {
-        cancelAnimationFrame(frame.current)
-        html.classList.remove("is-flip-arrive")
-        window.setTimeout(() => html.classList.remove("is-handoff", "is-landed"), 1800)
-        setOn(false); setReady(false)
-      }
-      score.current?.stop(2.6)
-      const target = document.querySelector<HTMLElement>(".xp-hero h1 .xp-name")
       const textNode = target?.firstChild
       if (!target || !textNode || textNode.nodeType !== Node.TEXT_NODE || !rLetter.current) { close(false); return }
-      window.scrollTo(0, 0)
-      html.classList.add("is-handoff", "is-flip-arrive")
+      score.current?.stop(2.8)
       const range = document.createRange(); range.setStart(textNode, 0); range.setEnd(textNode, 1)
       const dst = range.getBoundingClientRect()
       target.style.setProperty("--r-w", `${dst.width + 2}px`)
@@ -275,23 +277,51 @@ export function Flipbook() {
       ghost.innerHTML = "<b>R</b><em>R</em>"
       document.body.appendChild(ghost)
       root.current?.classList.add("is-leaving")
-      const dx = src.left + src.width / 2 - (dst.left + dst.width / 2)
-      const dy = src.top + src.height / 2 - (dst.top + dst.height / 2)
+      // A quadratic curve that rises a little on its way, sampled finely and eased once over the
+      // whole path, so speed changes smoothly from lift-off to landing.
+      const sx = src.left + src.width / 2 - (dst.left + dst.width / 2)
+      const sy = src.top + src.height / 2 - (dst.top + dst.height / 2)
       const k = src.height / dst.height
-      const lift = Math.min(90, Math.hypot(dx, dy) * 0.09)
-      const ease = "cubic-bezier(0.45, 0, 0.2, 1)"
-      ghost.animate([
-        { transform: `translate(${dx}px, ${dy}px) scale(${k})` },
-        { transform: `translate(${dx * 0.42}px, ${dy * 0.42 - lift}px) scale(${k + (1 - k) * 0.55})`, offset: 0.55 },
-        { transform: "translate(0px, 0px) scale(1)" },
-      ], { duration: FLY_MS, easing: ease, fill: "forwards" })
-      ghost.querySelector("b")!.animate([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0, offset: 0.72 }, { opacity: 0 }], { duration: FLY_MS, fill: "forwards" })
-      ghost.querySelector("em")!.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1, offset: 0.82 }, { opacity: 1 }], { duration: FLY_MS, fill: "forwards" })
+      const lift = Math.min(120, Math.hypot(sx, sy) * 0.14)
+      const cx = sx * 0.45, cy = sy * 0.45 - lift
+      const frames: Keyframe[] = []
+      for (let n = 0; n <= 48; n++) {
+        const e = smooth(n / 48), q = 1 - e
+        const x = q * q * sx + 2 * q * e * cx, y = q * q * sy + 2 * q * e * cy
+        frames.push({ transform: `translate(${x}px, ${y}px) scale(${k + (1 - k) * e})` })
+      }
+      ghost.animate(frames, { duration: FLY_MS, easing: "linear", fill: "forwards" })
+      ghost.querySelector("b")!.animate([{ opacity: 1 }, { opacity: 1, offset: 0.28 }, { opacity: 0, offset: 0.7 }, { opacity: 0 }], { duration: FLY_MS, easing: "ease-in-out", fill: "forwards" })
+      ghost.querySelector("em")!.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1, offset: 0.72 }, { opacity: 1 }], { duration: FLY_MS, easing: "ease-in-out", fill: "forwards" })
       window.setTimeout(() => {
         html.classList.add("is-landed")
-        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: "ease-out", fill: "forwards" }).onfinish = () => ghost.remove()
-        finish()
+        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: "ease-out", fill: "forwards" }).onfinish = () => ghost.remove()
+        cancelAnimationFrame(frame.current)
+        window.setTimeout(() => html.classList.remove("is-handoff", "is-landed"), 1800)
+        setOn(false); setReady(false)
       }, FLY_MS)
+    }
+
+    // A quiet field of stars for the last frame, drawn on the same clock; nearer stars drift a
+    // little faster and lean with the camera.
+    const sc = stars.current, sctx = sc?.getContext("2d")
+    const dpr = Math.min(2, window.devicePixelRatio || 1)
+    if (sc) { sc.width = geo.w * dpr; sc.height = geo.h * dpr }
+    const field = Array.from({ length: 260 }, (_, n) => {
+      const z = Math.pow(((n * 0.6180339) % 1), 2.2) // most stars far away
+      return { x: (n * 0.7548776) % 1, y: (n * 0.5698403) % 1, z, r: 0.35 + z * 1.3, ph: n * 2.39 }
+    })
+    const drawStars = (t: number, lean: number) => {
+      if (!sctx || !sc) return
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      sctx.clearRect(0, 0, geo.w, geo.h)
+      for (const s of field) {
+        const x = ((s.x * geo.w + t * 0.004 * (0.3 + s.z) + lean * s.z * 14) % geo.w + geo.w) % geo.w
+        const y = s.y * geo.h
+        const a = (0.25 + 0.6 * s.z) * (0.75 + 0.25 * Math.sin(t / 900 + s.ph))
+        sctx.fillStyle = `rgba(226, 232, 245, ${a})`
+        sctx.beginPath(); sctx.arc(x, y, s.r, 0, Math.PI * 2); sctx.fill()
+      }
     }
     const show = (k: number) => {
       const { i } = CUTS[k]
@@ -329,15 +359,24 @@ export function Flipbook() {
         // Log-scale with an ease at both ends: a slow drift inside the R, a long glide out, a soft
         // arrival, so the name is never simply "there".
         const p = Math.min(1, (t - HIT) / (REVEAL - HIT))
-        const s = Math.exp(Math.log(26) * (1 - smooth(p)))
+        const e = smooth(p)
+        const s = Math.exp(Math.log(26) * (1 - e))
         const tf = `translate(${ox} ${oy}) scale(${s}) translate(${-ox} ${-oy})`
         clip.current?.setAttribute("transform", tf)
         word.current?.setAttribute("transform", tf)
-        if (t >= REVEAL - 900) root.current?.classList.add("is-dawn")
+        depth.current.forEach((g) => g?.setAttribute("transform", tf))
+        // The camera orbits the name as it pulls back, then drifts a few degrees and comes home
+        // square just before the R lifts off.
+        const hold = Math.sin(Math.PI * Math.min(1, Math.max(0, (t - REVEAL) / (LEAVE - 500 - REVEAL))))
+        const ry = -24 * (1 - e) + 6 * hold, rx = 10 * (1 - e) - 2 * hold
+        if (titleCam.current) titleCam.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`
+        if (t >= REVEAL - 1400) { root.current?.classList.add("is-dawn"); drawStars(t, ry / 10) }
+        if (t >= LEAVE - 900 && !prepped) { prepped = true; prep() }
         if (t >= SOLID) root.current?.classList.add("is-solid")
         // One pass of light across the set letters.
         const sw = Math.min(1, Math.max(0, (t - SOLID - 500) / 1900))
         sheen.current?.setAttribute("gradientTransform", `translate(${-1.2 + 2.4 * smooth(sw)} 0)`)
+        if (left) drawStars(t, 0)
         if (t >= LEAVE && !left) { left = true; handoff() }
       }
       if (t >= END && !left) close(false)
@@ -362,20 +401,21 @@ export function Flipbook() {
               <stop offset="0" stopColor="#8a8d95" /><stop offset="0.42" stopColor="#e6e8ec" /><stop offset="0.5" stopColor="#ffffff" /><stop offset="0.58" stopColor="#e6e8ec" /><stop offset="1" stopColor="#7c7f87" />
             </linearGradient>
             <linearGradient id="xp-flip-sheen" ref={sheen} x1="0" y1="0" x2="1" y2="0.2" gradientTransform="translate(-1.2 0)">
-              <stop offset="0.38" stopColor="#fff" stopOpacity="0" /><stop offset="0.5" stopColor="#fff" stopOpacity="0.9" /><stop offset="0.62" stopColor="#fff" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="xp-flip-reflect" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0.35" stopColor="#d9dce2" stopOpacity="0" /><stop offset="1" stopColor="#d9dce2" stopOpacity="0.2" />
+              <stop offset="0.38" stopColor="#fff" stopOpacity="0" /><stop offset="0.5" stopColor="#fff" stopOpacity="0.5" /><stop offset="0.62" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
           </defs>
         </svg>
       )}
       <div className="xp-flip-bg" aria-hidden="true">
-        <i className="xp-flip-rays" />
-        <i className="xp-flip-haze" />
-        <i className="xp-flip-flare" />
-        {Array.from({ length: 36 }, (_, i) => <b key={i} style={{ "--x": `${(i * 37) % 100}%`, "--y": `${(i * 53) % 100}%`, "--s": `${1 + (i % 3)}px`, "--d": `${7 + (i % 5) * 2}s`, "--delay": `${-(i % 7)}s` } as React.CSSProperties} />)}
+        <canvas ref={stars} className="xp-flip-stars" />
       </div>
+      <div className="xp-flip-view">
+      <div className="xp-flip-title3d" ref={titleCam}>
+      {geo && text && Array.from({ length: DEPTH }, (_, k) => (
+        <svg key={k} className="xp-flip-depth" viewBox={`0 0 ${geo.w} ${geo.h}`} aria-hidden="true" style={{ transform: `translateZ(${-(k + 1) * geo.size * 0.011}px)` }}>
+          <g ref={(el) => { depth.current[k] = el }}><text {...text} fill={`hsl(220 6% ${26 - k * 1.2}%)`}>{NAME}</text></g>
+        </svg>
+      ))}
       <div className="xp-flip-world" aria-hidden="true">
         <div className="xp-flip-rig" ref={rig}>
           <div className="xp-flip-stage" ref={stage}>
@@ -391,7 +431,6 @@ export function Flipbook() {
       {geo && text && (
         <svg className="xp-flip-word" viewBox={`0 0 ${geo.w} ${geo.h}`} aria-hidden="true">
           <g ref={word}>
-            <text {...text} className="xp-flip-reflect" fill="url(#xp-flip-reflect)" transform={`translate(0 ${geo.h + geo.size * 0.78}) scale(1 -1)`}>{NAME}</text>
             <text {...text} className="xp-flip-edge">{NAME}</text>
             <text {...text} className="xp-flip-solid" fill="url(#xp-flip-silver)">
               {NAME.split("").map((c, i) => <tspan key={i} ref={i === 0 ? rLetter : undefined} style={{ "--i": i } as React.CSSProperties}>{c}</tspan>)}
@@ -400,6 +439,8 @@ export function Flipbook() {
           </g>
         </svg>
       )}
+      </div>
+      </div>
       <i className="xp-flip-grain" aria-hidden="true" />
       <button type="button" className="xp-opening-skip xp-flip-skip" onClick={(e) => { e.stopPropagation(); close() }}>Skip</button>
     </div>
