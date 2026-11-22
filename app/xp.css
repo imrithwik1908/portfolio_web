@@ -2067,7 +2067,7 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 /* The flipbook: an optional second opening, from the command menu. */
 .xp-flip { position: fixed; inset: 0; z-index: 210; overflow: hidden; background: #050404; color: #f3ead8; cursor: pointer; transition: opacity 450ms ease; animation: xp-fade 250ms ease both; }
 .xp-flip.is-out { opacity: 0; pointer-events: none; }
-.xp-flip-stage { position: absolute; inset: 0; perspective: 1500px; transform-origin: 50% 50%; will-change: transform, filter; }
+.xp-flip-stage { position: absolute; inset: 0; perspective: 1500px; transform-style: flat; transform-origin: 50% 50%; will-change: transform, filter; }
 .xp-flip-page { position: absolute; inset: 0; overflow: hidden; border: clamp(6px, 1.2vw, 14px) solid #050404; opacity: 0; transform-origin: 0% 50%; backface-visibility: hidden; }
 .xp-flip-page::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0, 0, 0, 0.22) 0.9px, transparent 1.2px); background-size: 5px 5px; mix-blend-mode: multiply; opacity: 0.55; pointer-events: none; }
 .xp-flip-page.is-back { z-index: 1; opacity: 1; filter: brightness(0.5); }
@@ -2100,25 +2100,12 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip-type b { font: 400 clamp(3.4rem, 13vw, 11.5rem) / 0.9 var(--xp-serif); letter-spacing: -0.01em; }
 .xp-flip-type small { font: 0.8rem var(--xp-mono); letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.75; }
 .xp-flip-flash { position: absolute; inset: 0; z-index: 3; background: radial-gradient(circle at 50% 50%, #fff8ea, #f4b76a 40%, rgba(244, 183, 106, 0) 75%); opacity: 0; pointer-events: none; }
-.xp-flip.is-plate .xp-flip-flash { animation: xp-flip-flash 1100ms ease-out both; }
-@keyframes xp-flip-flash { 0% { opacity: 0; } 7% { opacity: 1; } 100% { opacity: 0; } }
-.xp-flip-plate { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: clamp(14px, 2vw, 26px); opacity: 0; pointer-events: none; }
-.xp-flip.is-plate .xp-flip-plate { opacity: 1; }
-.xp-flip-name { position: relative; margin: 0; font: 600 clamp(4.4rem, 21vw, 18rem) / 0.9 var(--font-oswald), "Arial Narrow", sans-serif; letter-spacing: 0.01em; white-space: nowrap; }
-.xp-flip-fill { display: block; color: transparent; background-size: cover; background-position: center; -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1.5px rgba(244, 183, 106, 0.55); filter: contrast(1.25) saturate(1.3); transition: opacity 600ms ease; }
-.xp-flip-gold { position: absolute; inset: 0; color: transparent; background: linear-gradient(100deg, #6b3f0f 0%, #c98a3e 22%, #f4c98a 38%, #fff6e2 46%, #f4c98a 54%, #c98a3e 70%, #5e360c 100%); background-size: 260% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 34px rgba(244, 183, 106, 0.35)); opacity: 0; transition: opacity 700ms ease; }
-.xp-flip.is-gold .xp-flip-fill { opacity: 0; }
-.xp-flip.is-gold .xp-flip-gold { opacity: 1; animation: xp-flip-sweep 1700ms 250ms cubic-bezier(0.45, 0, 0.2, 1) both; }
-@keyframes xp-flip-sweep { from { background-position: 100% 0; } to { background-position: 0% 0; } }
-.xp-flip-sub { margin: 0; padding-top: 14px; border-top: 1px solid rgba(244, 183, 106, 0.45); color: rgba(243, 234, 216, 0.78); font: clamp(0.6rem, 1.6vw, 0.78rem) var(--xp-mono); letter-spacing: 0.22em; text-align: center; text-transform: uppercase; opacity: 0; clip-path: inset(0 50% 0 50%); transition: opacity 600ms 500ms ease, clip-path 1100ms 500ms cubic-bezier(0.2, 0.7, 0.1, 1); }
-.xp-flip.is-gold .xp-flip-sub { opacity: 1; clip-path: inset(0 0 0 0); }
+.xp-flip.is-plate .xp-flip-flash { animation: xp-flip-flash 700ms ease-out both; }
+@keyframes xp-flip-flash { 0% { opacity: 0; } 10% { opacity: 0.55; } 100% { opacity: 0; } }
 .xp-flip-grain { position: absolute; inset: 0; z-index: 5; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.6)); pointer-events: none; }
 .xp-flip-skip { z-index: 6; }
 .xp-flip.is-still .xp-flip-stage { display: none; }
-.xp-flip.is-still .xp-flip-plate { opacity: 1; }
-.xp-flip.is-still .xp-flip-fill { opacity: 0; }
-.xp-flip.is-still .xp-flip-gold, .xp-flip.is-still .xp-flip-sub { opacity: 1; clip-path: none; animation: none; background-position: 50% 0; }
-@media (max-width: 760px) { .xp-flip-page { border-width: 5px; } .xp-flip-sub { max-width: 30ch; line-height: 1.7; } }
+@media (max-width: 760px) { .xp-flip-page { border-width: 5px; } }
 .xp-credits-intro { max-width: 60ch; margin: 8px 0 32px !important; color: var(--xp-muted); }
 .xp-credits-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px 28px; margin: 0; padding: 0; list-style: none; }
 .xp-credits-list li { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
@@ -2126,3 +2113,22 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-credits-list div { display: grid; gap: 2px; font-size: 0.85rem; color: var(--xp-muted); min-width: 0; }
 .xp-credits-list div > a:first-child { color: var(--xp-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .xp-credits-list a { text-decoration: underline; text-decoration-color: var(--xp-line-strong); text-underline-offset: 3px; }
+
+.xp-flip-world { position: absolute; inset: 0; perspective: 1100px; perspective-origin: 50% 45%; }
+.xp-flip-rig { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.xp-flip-ghost { position: absolute; inset: 0; overflow: hidden; border: clamp(6px, 1.2vw, 14px) solid #050404; opacity: 0; filter: brightness(0.55) saturate(0.8); transform: translateZ(calc(var(--k) * -260px - 200px)) translateX(calc((var(--k) - 1) * 9%)) rotateY(calc((var(--k) - 2) * -4deg)); pointer-events: none; }
+.xp-flip-ghost.is-paper, .xp-flip-ghost.is-tint { background: #f3efe8; }
+.xp-flip-ghost.is-board { background: #141210; }
+.xp-flip-ghost.is-photo, .xp-flip-ghost.is-ink { background: #0b0907; }
+.xp-flip-ghost.is-lamp { background: #f2b062; }
+.xp-flip-box { position: absolute; left: 50%; top: 50%; z-index: 4; display: grid; place-items: center; width: min(74vw, 1000px); aspect-ratio: 3.6 / 1; transform: translate(-50%, -50%); border: 1px solid rgba(232, 234, 238, 0); background: rgba(10, 10, 12, 0); pointer-events: none; transition: border-color 600ms ease, background 700ms ease, box-shadow 900ms ease; }
+.xp-flip.is-box .xp-flip-box { border-color: rgba(232, 234, 238, 0.55); background: radial-gradient(ellipse at 50% 120%, rgba(244, 183, 106, 0.16), transparent 60%), #0b0b0d; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 40px 120px -40px rgba(244, 183, 106, 0.25); }
+.xp-flip-name { margin: 0; font: 300 calc(min(74vw, 1000px) * 0.13) / 1 var(--font-oswald), "Arial Narrow", sans-serif; letter-spacing: 0.5em; margin-right: -0.5em; text-transform: uppercase; white-space: nowrap; opacity: 0; transition: opacity 900ms ease, letter-spacing 2400ms cubic-bezier(0.16, 1, 0.3, 1), margin-right 2400ms cubic-bezier(0.16, 1, 0.3, 1), filter 900ms ease; filter: blur(6px); }
+.xp-flip-name span { color: transparent; background: linear-gradient(100deg, #7e8189 0%, #c9ccd3 30%, #ffffff 46%, #c9ccd3 60%, #7e8189 100%); background-size: 260% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; }
+.xp-flip.is-name .xp-flip-name { opacity: 1; letter-spacing: 0.3em; margin-right: -0.3em; filter: blur(0); }
+.xp-flip.is-name .xp-flip-name span { animation: xp-flip-sheen 2000ms 400ms cubic-bezier(0.45, 0, 0.2, 1) both; }
+@keyframes xp-flip-sheen { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+.xp-flip.is-still .xp-flip-world { display: none; }
+.xp-flip.is-still .xp-flip-box { border-color: rgba(232, 234, 238, 0.55); background: #0b0b0d; }
+.xp-flip.is-still .xp-flip-name { opacity: 1; letter-spacing: 0.3em; margin-right: -0.3em; filter: none; transition: none; }
+@media (max-width: 760px) { .xp-flip-box { width: 86vw; } .xp-flip-name { font-size: calc(86vw * 0.13); } }
