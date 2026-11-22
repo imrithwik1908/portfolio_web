@@ -3,7 +3,8 @@
 //   0 – 4 s   a low drone and a string-like swell (detuned saws, filter slowly opening) in D minor,
 //             a soft paper flick on every cut, and a noise riser that climbs with the cutting
 //   4 s       the hit: a deep boom, a wide brass-like D minor chord, a cymbal-ish wash
-//   4 – 7 s   the chord rings and opens to D major (add 9) as the name settles, a high bell on the shine
+//   after     the chord opens to D major (add 9) under the pull-back, bells as the name lands and
+//             the light crosses it, a soft rising breath as the R lifts off for the homepage
 
 export type FlipScore = { start: () => Promise<boolean>; stop: (seconds?: number) => void }
 
@@ -93,9 +94,10 @@ export function createFlipScore(cuts: number[], hitAt: number, volume = 0.6): Fl
     thump(hit, 0.4, 160, 60, 0.4)
     wash(hit, 2.2, 0.28, false)
     saws([38, 50, 57, 62, 65, 69], hit, 1.4, 0.75, 800, 5200, 0.03) // D minor, wide
-    saws([38, 50, 57, 62, 66, 69, 76], hit + 1.2, 2.6, 0.62, 2400, 3400, 0.5) // opens to D major add 9
-    bell(hz(81), hit + 1.4, 0.07)
-    bell(hz(86), hit + 2.0, 0.05)
+    saws([38, 50, 57, 62, 66, 69, 76], hit + 1.2, 5.4, 0.62, 2400, 3400, 1.6) // opens to D major add 9 as the name pulls out
+    bell(hz(81), hit + 2.6, 0.06) // the name arrives
+    bell(hz(86), hit + 3.5, 0.06) // the light crosses it
+    wash(hit + 4.6, 1.6, 0.06, true) // a breath as the R lifts off
   }
 
   let started = false, stopped = false

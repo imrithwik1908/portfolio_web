@@ -69,9 +69,11 @@ const IMAGES = Array.from(new Set(PANELS.flatMap((p) => (p.kind === "img" ? [p.s
 // Act one: one pass through the cards, each a little quicker than the last.
 // Act two: the title, with the pages still flipping (steadier now) inside the letters.
 const HIT = 6000 // the camera is inside the R
-const REVEAL = HIT + 1500 // the whole name is on screen
-const SOLID = HIT + 2400 // the letters set
-const END = HIT + 3900
+const REVEAL = HIT + 2600 // the whole name is on screen
+const SOLID = HIT + 3000 // the letters start to set
+const LEAVE = HIT + 5200 // the R lifts off for the homepage
+const FLY_MS = 1700
+const END = LEAVE + FLY_MS + 200
 const CUTS: { t: number; i: number }[] = (() => {
   const out: { t: number; i: number }[] = []
   let t = 140, gap = 560
@@ -182,6 +184,8 @@ export function Flipbook() {
   const stage = useRef<HTMLDivElement>(null)
   const clip = useRef<SVGTextElement>(null)
   const word = useRef<SVGGElement>(null)
+  const sheen = useRef<SVGLinearGradientElement>(null)
+  const rLetter = useRef<SVGTSpanElement>(null)
   const score = useRef<FlipScore | null>(null)
   const frame = useRef(0)
   const closing = useRef(false)
@@ -242,7 +246,53 @@ export function Flipbook() {
       if (r) { ox = r.x + r.width * 0.2; oy = r.y + r.height * 0.55 }
     } catch { /* keep the estimate */ }
 
-    let cut = -1, start = 0, prev = -1
+    let cut = -1, start = 0, prev = -1, left = false
+
+    // The handoff: the R lifts off the title and glides onto the R of the name on the homepage,
+    // turning into it on the way; the other letters dissolve and the page pulls into focus.
+    const handoff = () => {
+      const html = document.documentElement
+      const finish = () => {
+        cancelAnimationFrame(frame.current)
+        html.classList.remove("is-flip-arrive")
+        window.setTimeout(() => html.classList.remove("is-handoff", "is-landed"), 1800)
+        setOn(false); setReady(false)
+      }
+      score.current?.stop(2.6)
+      const target = document.querySelector<HTMLElement>(".xp-hero h1 .xp-name")
+      const textNode = target?.firstChild
+      if (!target || !textNode || textNode.nodeType !== Node.TEXT_NODE || !rLetter.current) { close(false); return }
+      window.scrollTo(0, 0)
+      html.classList.add("is-handoff", "is-flip-arrive")
+      const range = document.createRange(); range.setStart(textNode, 0); range.setEnd(textNode, 1)
+      const dst = range.getBoundingClientRect()
+      target.style.setProperty("--r-w", `${dst.width + 2}px`)
+      const src = rLetter.current.getBoundingClientRect()
+      const cs = getComputedStyle(target)
+      const ghost = document.createElement("span")
+      ghost.className = "xp-opening-flight is-flip"
+      Object.assign(ghost.style, { left: `${dst.left}px`, top: `${dst.top}px`, width: `${dst.width}px`, height: `${dst.height}px`, font: `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} / ${dst.height}px ${cs.fontFamily}` })
+      ghost.innerHTML = "<b>R</b><em>R</em>"
+      document.body.appendChild(ghost)
+      root.current?.classList.add("is-leaving")
+      const dx = src.left + src.width / 2 - (dst.left + dst.width / 2)
+      const dy = src.top + src.height / 2 - (dst.top + dst.height / 2)
+      const k = src.height / dst.height
+      const lift = Math.min(90, Math.hypot(dx, dy) * 0.09)
+      const ease = "cubic-bezier(0.45, 0, 0.2, 1)"
+      ghost.animate([
+        { transform: `translate(${dx}px, ${dy}px) scale(${k})` },
+        { transform: `translate(${dx * 0.42}px, ${dy * 0.42 - lift}px) scale(${k + (1 - k) * 0.55})`, offset: 0.55 },
+        { transform: "translate(0px, 0px) scale(1)" },
+      ], { duration: FLY_MS, easing: ease, fill: "forwards" })
+      ghost.querySelector("b")!.animate([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0, offset: 0.72 }, { opacity: 0 }], { duration: FLY_MS, fill: "forwards" })
+      ghost.querySelector("em")!.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1, offset: 0.82 }, { opacity: 1 }], { duration: FLY_MS, fill: "forwards" })
+      window.setTimeout(() => {
+        html.classList.add("is-landed")
+        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: "ease-out", fill: "forwards" }).onfinish = () => ghost.remove()
+        finish()
+      }, FLY_MS)
+    }
     const show = (k: number) => {
       const { i } = CUTS[k]
       const front = pages.current[i], back = prev >= 0 ? pages.current[prev] : null
@@ -276,14 +326,21 @@ export function Flipbook() {
         root.current?.classList.add("is-title")
         if (rig.current) rig.current.style.transform = "none"
         if (stage.current) stage.current.style.filter = "none"
+        // Log-scale with an ease at both ends: a slow drift inside the R, a long glide out, a soft
+        // arrival, so the name is never simply "there".
         const p = Math.min(1, (t - HIT) / (REVEAL - HIT))
-        const s = Math.exp(Math.log(26) * Math.pow(1 - p, 3)) // 26 → 1, fast then gentle
+        const s = Math.exp(Math.log(26) * (1 - smooth(p)))
         const tf = `translate(${ox} ${oy}) scale(${s}) translate(${-ox} ${-oy})`
         clip.current?.setAttribute("transform", tf)
         word.current?.setAttribute("transform", tf)
+        if (t >= REVEAL - 900) root.current?.classList.add("is-dawn")
         if (t >= SOLID) root.current?.classList.add("is-solid")
+        // One pass of light across the set letters.
+        const sw = Math.min(1, Math.max(0, (t - SOLID - 500) / 1900))
+        sheen.current?.setAttribute("gradientTransform", `translate(${-1.2 + 2.4 * smooth(sw)} 0)`)
+        if (t >= LEAVE && !left) { left = true; handoff() }
       }
-      if (t >= END) close(false)
+      if (t >= END && !left) close(false)
     }
     frame.current = requestAnimationFrame(tick)
     return () => { cancelAnimationFrame(frame.current); score.current?.stop(0.3) }
@@ -304,9 +361,21 @@ export function Flipbook() {
             <linearGradient id="xp-flip-silver" x1="0" y1="0" x2="1" y2="0.35">
               <stop offset="0" stopColor="#8a8d95" /><stop offset="0.42" stopColor="#e6e8ec" /><stop offset="0.5" stopColor="#ffffff" /><stop offset="0.58" stopColor="#e6e8ec" /><stop offset="1" stopColor="#7c7f87" />
             </linearGradient>
+            <linearGradient id="xp-flip-sheen" ref={sheen} x1="0" y1="0" x2="1" y2="0.2" gradientTransform="translate(-1.2 0)">
+              <stop offset="0.38" stopColor="#fff" stopOpacity="0" /><stop offset="0.5" stopColor="#fff" stopOpacity="0.9" /><stop offset="0.62" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="xp-flip-reflect" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0.35" stopColor="#d9dce2" stopOpacity="0" /><stop offset="1" stopColor="#d9dce2" stopOpacity="0.2" />
+            </linearGradient>
           </defs>
         </svg>
       )}
+      <div className="xp-flip-bg" aria-hidden="true">
+        <i className="xp-flip-rays" />
+        <i className="xp-flip-haze" />
+        <i className="xp-flip-flare" />
+        {Array.from({ length: 36 }, (_, i) => <b key={i} style={{ "--x": `${(i * 37) % 100}%`, "--y": `${(i * 53) % 100}%`, "--s": `${1 + (i % 3)}px`, "--d": `${7 + (i % 5) * 2}s`, "--delay": `${-(i % 7)}s` } as React.CSSProperties} />)}
+      </div>
       <div className="xp-flip-world" aria-hidden="true">
         <div className="xp-flip-rig" ref={rig}>
           <div className="xp-flip-stage" ref={stage}>
@@ -322,8 +391,12 @@ export function Flipbook() {
       {geo && text && (
         <svg className="xp-flip-word" viewBox={`0 0 ${geo.w} ${geo.h}`} aria-hidden="true">
           <g ref={word}>
+            <text {...text} className="xp-flip-reflect" fill="url(#xp-flip-reflect)" transform={`translate(0 ${geo.h + geo.size * 0.78}) scale(1 -1)`}>{NAME}</text>
             <text {...text} className="xp-flip-edge">{NAME}</text>
-            <text {...text} className="xp-flip-solid" fill="url(#xp-flip-silver)">{NAME}</text>
+            <text {...text} className="xp-flip-solid" fill="url(#xp-flip-silver)">
+              {NAME.split("").map((c, i) => <tspan key={i} ref={i === 0 ? rLetter : undefined} style={{ "--i": i } as React.CSSProperties}>{c}</tspan>)}
+            </text>
+            <text {...text} className="xp-flip-sheen" fill="url(#xp-flip-sheen)">{NAME}</text>
           </g>
         </svg>
       )}

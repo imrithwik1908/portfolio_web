@@ -2065,7 +2065,7 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-can-note figcaption { margin-top: 10px; color: var(--xp-muted); font: 0.7rem var(--xp-mono); letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* The flipbook: an optional second opening, from the command menu. */
-.xp-flip { position: fixed; inset: 0; z-index: 210; overflow: hidden; background: #050404; color: #f3ead8; cursor: pointer; transition: opacity 450ms ease; animation: xp-fade 250ms ease both; }
+.xp-flip { position: fixed; inset: 0; z-index: 210; overflow: hidden; background: #050404; color: #f3ead8; cursor: pointer; transition: opacity 450ms ease, background-color 1300ms cubic-bezier(0.4, 0, 0.2, 1); animation: xp-fade 250ms ease both; }
 .xp-flip.is-out { opacity: 0; pointer-events: none; }
 .xp-flip-stage { position: absolute; inset: 0; perspective: 1500px; transform-style: flat; transform-origin: 50% 50%; will-change: transform, filter; }
 .xp-flip-page { position: absolute; inset: 0; overflow: hidden; border: clamp(6px, 1.2vw, 14px) solid #050404; opacity: 0; transform-origin: 0% 50%; backface-visibility: hidden; }
@@ -2117,13 +2117,13 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip-world { position: absolute; inset: 0; perspective: 1200px; perspective-origin: 50% 45%; overflow: hidden; transition: opacity 900ms ease; }
 .xp-flip-rig { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 50% 50%; will-change: transform; }
 .xp-flip.is-title .xp-flip-world { clip-path: url(#xp-flip-letters); }
-.xp-flip.is-solid .xp-flip-world { opacity: 0; }
+.xp-flip.is-solid .xp-flip-world { opacity: 0; transition-duration: 1500ms; }
 .xp-flip-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .xp-flip-word { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; }
 .xp-flip-edge { fill: none; stroke: rgba(240, 236, 228, 0.7); stroke-width: 1.2; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity 500ms ease; }
 .xp-flip.is-title .xp-flip-edge { opacity: 1; }
 .xp-flip.is-solid .xp-flip-edge { opacity: 0.35; transition-duration: 1200ms; }
-.xp-flip-solid { opacity: 0; transition: opacity 900ms ease; filter: drop-shadow(0 0 26px rgba(244, 183, 106, 0.18)); }
+.xp-flip-solid { opacity: 0; transition: opacity 1500ms ease; filter: drop-shadow(0 0 26px rgba(244, 183, 106, 0.2)); }
 .xp-flip.is-solid .xp-flip-solid { opacity: 1; }
 .xp-flip.is-still .xp-flip-world { display: none; }
 .xp-flip.is-still .xp-flip-solid { transition: none; }
@@ -2141,3 +2141,33 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip-sentence i { font-style: normal; padding: 0 0.12em; border-radius: 0.12em; background: rgba(214, 120, 40, calc(var(--lit) * 0.85)); color: color-mix(in srgb, #24201b calc(100% - var(--lit) * 100%), #fff); }
 .xp-flip-sentence small { font: 0.85rem var(--xp-mono); letter-spacing: 0.18em; text-transform: uppercase; color: #6b6358; }
 .xp-flip-sentence small b { color: #b45d16; }
+
+/* The flipbook's last frame: haze, slow rays, a horizon flare, drifting dust, a reflection. */
+.xp-flip-bg { position: absolute; inset: 0; z-index: 0; opacity: 0; overflow: hidden; transition: opacity 1800ms ease; pointer-events: none; }
+.xp-flip.is-dawn .xp-flip-bg { opacity: 1; }
+.xp-flip-world { z-index: 1; }
+.xp-flip-haze { position: absolute; inset: 0; background: radial-gradient(ellipse 55% 38% at 50% 50%, rgba(244, 183, 106, 0.2), rgba(150, 80, 30, 0.08) 48%, transparent 72%), linear-gradient(180deg, transparent 55%, rgba(244, 183, 106, 0.06) 62%, transparent 80%); }
+.xp-flip-rays { position: absolute; inset: -60%; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 222, 176, 0.09) 0deg 1.1deg, transparent 1.1deg 7.5deg); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, rgba(0, 0, 0, 0.5) 18%, transparent 42%); mask-image: radial-gradient(circle at 50% 50%, #000 0%, rgba(0, 0, 0, 0.5) 18%, transparent 42%); animation: xp-flip-turnrays 70s linear infinite; }
+@keyframes xp-flip-turnrays { to { transform: rotate(360deg); } }
+.xp-flip-flare { position: absolute; left: -10%; right: -10%; top: 50%; height: 2px; margin-top: -1px; background: linear-gradient(90deg, transparent, rgba(255, 214, 160, 0.15) 18%, rgba(255, 238, 210, 0.95) 50%, rgba(255, 214, 160, 0.15) 82%, transparent); box-shadow: 0 0 22px 4px rgba(244, 183, 106, 0.3); transform: scaleX(0); opacity: 0; transition: transform 2200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 900ms ease; }
+.xp-flip.is-solid .xp-flip-flare { transform: scaleX(1); opacity: 0.75; }
+.xp-flip-bg b { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: rgba(255, 226, 184, 0.75); box-shadow: 0 0 6px rgba(255, 210, 150, 0.6); opacity: 0; animation: xp-flip-dust var(--d) linear var(--delay) infinite; }
+@keyframes xp-flip-dust { 0% { transform: translate(0, 20px); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.5; } 100% { transform: translate(14px, -60px); opacity: 0; } }
+.xp-flip-reflect { opacity: 0; transition: opacity 1800ms 500ms ease; }
+.xp-flip.is-solid .xp-flip-reflect { opacity: 1; }
+.xp-flip-sheen { opacity: 0; mix-blend-mode: screen; }
+.xp-flip.is-solid .xp-flip-sheen { opacity: 1; }
+
+/* The handoff to the homepage. */
+.xp-flip.is-leaving { background-color: rgba(5, 4, 4, 0); pointer-events: none; }
+.xp-flip.is-leaving .xp-flip-bg, .xp-flip.is-leaving .xp-flip-grain, .xp-flip.is-leaving .xp-flip-skip { opacity: 0; transition: opacity 1100ms ease; }
+.xp-flip.is-leaving .xp-flip-edge, .xp-flip.is-leaving .xp-flip-reflect, .xp-flip.is-leaving .xp-flip-sheen { opacity: 0; transition: opacity 500ms ease; }
+.xp-flip-solid tspan { transition: fill-opacity 800ms ease; }
+.xp-flip.is-leaving .xp-flip-solid tspan { fill-opacity: 0; transition-delay: calc(var(--i) * 70ms); }
+.xp-flip.is-leaving .xp-flip-solid tspan:first-child { transition: none; }
+.xp-flip.is-leaving .xp-flip-word { filter: blur(4px); transform: translateY(-1.2%); transition: filter 1000ms ease, transform 1400ms cubic-bezier(0.2, 0.7, 0.1, 1); }
+.xp-opening-flight.is-flip { z-index: 220; }
+.xp-opening-flight.is-flip b { color: #eceef2; font: 600 0.86em var(--font-oswald), "Arial Narrow", sans-serif; text-shadow: 0 0 24px rgba(244, 183, 106, 0.35); }
+html.is-flip-arrive main { animation: xp-flip-arrive 1700ms cubic-bezier(0.2, 0.7, 0.1, 1) both; }
+html.is-flip-arrive .xp-nav { animation: xp-fade 1200ms 500ms ease both; }
+@keyframes xp-flip-arrive { from { filter: blur(14px) brightness(0.5); transform: scale(1.025); } to { filter: none; transform: none; } }
