@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-import { Instrument_Sans, Instrument_Serif } from 'next/font/google'
+import { Instrument_Sans, Instrument_Serif, Oswald } from 'next/font/google'
 import './globals.css'
 import './xp.css'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -24,6 +24,8 @@ const geistMono = localFont({
 })
 
 const instrumentSans = Instrument_Sans({ subsets: ['latin'], variable: '--font-instrument-sans' })
+// Only the flipbook intro's name plate uses this, so it isn't preloaded.
+const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald', preload: false })
 const instrumentSerif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-instrument-serif' })
 
 export const metadata: Metadata = {
@@ -58,7 +60,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: "try{var p=localStorage.getItem('xp-palette');if(p)document.documentElement.dataset.palette=p}catch(e){}try{if(sessionStorage.getItem('xp-intro')||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.intro='off';else document.documentElement.classList.add('is-intro')}catch(e){document.documentElement.dataset.intro='off'}" }} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} bg-background font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} ${instrumentSerif.variable} ${oswald.variable} bg-background font-sans`}>
         <ThemeProvider
           attribute="class"
           storageKey="portfolio-theme-v3"

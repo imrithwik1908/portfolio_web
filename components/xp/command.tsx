@@ -32,7 +32,7 @@ export function CommandMenu() {
       window.scrollTo(0, 0)
       if (window.location.pathname === "/") window.location.reload(); else window.location.href = "/"
     } },
-    { group: "Actions", label: "Play the flipbook intro", hint: "Seven seconds of my work, with sound", run: () => window.dispatchEvent(new Event("xp:flipbook")) },
+    { group: "Actions", label: "Play the flipbook intro", hint: "Nine seconds, with sound", run: () => window.dispatchEvent(new Event("xp:flipbook")) },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),
     { group: "Projects", label: "All projects", run: () => router.push("/projects") },
@@ -41,6 +41,7 @@ export function CommandMenu() {
     { group: "Elsewhere", label: "GitHub", hint: "imrithwik1908", run: () => window.open("https://github.com/imrithwik1908", "_blank", "noopener") },
     { group: "Elsewhere", label: "LinkedIn", hint: "sairithwikreddy", run: () => window.open("https://www.linkedin.com/in/sairithwikreddy", "_blank", "noopener") },
     { group: "Elsewhere", label: "This site's source code", run: () => window.open("https://github.com/imrithwik1908/portfolio_web", "_blank", "noopener") },
+    { group: "Elsewhere", label: "Flipbook picture credits", hint: "Who took the photographs", run: () => router.push("/credits") },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ], [router])
 

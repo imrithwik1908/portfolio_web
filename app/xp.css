@@ -2072,13 +2072,28 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip-page::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0, 0, 0, 0.22) 0.9px, transparent 1.2px); background-size: 5px 5px; mix-blend-mode: multiply; opacity: 0.55; pointer-events: none; }
 .xp-flip-page.is-back { z-index: 1; opacity: 1; filter: brightness(0.5); }
 .xp-flip-page.is-front { z-index: 2; opacity: 1; animation: xp-flip-turn var(--d, 300ms) cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-@keyframes xp-flip-turn { from { transform: rotateY(-86deg) scale(1.04); } to { transform: rotateY(0deg) scale(1); } }
+@keyframes xp-flip-turn { from { transform: rotateY(-80deg) scale(1.03); opacity: 0.35; } 35% { opacity: 1; } to { transform: rotateY(0deg) scale(1); opacity: 1; } }
 .xp-flip-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.1) 55%, rgba(255, 240, 210, 0.12)); opacity: 0; pointer-events: none; }
 .xp-flip-page.is-front .xp-flip-shade { animation: xp-flip-shade var(--d, 300ms) ease-out both; }
 @keyframes xp-flip-shade { from { opacity: 1; } to { opacity: 0; } }
-.xp-flip-img { position: absolute; inset: 0; background-repeat: no-repeat; background-size: cover; filter: contrast(1.12) saturate(1.1); }
+.xp-flip-cam { position: absolute; inset: 0; display: grid; place-items: center; transform: scale(var(--z, 1)); }
+.xp-flip-page.is-front .xp-flip-cam, .xp-flip-page.is-back .xp-flip-cam { animation: xp-flip-drift 2.6s linear both; }
+@keyframes xp-flip-drift { from { transform: scale(var(--z, 1)); } to { transform: scale(calc(var(--z, 1) * 1.09)); } }
+.xp-flip-page.is-front.is-cut { animation: xp-flip-zoomcut var(--d, 200ms) cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+@keyframes xp-flip-zoomcut { from { transform: scale(1.14); filter: brightness(1.35); } to { transform: scale(1); filter: brightness(1); } }
+.xp-flip-page.is-front.is-cut .xp-flip-shade { animation: none; }
+.xp-flip-img { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; filter: contrast(1.08) saturate(1.08); }
+.xp-flip-page.is-paper .xp-flip-img { inset: 7vh 7vw; }
+.xp-flip-vis { display: grid; place-items: center; width: 100%; height: 100%; padding: 8vh 9vw; border: 0 !important; border-radius: 0 !important; }
+.xp-flip-vis svg { width: min(80vw, 125vh); height: auto; }
+.xp-flip-fig { display: grid; place-items: center; width: 100%; height: 100%; padding: 6vh 7vw; font-family: var(--xp-sans); }
+.xp-flip-fig svg { width: min(86vw, 160vh); max-height: 86vh; height: auto; }
+.xp-flip-fog { width: 100%; height: 100%; }
+.xp-flip-page.is-board { background: #141210; }
+.xp-flip-page.is-tint { background: #f3efe8; }
+.xp-flip-loading { position: absolute; inset: 0; z-index: 7; display: grid; place-items: center; margin: 0; color: rgba(243, 234, 216, 0.5); font: 0.72rem var(--xp-mono); letter-spacing: 0.2em; text-transform: uppercase; }
 .xp-flip-page.is-photo { background: #0d0c0e; }
-.xp-flip-page.is-paper { background: #efe6d3; color: #18130c; }
+.xp-flip-page.is-paper { background: #f6f3ee; color: #18130c; }
 .xp-flip-page.is-ink { background: #0b0907; color: #f4b76a; }
 .xp-flip-page.is-lamp { background: #f2b062; color: #140d05; }
 .xp-flip-type { position: absolute; inset: 0; display: grid; place-content: center; gap: 14px; padding: 0 6vw; text-align: center; }
@@ -2089,7 +2104,7 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 @keyframes xp-flip-flash { 0% { opacity: 0; } 7% { opacity: 1; } 100% { opacity: 0; } }
 .xp-flip-plate { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: clamp(14px, 2vw, 26px); opacity: 0; pointer-events: none; }
 .xp-flip.is-plate .xp-flip-plate { opacity: 1; }
-.xp-flip-name { position: relative; margin: 0; font: 900 clamp(3.6rem, 17vw, 15rem) / 0.86 var(--font-geist-sans), system-ui, sans-serif; letter-spacing: -0.035em; white-space: nowrap; }
+.xp-flip-name { position: relative; margin: 0; font: 600 clamp(4.4rem, 21vw, 18rem) / 0.9 var(--font-oswald), "Arial Narrow", sans-serif; letter-spacing: 0.01em; white-space: nowrap; }
 .xp-flip-fill { display: block; color: transparent; background-size: cover; background-position: center; -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1.5px rgba(244, 183, 106, 0.55); filter: contrast(1.25) saturate(1.3); transition: opacity 600ms ease; }
 .xp-flip-gold { position: absolute; inset: 0; color: transparent; background: linear-gradient(100deg, #6b3f0f 0%, #c98a3e 22%, #f4c98a 38%, #fff6e2 46%, #f4c98a 54%, #c98a3e 70%, #5e360c 100%); background-size: 260% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 34px rgba(244, 183, 106, 0.35)); opacity: 0; transition: opacity 700ms ease; }
 .xp-flip.is-gold .xp-flip-fill { opacity: 0; }
@@ -2104,3 +2119,10 @@ html.is-handoff.is-landed .xp-hero h1 .xp-name { animation: xp-name-unfold 1600m
 .xp-flip.is-still .xp-flip-fill { opacity: 0; }
 .xp-flip.is-still .xp-flip-gold, .xp-flip.is-still .xp-flip-sub { opacity: 1; clip-path: none; animation: none; background-position: 50% 0; }
 @media (max-width: 760px) { .xp-flip-page { border-width: 5px; } .xp-flip-sub { max-width: 30ch; line-height: 1.7; } }
+.xp-credits-intro { max-width: 60ch; margin: 8px 0 32px !important; color: var(--xp-muted); }
+.xp-credits-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px 28px; margin: 0; padding: 0; list-style: none; }
+.xp-credits-list li { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+.xp-credits-list img { width: 120px; height: 68px; object-fit: cover; border-radius: 6px; }
+.xp-credits-list div { display: grid; gap: 2px; font-size: 0.85rem; color: var(--xp-muted); min-width: 0; }
+.xp-credits-list div > a:first-child { color: var(--xp-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xp-credits-list a { text-decoration: underline; text-decoration-color: var(--xp-line-strong); text-underline-offset: 3px; }
