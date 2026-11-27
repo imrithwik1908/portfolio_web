@@ -1970,30 +1970,8 @@ html.has-brief { overflow: hidden; }
 
 
 /* Toolkit: four things you can hand me. A promise, then where I've done it, then the tools, quietly. */
-.xp-can { display: grid; gap: 8px; }
-.xp-can-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--xp-line); }
-.xp-can-list > li { border-bottom: 1px solid var(--xp-line); }
-.xp-can-promise { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); align-items: baseline; gap: 12px; width: 100%; padding: clamp(18px, 2.6vw, 28px) 0; border: 0; color: var(--xp-muted); background: none; text-align: left; cursor: pointer; transition: color 400ms ease; }
-.xp-can-n { justify-self: start; align-self: center; width: 7px; height: 7px; border: 1px solid var(--xp-muted); border-radius: 50%; transition: border-color 400ms ease, background 400ms ease; }
-.xp-can-text { font: 400 clamp(1.35rem, 2.4vw, 2.1rem) / 1.15 var(--xp-serif); letter-spacing: -0.01em; text-wrap: balance; }
-.xp-can-text em { font-style: italic; }
-.xp-can-promise:hover, .xp-can-promise:focus-visible { color: var(--xp-ink-2); outline: none; }
-.xp-can-list > li.is-open .xp-can-promise { color: var(--xp-ink); cursor: default; }
-.xp-can-list > li.is-open .xp-can-n { border-color: var(--xp-lamp); background: var(--xp-lamp); }
-.xp-can-list > li.is-open .xp-can-text em { color: var(--xp-lamp); text-shadow: 0 0 28px rgba(var(--xp-lamp-rgb), 0.35); }
-.xp-can-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 600ms var(--xp-spring); }
-.xp-can-list > li.is-open .xp-can-body { grid-template-rows: 1fr; }
-.xp-can-inner { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); min-height: 0; overflow: hidden; padding-left: calc(3.2rem + 12px); opacity: 0; transform: translateY(-6px); transition: opacity 400ms ease, transform 500ms var(--xp-spring), padding 600ms var(--xp-spring); }
-.xp-can-list > li.is-open .xp-can-inner { padding-bottom: clamp(22px, 3vw, 34px); opacity: 1; transform: none; transition-delay: 120ms; }
-.xp-can-proof { max-width: 56ch; margin: 0; color: var(--xp-ink-2); font-size: 1.08rem; line-height: 1.7; }
-.xp-can-proof b { color: var(--xp-ink); font-weight: 500; }
 @media (max-width: 760px) {
-  .xp-can-promise { grid-template-columns: 1.2rem minmax(0, 1fr); gap: 6px; }
-  .xp-can-text { font-size: 1.5rem; }
-  .xp-can-inner { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-left: calc(2.2rem + 6px); }
-  .xp-can-proof { font-size: 1rem; }
 }
-@media (prefers-reduced-motion: reduce) { .xp-can-body, .xp-can-inner { transition: none; } }
 .xp-about-text em { color: var(--xp-ink); font-style: italic; }
 .xp-about-text .xp-about-now { color: var(--xp-ink); }
 
@@ -2009,10 +1987,6 @@ html.has-brief { overflow: hidden; }
   .xp-ring small { font-size: 0.42rem; letter-spacing: 0; }
 }
 
-/* How I work: the line I wrote down, set like a margin note beside the moment it mattered. */
-.xp-can-note { position: relative; margin: 0; padding: 2px 0 2px 18px; border-left: 1px solid rgba(var(--xp-lamp-rgb), 0.45); }
-.xp-can-note blockquote { margin: 0; color: var(--xp-ink); font: italic 400 clamp(1.05rem, 1.5vw, 1.25rem) / 1.45 var(--xp-serif); }
-.xp-can-note figcaption { margin-top: 10px; color: var(--xp-muted); font: 0.7rem var(--xp-mono); letter-spacing: 0.08em; text-transform: uppercase; }
 
 
 
@@ -2053,4 +2027,37 @@ html:not(.is-writing) .xp-write-hand { opacity: 0; }
 .xp-ripple i { position: absolute; left: -1px; top: -1px; width: 2px; height: 2px; border-radius: 50%; background: rgba(var(--xp-lamp-rgb), 0.9); box-shadow: 0 0 6px rgba(var(--xp-lamp-rgb), 0.7); opacity: 0; animation: xp-ripple-speck 900ms var(--delay) cubic-bezier(0.15, 0.6, 0.3, 1) forwards; }
 @keyframes xp-ripple-ring { from { transform: scale(0.2); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
 @keyframes xp-ripple-speck { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
-.xp-can-lede { max-width: 58ch; margin: 0 0 8px !important; color: var(--xp-muted); }
+
+/* Toolkit: the tools from the résumé beside the work that used them; lines on hover. */
+.xp-kitmap { position: relative; }
+.xp-kitmap-lede { max-width: 58ch; margin: 0 0 clamp(26px, 3vw, 40px) !important; color: var(--xp-muted); }
+.xp-kitmap-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 0.75fr); gap: clamp(48px, 8vw, 140px); align-items: center; }
+.xp-kitmap-group { margin-bottom: clamp(20px, 2.4vw, 30px); }
+.xp-kitmap-group > p { margin: 0 0 10px !important; color: var(--xp-muted); font: 0.68rem var(--xp-mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.xp-kitmap-group ul { display: flex; flex-wrap: wrap; gap: 2px 4px; margin: 0; padding: 0; list-style: none; }
+.xp-kitmap-tools button { padding: 2px 8px 4px; border: 0; border-radius: 8px; color: var(--xp-ink-2); background: none; font: 400 clamp(1.2rem, 1.9vw, 1.65rem) / 1.25 var(--xp-serif); cursor: default; transition: color 300ms ease, opacity 300ms ease, text-shadow 300ms ease, background 300ms ease; }
+.xp-kitmap-tools button.is-bare { color: var(--xp-muted); }
+.xp-kitmap-tools button:hover, .xp-kitmap-tools button:focus-visible { outline: none; }
+.xp-kitmap-tools button.is-lit { color: var(--xp-lamp); text-shadow: 0 0 24px rgba(var(--xp-lamp-rgb), 0.35); }
+.xp-kitmap.is-focus .xp-kitmap-tools button:not(.is-lit) { opacity: 0.32; }
+.xp-kitmap-places { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.xp-kitmap-places a { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 10px; align-items: baseline; padding: 10px 12px; border-radius: 12px; color: var(--xp-ink-2); text-decoration: none; transition: opacity 300ms ease, background 300ms ease, color 300ms ease; }
+.xp-kitmap-places strong { font: 400 1.12rem var(--xp-serif); color: inherit; }
+.xp-kitmap-places small { grid-column: 2; color: var(--xp-muted); font: 0.72rem var(--xp-mono); letter-spacing: 0.04em; }
+.xp-kitmap-star { position: relative; top: 1px; width: 9px; height: 9px; border: 1px solid rgba(var(--xp-lamp-rgb), 0.6); border-radius: 50%; transition: background 300ms ease, box-shadow 300ms ease, transform 400ms var(--xp-spring); }
+.xp-kitmap-places a.is-on { color: var(--xp-ink); background: var(--xp-tint); }
+.xp-kitmap-places a.is-on .xp-kitmap-star { background: var(--xp-lamp); box-shadow: 0 0 14px rgba(var(--xp-lamp-rgb), 0.7); transform: scale(1.25); }
+.xp-kitmap.is-focus .xp-kitmap-places a:not(.is-on) { opacity: 0.4; }
+.xp-kitmap-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.xp-kitmap-lines path { fill: none; stroke: rgba(var(--xp-lamp-rgb), 0.55); stroke-width: 1; stroke-dasharray: 1 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 4px rgba(var(--xp-lamp-rgb), 0.45)); animation: xp-kitmap-draw 650ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards; }
+@keyframes xp-kitmap-draw { to { stroke-dashoffset: 0; } }
+@media (max-width: 899px) {
+  .xp-kitmap-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .xp-kitmap-places { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .xp-kitmap-places a { padding: 8px 10px; }
+  .xp-kitmap-lines { display: none; }
+}
+@media (max-width: 760px) { .xp-kitmap-tools button { font-size: 1.15rem; padding: 2px 6px 3px; } .xp-kitmap-places small { font-size: 0.66rem; } }
+.xp-kitmap-lines { z-index: 0; }
+.xp-kitmap-tools, .xp-kitmap-places { position: relative; z-index: 1; }
+@media (max-width: 760px) { .xp-reveal-row { flex-wrap: wrap; } .xp-reveal-gpa { flex: 1 1 100%; min-width: 0; max-width: 100%; } .xp-reveal-gpa small { white-space: normal; line-height: 1.5; } }
