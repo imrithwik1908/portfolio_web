@@ -7,6 +7,7 @@ import { Arrow } from "@/components/xp/arrow"
 import { Note } from "@/components/xp/note"
 import { ResumeLink } from "@/components/xp/resume"
 import { BriefLink } from "@/components/xp/brief"
+import { Signature } from "@/components/xp/signature"
 
 function Portrait() {
   const [proof, setProof] = useState(false)
@@ -121,7 +122,7 @@ export function Hero() {
           <span className="xp-tip" tabIndex={0} role="img" aria-label="Arizona skips daylight saving, so Tempe\u2019s clock never jumps." data-tip="Arizona skips daylight saving, so Tempe’s clock never jumps."><span className={`xp-sky ${now?.day ? "is-day" : "is-night"}`} /></span>
           Tempe, Arizona{now && <> · <Offset label={`${now.part}, ${now.time}`} /></>}
         </p>
-        <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name">Rithwik</em>.</h1>
+        <h1 id="xp-hero-title">Hi, I&apos;m <em className="xp-name"><span className="sr-only">Rithwik</span><Signature className="xp-name-sig" /></em>.</h1>
         <Roles />
         <p className="xp-hero-line">I build machine learning systems and the software around them, and I care more about why a model fails than about its best score.</p>
         <ul className="xp-hero-proof" aria-label="In short">
