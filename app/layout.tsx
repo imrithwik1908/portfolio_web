@@ -10,6 +10,7 @@ import { CommandMenu } from '@/components/xp/command'
 import { PageTransitions } from '@/components/xp/transitions'
 import { Brief } from '@/components/xp/brief'
 import { Intro } from '@/components/xp/intro'
+import { Ripple } from '@/components/xp/ripple'
 import { PrintResume, ResumeDossier } from '@/components/xp/resume'
 
 const geistSans = localFont({
@@ -67,6 +68,7 @@ export default function RootLayout({
         >
           <div className="site-shell relative flex min-h-screen flex-col">
             <Intro />
+            <Ripple />
             <Ambient />
             <CommandMenu />
             <PageTransitions />

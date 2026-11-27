@@ -1973,13 +1973,13 @@ html.has-brief { overflow: hidden; }
 .xp-can { display: grid; gap: 8px; }
 .xp-can-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--xp-line); }
 .xp-can-list > li { border-bottom: 1px solid var(--xp-line); }
-.xp-can-promise { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); align-items: baseline; gap: 12px; width: 100%; padding: clamp(18px, 2.6vw, 28px) 0; border: 0; color: var(--xp-muted); background: none; text-align: left; cursor: pointer; transition: color 400ms ease; }
-.xp-can-n { color: var(--xp-muted); font: 0.75rem var(--xp-mono); letter-spacing: 0.12em; transition: color 400ms ease; }
-.xp-can-text { font: 400 clamp(1.6rem, 3.4vw, 3rem) / 1.08 var(--xp-serif); letter-spacing: -0.015em; text-wrap: balance; }
+.xp-can-promise { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); align-items: baseline; gap: 12px; width: 100%; padding: clamp(18px, 2.6vw, 28px) 0; border: 0; color: var(--xp-muted); background: none; text-align: left; cursor: pointer; transition: color 400ms ease; }
+.xp-can-n { justify-self: start; align-self: center; width: 7px; height: 7px; border: 1px solid var(--xp-muted); border-radius: 50%; transition: border-color 400ms ease, background 400ms ease; }
+.xp-can-text { font: 400 clamp(1.35rem, 2.4vw, 2.1rem) / 1.15 var(--xp-serif); letter-spacing: -0.01em; text-wrap: balance; }
 .xp-can-text em { font-style: italic; }
 .xp-can-promise:hover, .xp-can-promise:focus-visible { color: var(--xp-ink-2); outline: none; }
 .xp-can-list > li.is-open .xp-can-promise { color: var(--xp-ink); cursor: default; }
-.xp-can-list > li.is-open .xp-can-n { color: var(--xp-lamp); }
+.xp-can-list > li.is-open .xp-can-n { border-color: var(--xp-lamp); background: var(--xp-lamp); }
 .xp-can-list > li.is-open .xp-can-text em { color: var(--xp-lamp); text-shadow: 0 0 28px rgba(var(--xp-lamp-rgb), 0.35); }
 .xp-can-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 600ms var(--xp-spring); }
 .xp-can-list > li.is-open .xp-can-body { grid-template-rows: 1fr; }
@@ -1988,7 +1988,7 @@ html.has-brief { overflow: hidden; }
 .xp-can-proof { max-width: 56ch; margin: 0; color: var(--xp-ink-2); font-size: 1.08rem; line-height: 1.7; }
 .xp-can-proof b { color: var(--xp-ink); font-weight: 500; }
 @media (max-width: 760px) {
-  .xp-can-promise { grid-template-columns: 2.2rem minmax(0, 1fr); gap: 6px; }
+  .xp-can-promise { grid-template-columns: 1.2rem minmax(0, 1fr); gap: 6px; }
   .xp-can-text { font-size: 1.5rem; }
   .xp-can-inner { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-left: calc(2.2rem + 6px); }
   .xp-can-proof { font-size: 1rem; }
@@ -2018,20 +2018,30 @@ html.has-brief { overflow: hidden; }
 
 
 
-/* The opening: my name, written in, then settled into the heading. */
+/* The opening: my name, handwritten, then dissolved into the heading. */
 html.is-intro { overflow: hidden; }
 html.is-intro .xp-hero *, html.is-intro .xp-nav, html.is-intro .xp-nav * { animation-play-state: paused !important; }
 html.intro-done .xp-hero h1 { animation: none; }
-html.is-writing .xp-hero h1 .xp-name { visibility: hidden; }
+.xp-hero h1 .xp-name { transition: color 500ms ease, background-color 500ms ease, opacity 650ms ease; }
+html.is-writing .xp-hero h1 .xp-name { opacity: 0; }
 .xp-write { position: fixed; inset: 0; z-index: 200; pointer-events: none; }
 .xp-write::before { content: ""; position: absolute; inset: 0; background: var(--xp-paper); transition: opacity 1500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms; }
 .xp-write.is-leaving::before { opacity: 0; }
 html[data-intro="off"] .xp-write { display: none; }
-.xp-write-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.xp-write-word { fill: var(--xp-lamp); stroke: var(--xp-lamp); transform-origin: 0 0; transform: var(--from); will-change: transform; animation: xp-write-glide var(--glide) var(--glide-at) cubic-bezier(0.45, 0, 0.2, 1) forwards; }
+.xp-write-hand { position: absolute; transform-origin: 0 0; transform: var(--from); will-change: transform; transition: opacity 650ms ease; }
+.xp-write-hand.is-go { animation: xp-write-glide var(--glide) var(--glide-at) cubic-bezier(0.45, 0, 0.25, 1) forwards; }
 @keyframes xp-write-glide { from { transform: var(--from); } to { transform: none; } }
-.xp-write-word text { fill-opacity: 0; stroke-linejoin: round; stroke-dasharray: var(--dash); stroke-dashoffset: var(--dash); animation: xp-write-pen var(--draw) var(--at) cubic-bezier(0.55, 0.05, 0.35, 1) forwards, xp-write-ink var(--ink) calc(var(--at) + var(--draw) * 0.6) ease forwards; }
+.xp-write-hand path { fill: none; stroke: var(--xp-lamp); stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.xp-write-hand.is-go path { animation: xp-write-pen var(--dur) var(--at) cubic-bezier(0.37, 0, 0.63, 1) forwards; }
 @keyframes xp-write-pen { to { stroke-dashoffset: 0; } }
-@keyframes xp-write-ink { to { fill-opacity: 1; stroke-opacity: 0; } }
-.xp-write.is-skip .xp-write-svg { opacity: 0; transition: opacity 300ms ease; }
+html:not(.is-writing) .xp-write-hand { opacity: 0; }
+.xp-write.is-skip .xp-write-hand { transition-duration: 300ms; }
 .xp-write.is-skip::before { transition-duration: 450ms; transition-delay: 0ms; }
+
+/* Clicks on empty space: a faint widening ring and a few specks drifting off. */
+.xp-ripple { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }
+.xp-ripple::before { content: ""; position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border: 1px solid rgba(var(--xp-lamp-rgb), 0.55); border-radius: 50%; animation: xp-ripple-ring 900ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+.xp-ripple i { position: absolute; left: -1px; top: -1px; width: 2px; height: 2px; border-radius: 50%; background: rgba(var(--xp-lamp-rgb), 0.9); box-shadow: 0 0 6px rgba(var(--xp-lamp-rgb), 0.7); opacity: 0; animation: xp-ripple-speck 900ms var(--delay) cubic-bezier(0.15, 0.6, 0.3, 1) forwards; }
+@keyframes xp-ripple-ring { from { transform: scale(0.2); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes xp-ripple-speck { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+.xp-can-lede { max-width: 58ch; margin: 0 0 8px !important; color: var(--xp-muted); }
