@@ -140,7 +140,7 @@ export function Hero() {
       <Portrait />
 
       <a href="#work" className="xp-scroll-cue" aria-label="Scroll to the work"><span /></a>
-      <Note className="is-hero">The opening titles play once per visit, skip on any key, and never play if you prefer reduced motion. The sky icon follows the real hour in Tempe.</Note>
+      <Note className="is-hero">The name is written in once per visit; any key skips it, and it never plays if you prefer reduced motion. The sky icon follows the real hour in Tempe.</Note>
     </section>
   )
 }

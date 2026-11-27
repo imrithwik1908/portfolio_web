@@ -260,6 +260,3 @@ export function FilmStrip() {
     </nav>
   )
 }
-
-// The same drawings, for the flipbook intro.
-export const FIGURE_DRAWINGS = { release: ReleaseLogic, trace: TraceLife, agreement: Agreement, tensor: TensorResults, schema: CourseSchema, enroll: Enrollment }

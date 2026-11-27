@@ -27,12 +27,11 @@ export function CommandMenu() {
     { group: "Actions", label: "Open my résumé", hint: "Read it here, or print", run: openResume },
     { group: "Actions", label: "Download my résumé", hint: "One-page PDF, ATS-friendly", run: () => { const a = document.createElement("a"); a.href = RESUME_PDF; a.download = ""; a.click() } },
     { group: "Actions", label: "Copy my email", hint: EMAIL, run: () => { navigator.clipboard?.writeText(EMAIL).then(() => toast("Email copied."), () => { window.location.href = `mailto:${EMAIL}` }) } },
-    { group: "Actions", label: "Watch the intro again", hint: "Ten seconds, with sound", run: () => {
+    { group: "Actions", label: "Watch the intro again", hint: "My name, written in", run: () => {
       try { sessionStorage.removeItem("xp-intro") } catch { /* storage blocked: the intro plays anyway */ }
       window.scrollTo(0, 0)
       if (window.location.pathname === "/") window.location.reload(); else window.location.href = "/"
     } },
-    { group: "Actions", label: "Play the flipbook intro", hint: "Nine seconds, with sound", run: () => window.dispatchEvent(new Event("xp:flipbook")) },
     { group: "Actions", label: "Change colours", hint: "Amber, Nebula, Aurora, Mars", run: () => document.querySelector<HTMLButtonElement>(".xp-swatch")?.click() },
     ...projects.map((p) => ({ group: "Projects", label: p.title, hint: p.eyebrow, run: () => router.push(`/projects/${p.slug}`) })),
     { group: "Projects", label: "All projects", run: () => router.push("/projects") },
@@ -41,7 +40,6 @@ export function CommandMenu() {
     { group: "Elsewhere", label: "GitHub", hint: "imrithwik1908", run: () => window.open("https://github.com/imrithwik1908", "_blank", "noopener") },
     { group: "Elsewhere", label: "LinkedIn", hint: "sairithwikreddy", run: () => window.open("https://www.linkedin.com/in/sairithwikreddy", "_blank", "noopener") },
     { group: "Elsewhere", label: "This site's source code", run: () => window.open("https://github.com/imrithwik1908/portfolio_web", "_blank", "noopener") },
-    { group: "Elsewhere", label: "Flipbook picture credits", hint: "Who took the photographs", run: () => router.push("/credits") },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ], [router])
 
