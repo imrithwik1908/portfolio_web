@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react"
 
-// The opening: my name, written in. About three and a half seconds, silent.
+// The opening: my name, written in. About three and three-quarter seconds, silent.
 //
-// "Rithwik" is drawn stroke by stroke in the hero's own italic, large and centred: the R slowly,
-// then the rest in one quicker run, each letter's ink settling in just behind its pen. Then the
-// word glides down into its place in "Hi, I'm Rithwik" while the dark lifts off the page, and the
-// real heading takes over underneath. Every letter is positioned from the hero's own layout, so the
-// handover lands on the exact glyphs.
+// "Rithwik" is drawn stroke by stroke in the hero's own italic, large and centred. The R is written
+// alone and slowly; as the i begins, the word starts gliding down towards "Hi, I'm Rithwik" and the
+// rest is written on the way, each letter's ink settling just behind its pen, so the k is finished
+// as the word lands. The dark lifts during the glide and the real heading takes over underneath.
+// Every letter is positioned from the hero's own layout, so the handover lands on the exact glyphs.
 //
 // Once per visit, homepage only. Any key, click or scroll finishes it at once; never shown with
 // reduced motion (the inline script in the layout decides before the first paint).
@@ -16,9 +16,12 @@ import { useEffect, useRef, useState } from "react"
 type Letter = { ch: string; x: number }
 type Geo = { letters: Letter[]; y: number; font: string; size: number; from: string }
 
-const R_DRAW = 1000 // the R, slowly
-const REST_AT = 900, STEP = 120, LETTER_DRAW = 520 // then the others, overlapping
-const GLIDE_AT = 2350, GLIDE = 1150 // the glide itself is a CSS animation on the same timeline
+// The R is written alone, slowly. From the second letter on, the word is already travelling: the
+// rest are written on the way, and the k's ink settles just as the word lands in the heading.
+const R_AT = 150, R_DRAW = 1450
+const REST_AT = 1500, STEP = 260, LETTER_DRAW = 620, INK = 500
+const GLIDE_AT = REST_AT // the glide itself is a CSS animation on the same timeline
+const GLIDE = REST_AT + 5 * STEP + LETTER_DRAW * 0.6 + INK + 40 - GLIDE_AT
 
 export function Intro() {
   const [phase, setPhase] = useState<"play" | "leave" | "gone">("play")
@@ -98,10 +101,10 @@ export function Intro() {
             onAnimationEnd={(e) => { if (e.animationName === "xp-write-glide") { done.current = true; document.documentElement.classList.remove("is-writing"); setPhase("gone") } }}
           >
             {geo.letters.map((l, i) => {
-              const at = i === 0 ? 120 : REST_AT + (i - 1) * STEP
+              const at = i === 0 ? R_AT : REST_AT + (i - 1) * STEP
               const draw = i === 0 ? R_DRAW : LETTER_DRAW
               return (
-                <text key={i} x={l.x} y={geo.y} style={{ "--at": `${at}ms`, "--draw": `${draw}ms`, "--dash": geo.size * 7, strokeWidth: Math.max(0.6, geo.size / 70) } as React.CSSProperties}>{l.ch}</text>
+                <text key={i} x={l.x} y={geo.y} style={{ "--at": `${at}ms`, "--draw": `${draw}ms`, "--ink": `${INK}ms`, "--dash": geo.size * 7, strokeWidth: Math.max(0.6, geo.size / 70) } as React.CSSProperties}>{l.ch}</text>
               )
             })}
           </g>
