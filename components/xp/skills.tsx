@@ -1,112 +1,89 @@
 "use client"
 
 import Link from "next/link"
-import { Fragment, useState } from "react"
-import { Note } from "@/components/xp/note"
+import { useEffect, useRef, useState } from "react"
 
-// The toolkit as a star chart: every tool on my résumé down the side, grouped the way the résumé
-// groups them, and the work on this site across the top. A lit star means that project used that
-// tool, so the whole thing reads at a glance with no hovering; pointing at a row or a column just
-// brings it forward. Tools with no star are on my résumé but not in anything shown here. Nothing
-// is rated.
+// The toolkit as one sentence that rewrites itself: "For <project> I used <its tools>." Click the
+// project (or one of the names below) to switch; while nobody has touched it and it's on screen,
+// it moves on by itself every few seconds. Every sentence is in the page at once, stacked in one
+// grid cell, so the block is as tall as the longest and nothing jumps. The tools on my résumé that
+// none of this work used sit in a quiet line underneath. Nothing is rated.
 //
 // Where each tool was used comes from the project stacks and résumé bullets (lib/portfolio-data.ts,
 // lib/resume.json); "This site" is this repository.
 
-type Place = { id: string; name: string; href: string }
-const PLACES: Place[] = [
-  { id: "agentguard", name: "AgentGuard", href: "/projects/agentguard" },
-  { id: "xmutest", name: "X-MuTeST", href: "/projects/x-mutest" },
-  { id: "tensor", name: "Tensor Fusion", href: "/projects/tensor-fusion" },
-  { id: "course", name: "Course Catalog", href: "/projects/course-catalog" },
-  { id: "blackcoffer", name: "Blackcoffer", href: "/#path" },
-  { id: "site", name: "This site", href: "https://github.com/imrithwik1908/portfolio_web" },
+type Project = { name: string; href: string; tools: string[]; for?: string }
+const PROJECTS: Project[] = [
+  { name: "AgentGuard", href: "/projects/agentguard", tools: ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "Next.js", "SQL"], for: "LLM evaluation" },
+  { name: "X-MuTeST", href: "/projects/x-mutest", tools: ["Python", "PyTorch", "Hugging Face Transformers"], for: "NLP and explainable AI" },
+  { name: "Tensor Fusion", href: "/projects/tensor-fusion", tools: ["Python", "PyTorch", "scikit-learn"], for: "multimodal learning" },
+  { name: "Course Catalog", href: "/projects/course-catalog", tools: ["JavaScript", "Node.js", "MongoDB"] },
+  { name: "Blackcoffer", href: "/#path", tools: ["Python"], for: "time-series forecasting" },
+  { name: "this site", href: "https://github.com/imrithwik1908/portfolio_web", tools: ["TypeScript", "Next.js"] },
 ]
+const ALSO = ["C++", "Flask", "Neo4j", "Git", "Jenkins", "AWS", "GCP"]
+const EVERY = 4800
 
-const GROUPS: { name: string; tools: [string, string[]][] }[] = [
-  {
-    name: "Languages",
-    tools: [["Python", ["agentguard", "xmutest", "tensor", "blackcoffer"]], ["SQL", ["agentguard"]], ["TypeScript", ["site"]], ["JavaScript", ["course"]], ["C++", []]],
-  },
-  {
-    name: "ML and data",
-    tools: [
-      ["PyTorch", ["xmutest", "tensor"]], ["Hugging Face Transformers", ["xmutest"]], ["scikit-learn", ["tensor"]], ["NLP", ["xmutest"]],
-      ["LLM evaluation", ["agentguard"]], ["Explainable AI", ["xmutest"]], ["Multimodal learning", ["tensor"]], ["Time-series forecasting", ["blackcoffer"]],
-    ],
-  },
-  {
-    name: "Systems and tools",
-    tools: [
-      ["FastAPI", ["agentguard"]], ["PostgreSQL", ["agentguard"]], ["Redis", ["agentguard"]], ["Docker", ["agentguard"]], ["Next.js", ["agentguard", "site"]],
-      ["Node.js", ["course"]], ["MongoDB", ["course"]], ["Flask", []], ["Neo4j", []], ["Git", []], ["Jenkins", []], ["AWS", []], ["GCP", []],
-    ],
-  },
-]
+function list(words: string[]) {
+  return words.map((w, i) => (
+    <span key={w} className="xp-say-w" style={{ "--i": i } as React.CSSProperties}>
+      {w}{i < words.length - 2 ? ", " : i === words.length - 2 ? " and " : ""}
+    </span>
+  ))
+}
+
+const plain = (words: string[]) => words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`
 
 export function Skills() {
-  const [row, setRow] = useState<string | null>(null)
-  const [col, setCol] = useState<string | null>(null)
-  const focus = row || col
+  const [at, setAt] = useState(0)
+  const [auto, setAuto] = useState(true)
+  const root = useRef<HTMLDivElement>(null)
+
+  // Move on by itself only while on screen, untouched, and motion is welcome.
+  useEffect(() => {
+    if (!auto || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    let timer = 0
+    const io = new IntersectionObserver(([e]) => {
+      window.clearInterval(timer)
+      if (e.isIntersecting) timer = window.setInterval(() => setAt((v) => (v + 1) % PROJECTS.length), EVERY)
+    }, { threshold: 0.6 })
+    if (root.current) io.observe(root.current)
+    return () => { io.disconnect(); window.clearInterval(timer) }
+  }, [auto])
+
+  const pick = (i: number) => { setAuto(false); setAt(i) }
+  const p = PROJECTS[at]
 
   return (
-    <div className={`xp-chart ${focus ? "is-focus" : ""}`} onMouseLeave={() => { setRow(null); setCol(null) }}>
-      <p className="xp-chart-lede">Every tool on my résumé, against the work on this site. A star means that project used it, and you can open the project to see where. The rows with no star are on my résumé but not in anything shown here.</p>
-
-      <div className="xp-chart-scroll">
-        <table className="xp-chart-table">
-          <caption className="sr-only">Tools from my résumé, and which projects on this site used each one</caption>
-          <thead>
-            <tr>
-              <td />
-              {PLACES.map((p) => {
-                const props = {
-                  onMouseEnter: () => { setRow(null); setCol(p.id) },
-                  onFocus: () => { setRow(null); setCol(p.id) },
-                  onBlur: () => setCol(null),
-                }
-                return (
-                  <th key={p.id} scope="col" className={col === p.id ? "is-on" : ""}>
-                    {p.href.startsWith("http")
-                      ? <a href={p.href} target="_blank" rel="noreferrer" {...props}><span>{p.name}</span></a>
-                      : <Link href={p.href} {...props}><span>{p.name}</span></Link>}
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {GROUPS.map((g) => (
-              <Fragment key={g.name}>
-                <tr className="xp-chart-group"><th scope="rowgroup" colSpan={PLACES.length + 1}>{g.name}</th></tr>
-                {g.tools.map(([t, where]) => {
-                  const lit = row === t || (col !== null && where.includes(col))
-                  return (
-                    <tr
-                      key={t}
-                      className={`${lit ? "is-lit" : ""} ${where.length ? "" : "is-bare"}`}
-                      onMouseEnter={() => { setCol(null); setRow(t) }}
-                    >
-                      <th scope="row">{t}</th>
-                      {PLACES.map((p) => {
-                        const used = where.includes(p.id)
-                        return (
-                          <td key={p.id} className={`${used ? "is-used" : ""} ${col === p.id ? "is-col" : ""}`}>
-                            <i aria-hidden="true" />
-                            {used && <span className="sr-only">Used in {p.name}</span>}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  )
-                })}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
+    <div ref={root} className="xp-say" onMouseEnter={() => setAuto(false)} onFocus={() => setAuto(false)}>
+      <div className="xp-say-stack" aria-live={auto ? "off" : "polite"}>
+        {PROJECTS.map((q, i) => (
+          <p key={q.name} className={`xp-say-line ${i === at ? "is-on" : ""}`} aria-hidden={i !== at}>
+            For{" "}
+            <button type="button" className="xp-say-pick" tabIndex={i === at ? 0 : -1} onClick={() => pick((at + 1) % PROJECTS.length)} aria-label={`${q.name}. Show the next project`}>
+              {q.name}<span aria-hidden="true">↻</span>
+            </button>{" "}
+            I used {i === at
+              ? <>{list(q.tools)}{q.for && <span className="xp-say-w xp-say-for" style={{ "--i": q.tools.length } as React.CSSProperties}>, for {q.for}</span>}</>
+              : <>{plain(q.tools)}{q.for && `, for ${q.for}`}</>}.
+          </p>
+        ))}
       </div>
 
-      <Note className="is-kit">Nothing here is rated. Each star points at work you can open and check.</Note>
+      <div className="xp-say-nav">
+        <ol aria-label="Projects">
+          {PROJECTS.map((q, i) => (
+            <li key={q.name}>
+              <button type="button" className={i === at ? "is-on" : ""} aria-current={i === at} onClick={() => pick(i)}>{q.name}</button>
+            </li>
+          ))}
+        </ol>
+        {p.href.startsWith("http")
+          ? <a className="xp-say-open" href={p.href} target="_blank" rel="noreferrer">See the code →</a>
+          : <Link className="xp-say-open" href={p.href}>See {p.name} →</Link>}
+      </div>
+
+      <p className="xp-say-also">Also on my résumé, though not in the work here: {ALSO.join(" · ")}.</p>
     </div>
   )
 }
