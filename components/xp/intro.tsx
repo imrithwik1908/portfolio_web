@@ -61,7 +61,7 @@ export function Intro() {
       if (!alive) return
       const r = target.getBoundingClientRect()
       const W = window.innerWidth, H = window.innerHeight
-      const s = Math.min((W * 0.62) / r.width, (H * 0.42) / r.height, 4.6)
+      const s = Math.min((W * (W < 700 ? 0.86 : 0.62)) / r.width, (H * 0.42) / r.height, 4.6)
       // scaled about its own top-left corner, so its centre lands on the centre of the screen
       const tx = W / 2 - r.left - (r.width / 2) * s, ty = H / 2 - r.top - (r.height / 2) * s
       setBox({ left: r.left, top: r.top, width: r.width, height: r.height, from: `translate(${tx}px, ${ty}px) scale(${s})` })
